@@ -67,8 +67,9 @@ PIPELINES = [
     PipelineSpec("1", "youtube", "YouTube", "1_extractors_youtube.py"),
     PipelineSpec("2", "twitter", "Twitter/X", "2_extractors_twitter.py"),
     PipelineSpec("3", "medios_tampico", "Medios Tampico", "3_extractors_medios.py"),
-    PipelineSpec("4", "facebook_comentarios", "Facebook desde CSV URLs", "4_extractors_facebook_comentarios.py"),
-    PipelineSpec("5", "facebook_posts", "Facebook posts", "5_extractors_facebook_posts.py"),
+    PipelineSpec("4", "facebook_urls", "Facebook URLs (Generador)", "2_extractors_facebook_urls.py"),
+    PipelineSpec("5", "facebook_posts", "Facebook Posts (desde URLs)", "5_extractors_facebook_posts.py"),
+    PipelineSpec("6", "facebook_comentarios", "Facebook Comentarios (desde URLs)", "4_extractors_facebook_comentarios.py"),
 ]
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
@@ -372,12 +373,59 @@ def build_medios(
     return cmd, {}
 
 
-def build_facebook_comments_from_csv(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+def build_facebook_urls(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+    """
+    Fase 1: Generador de URLs de Facebook
+    Descarga posts desde páginas y retiene SOLO URLs + metadata
+    """
     if use_defaults:
         # MODO GENÉRICO: usar parámetros por defecto
-        mode = "ambos"
-        pages = []
-        input_csv = ""
+        pages = DEFAULT_FB_PAGES
+        output_dir = str(REPO_ROOT / "Facebook")
+        max_urls = 100
+        sample_percent = None
+        sample_seed = 42
+        batch_size = 10
+        apify_token = ""
+    else:
+        # MODO ESPECÍFICO: preguntar parámetros
+        print("\n=== Facebook URLs Generator ===")
+        pages = prompt_list("Páginas target separadas por coma", DEFAULT_FB_PAGES)
+        output_dir = prompt_text("Directorio base de salida", str(REPO_ROOT / "Facebook"))
+        max_urls = prompt_int("Máximo de URLs descargadas por página", 100)
+        sample_percent = prompt_float("Sampling % de URLs (opcional)", allow_blank=True)
+        sample_seed = prompt_int("Semilla de sampling", 42)
+        batch_size = prompt_int("Batch size", 10)
+        apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
+
+    env = {}
+    if not use_defaults and apify_token:
+        if apify_token != os.getenv("APIFY_TOKEN", ""):
+            env["APIFY_TOKEN"] = apify_token
+
+    cmd = [
+        sys.executable,
+        str(SCRIPTS_DIR / "2_extractors_facebook_urls.py"),
+        "--since", since,
+        "--before", before,
+        "--output-dir", output_dir,
+        "--max-urls", str(max_urls),
+        "--sample-seed", str(sample_seed),
+        "--batch-size", str(batch_size),
+        "--no-prompt",
+    ]
+    append_many(cmd, "--pages", pages)
+    append_optional(cmd, "--sample-percent", sample_percent)
+    return cmd, env
+
+
+def build_facebook_comentarios(since: str, before: str, use_defaults: bool = False, input_csv: str = "") -> tuple[list[str], dict[str, str]]:
+    """
+    Fase 2B: Descarga SOLO comentarios desde URLs de Facebook
+    Requiere: CSV generado por build_facebook_urls()
+    """
+    if use_defaults:
+        # MODO GENÉRICO: usar parámetros por defecto
         output_dir = str(REPO_ROOT / "Facebook")
         max_comments = 200
         max_urls = None
@@ -387,10 +435,7 @@ def build_facebook_comments_from_csv(since: str, before: str, use_defaults: bool
         apify_token = ""
     else:
         # MODO ESPECÍFICO: preguntar parámetros
-        print("\n=== Facebook desde CSV URLs ===")
-        mode = prompt_choice("Modo", ["ambos", "posts", "comentarios"], "ambos")
-        pages = prompt_list("Páginas para filtrar (opcional, separadas por coma)", allow_blank=True)
-        input_csv = prompt_text("CSV de URLs (opcional)", allow_blank=True)
+        print("\n=== Facebook Comentarios (desde URLs) ===")
         output_dir = prompt_text("Directorio base de salida", str(REPO_ROOT / "Facebook"))
         max_comments = prompt_int("Máximo de comentarios por post", 200)
         max_urls = prompt_int("Máximo de URLs a procesar (opcional)", allow_blank=True)
@@ -400,50 +445,49 @@ def build_facebook_comments_from_csv(since: str, before: str, use_defaults: bool
         apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
 
     env = {}
-    if mode in {"ambos", "comentarios"}:
-        # En modo específico, usar token del prompt; en modo genérico, solo si existe en env
-        if not use_defaults and apify_token:
-            if apify_token != os.getenv("APIFY_TOKEN", ""):
-                env["APIFY_TOKEN"] = apify_token
+    if not use_defaults and apify_token:
+        if apify_token != os.getenv("APIFY_TOKEN", ""):
+            env["APIFY_TOKEN"] = apify_token
 
     cmd = [
         sys.executable,
         str(SCRIPTS_DIR / "4_extractors_facebook_comentarios.py"),
         "--since", since,
         "--before", before,
-        "--mode", mode,
         "--output-dir", output_dir,
         "--max-comments", str(max_comments),
         "--sample-seed", str(sample_seed),
         "--batch-size", str(batch_size),
         "--no-prompt",
     ]
-    append_many(cmd, "--pages", pages)
-    append_optional(cmd, "--input-csv", input_csv)
+    if input_csv:
+        cmd.extend(["--input-csv", input_csv])
     append_optional(cmd, "--max-urls", max_urls)
     append_optional(cmd, "--sample-percent", sample_percent)
     return cmd, env
 
 
-def build_facebook_posts(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+def build_facebook_posts(since: str, before: str, use_defaults: bool = False, input_csv: str = "") -> tuple[list[str], dict[str, str]]:
+    """
+    Fase 2A: Descarga SOLO posts desde URLs de Facebook (Modo B - CSV)
+    Requiere: CSV generado por build_facebook_urls()
+    """
     if use_defaults:
         # MODO GENÉRICO: usar parámetros por defecto
-        pages = DEFAULT_FB_PAGES
         output_dir = str(REPO_ROOT / "Facebook")
         max_posts = 100
-        max_pages = None
+        max_urls = None
         sample_percent = None
         sample_seed = 42
         batch_size = 10
         apify_token = ""
     else:
         # MODO ESPECÍFICO: preguntar parámetros
-        print("\n=== Facebook posts ===")
-        pages = prompt_list("Páginas target separadas por coma", DEFAULT_FB_PAGES)
+        print("\n=== Facebook Posts (desde URLs) ===")
         output_dir = prompt_text("Directorio base de salida", str(REPO_ROOT / "Facebook"))
-        max_posts = prompt_int("Máximo de posts por página", 100)
-        max_pages = prompt_int("Máximo de páginas target (opcional)", allow_blank=True)
-        sample_percent = prompt_float("Sampling % de páginas (opcional)", allow_blank=True)
+        max_posts = prompt_int("Máximo de posts por URL", 100)
+        max_urls = prompt_int("Máximo de URLs a procesar (opcional)", allow_blank=True)
+        sample_percent = prompt_float("Sampling % de URLs (opcional)", allow_blank=True)
         sample_seed = prompt_int("Semilla de sampling", 42)
         batch_size = prompt_int("Batch size", 10)
         apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
@@ -464,13 +508,14 @@ def build_facebook_posts(since: str, before: str, use_defaults: bool = False) ->
         "--batch-size", str(batch_size),
         "--no-prompt",
     ]
-    append_many(cmd, "--pages", pages)
-    append_optional(cmd, "--max-pages", max_pages)
+    if input_csv:
+        cmd.extend(["--input-csv", input_csv])
+    append_optional(cmd, "--max-urls", max_urls)
     append_optional(cmd, "--sample-percent", sample_percent)
     return cmd, env
 
 
-def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bool = False, facebook_urls_csv: str = "") -> tuple[list[str], dict[str, str]]:
     if spec.key == "youtube":
         return build_youtube(since, before, use_defaults)
     if spec.key == "twitter":
@@ -486,10 +531,12 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
             before,
             use_defaults,
         )
+    if spec.key == "facebook_urls":
+        return build_facebook_urls(since, before, use_defaults)
     if spec.key == "facebook_comentarios":
-        return build_facebook_comments_from_csv(since, before, use_defaults)
+        return build_facebook_comentarios(since, before, use_defaults, facebook_urls_csv)
     if spec.key == "facebook_posts":
-        return build_facebook_posts(since, before, use_defaults)
+        return build_facebook_posts(since, before, use_defaults, facebook_urls_csv)
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -527,7 +574,19 @@ def main() -> None:
     # 3️⃣ PASO 3: Capturar fechas
     since, before = prompt_common_context()
     
+    # 3.5️⃣ VALIDAR DEPENDENCIAS DE FACEBOOK
+    # Si se seleccionan 5 (posts) o 6 (comentarios) sin 4 (URLs), agregar 4 al inicio
+    selected_codes = {s.code for s in selected}
+    if ("5" in selected_codes or "6" in selected_codes) and "4" not in selected_codes:
+        print("\n⚠️  Los extractores 5 (Posts) y/o 6 (Comentarios) requieren URLs del 4 (Facebook URLs).")
+        print("   Se ejecutará automáticamente el 4 primero.")
+        facebook_urls_spec = PIPELINES_BY_CODE["4"]
+        selected = [s for s in selected if s.code != "4"]  # Remover duplicados si existe
+        selected.insert(0, facebook_urls_spec)  # Agregar al inicio
+    
     # 4️⃣ PASO 4: Configurar según modo
+    facebook_urls_csv = ""  # CSV generado por el extractor de URLs
+    
     if execution_mode == "all_networks":
         # MODO GENÉRICO: Usar parámetros por defecto para todos
         print("\n" + "="*70)
@@ -537,8 +596,14 @@ def main() -> None:
         
         prepared: list[tuple[PipelineSpec, list[str], dict[str, str]]] = []
         for spec in selected:
-            cmd, env = build_pipeline(spec, since, before, use_defaults=True)
-            prepared.append((spec, cmd, env))
+            # Si es Facebook URLs (4), preparar para capturar el CSV
+            if spec.code == "4":
+                cmd, env = build_pipeline(spec, since, before, use_defaults=True)
+                prepared.append((spec, cmd, env))
+            else:
+                # Pasar el CSV generado si es 5 o 6
+                cmd, env = build_pipeline(spec, since, before, use_defaults=True, facebook_urls_csv=facebook_urls_csv)
+                prepared.append((spec, cmd, env))
     else:
         # MODO ESPECÍFICO: Preguntar parámetros para cada red
         print("\n" + "="*70)
@@ -548,8 +613,14 @@ def main() -> None:
         
         prepared: list[tuple[PipelineSpec, list[str], dict[str, str]]] = []
         for spec in selected:
-            cmd, env = build_pipeline(spec, since, before, use_defaults=False)
-            prepared.append((spec, cmd, env))
+            # Si es Facebook URLs (4), preparar para capturar el CSV
+            if spec.code == "4":
+                cmd, env = build_pipeline(spec, since, before, use_defaults=False)
+                prepared.append((spec, cmd, env))
+            else:
+                # Pasar el CSV generado si es 5 o 6
+                cmd, env = build_pipeline(spec, since, before, use_defaults=False, facebook_urls_csv=facebook_urls_csv)
+                prepared.append((spec, cmd, env))
 
     # 5️⃣ PASO 5: Mostrar resumen
     print("\n" + "="*70)
@@ -578,6 +649,8 @@ def main() -> None:
     print("INICIANDO EJECUCIÓN")
     print("="*70)
     
+    facebook_urls_csv = ""  # CSV generado por extractor 4
+    
     for spec, cmd, env_overrides in prepared:
         print(f"\n▶ Ejecutando {spec.label}")
         env = os.environ.copy()
@@ -585,6 +658,26 @@ def main() -> None:
         result = subprocess.run(cmd, env=env, cwd=str(REPO_ROOT))
         if result.returncode == 0:
             print(f"✅ {spec.label} completado")
+            
+            # Si es el extractor de URLs (4), intentar encontrar el CSV generado
+            if spec.code == "4":
+                facebook_dir = REPO_ROOT / "Facebook"
+                # Buscar el CSV más reciente con patrón [tag]_urls.csv
+                import glob
+                pattern = str(facebook_dir / "*" / "*_urls.csv")
+                csv_files = glob.glob(pattern)
+                if csv_files:
+                    # Usar el más reciente
+                    facebook_urls_csv = max(csv_files, key=os.path.getmtime)
+                    print(f"   📄 CSV detectado: {facebook_urls_csv}")
+                    
+                    # Actualizar los comandos pendientes de 5 y 6 para usa r este CSV
+                    for i, (pending_spec, pending_cmd, _) in enumerate(prepared[prepared.index((spec, cmd, env_overrides))+1:], 
+                                                                         start=prepared.index((spec, cmd, env_overrides))+1):
+                        if pending_spec.code in {"5", "6"}:
+                            if "--input-csv" not in pending_cmd:
+                                pending_cmd.extend(["--input-csv", facebook_urls_csv])
+                                prepared[i] = (pending_spec, pending_cmd, prepared[i][2])
             continue
 
         print(f"❌ {spec.label} falló con código {result.returncode}")
