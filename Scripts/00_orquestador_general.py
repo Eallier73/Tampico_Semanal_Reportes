@@ -20,6 +20,16 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
+# Importar configuración centralizada de queries
+from queries_config import (
+    YOUTUBE_CHANNELS,
+    YOUTUBE_SEARCH_QUERIES,
+    TWITTER_SEARCH_QUERIES,
+    MEDIOS_SITES,
+    MEDIOS_SEARCH_TERMS,
+    FACEBOOK_PAGES,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = REPO_ROOT / "Scripts"
@@ -27,27 +37,13 @@ SCRIPTS_DIR = REPO_ROOT / "Scripts"
 DEFAULT_GLOBAL_BEFORE = date.today().isoformat()
 DEFAULT_GLOBAL_SINCE = (date.today() - timedelta(days=7)).isoformat()
 
-DEFAULT_YOUTUBE_CHANNELS = ["monicavtampico"]
-DEFAULT_YOUTUBE_QUERIES = [
-    "presidenta municipal de Tampico",
-    "Presidenta municipal de Tampico",
-    "Gobierno de Tampico",
-    "gobierno de Tampico",
-]
-DEFAULT_TWITTER_QUERIES = [
-    "to:MonicaVTampico",
-    "from:MonicaVTampico",
-    "to:TampicoGob",
-    "from:TampicoGob",
-    "@TampicoGob",
-    "@MonicaVTampico",
-    "monica villarreal",
-    "gobierno de tampico",
-    "tampico",
-]
-DEFAULT_FB_PAGES = ["TampicoGob", "monicavtampico"]
-DEFAULT_MEDIOS_SITES = ["site:oem.com.mx", "site:milenio.com"]
-DEFAULT_TERMS_TAMPICO = ['"Monica Villarreal"', '"gobierno de tampico"', '"tampico"']
+# Usar configuración centralizada (desde queries_config.py)
+DEFAULT_YOUTUBE_CHANNELS = YOUTUBE_CHANNELS
+DEFAULT_YOUTUBE_QUERIES = YOUTUBE_SEARCH_QUERIES
+DEFAULT_TWITTER_QUERIES = TWITTER_SEARCH_QUERIES
+DEFAULT_FB_PAGES = FACEBOOK_PAGES
+DEFAULT_MEDIOS_SITES = MEDIOS_SITES
+DEFAULT_TERMS_TAMPICO = MEDIOS_SEARCH_TERMS
 
 
 @dataclass(frozen=True)
