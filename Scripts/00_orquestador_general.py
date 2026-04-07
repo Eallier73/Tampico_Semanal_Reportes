@@ -221,6 +221,7 @@ def build_youtube(since: str, before: str, use_defaults: bool = False) -> tuple[
         output_dir = str(REPO_ROOT / "Youtube")
         proxy_http = ""
         proxy_https = ""
+        api_key = ""
     else:
         # MODO ESPECÍFICO: preguntar parámetros
         print("\n=== YouTube ===")
@@ -237,12 +238,15 @@ def build_youtube(since: str, before: str, use_defaults: bool = False) -> tuple[
         output_dir = prompt_text("Directorio base de salida", str(REPO_ROOT / "Youtube"))
         proxy_http = prompt_text("Proxy HTTP opcional", allow_blank=True)
         proxy_https = prompt_text("Proxy HTTPS opcional", allow_blank=True)
+        api_key = prompt_secret("YouTube API key", "YOUTUBE_API_KEY", required=True)
 
     env = {}
-    api_key = prompt_secret("YouTube API key", "YOUTUBE_API_KEY", required=True)
-    if api_key and api_key != os.getenv("YOUTUBE_API_KEY", ""):
-        env["YOUTUBE_API_KEY"] = api_key
     
+    # En modo específico, usar token del prompt; en modo genérico, solo si existe en env
+    if not use_defaults and api_key:
+        if api_key != os.getenv("YOUTUBE_API_KEY", ""):
+            env["YOUTUBE_API_KEY"] = api_key
+
     if not use_defaults:
         if proxy_http:
             env["YT_PROXY_HTTP"] = proxy_http
@@ -371,6 +375,7 @@ def build_facebook_comments_from_csv(since: str, before: str, use_defaults: bool
         sample_percent = None
         sample_seed = 42
         batch_size = 25
+        apify_token = ""
     else:
         # MODO ESPECÍFICO: preguntar parámetros
         print("\n=== Facebook desde CSV URLs ===")
@@ -383,12 +388,14 @@ def build_facebook_comments_from_csv(since: str, before: str, use_defaults: bool
         sample_percent = prompt_float("Sampling % de URLs (opcional)", allow_blank=True)
         sample_seed = prompt_int("Semilla de sampling", 42)
         batch_size = prompt_int("Batch size en Apify", 25)
+        apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
 
     env = {}
     if mode in {"ambos", "comentarios"}:
-        apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
-        if apify_token and apify_token != os.getenv("APIFY_TOKEN", ""):
-            env["APIFY_TOKEN"] = apify_token
+        # En modo específico, usar token del prompt; en modo genérico, solo si existe en env
+        if not use_defaults and apify_token:
+            if apify_token != os.getenv("APIFY_TOKEN", ""):
+                env["APIFY_TOKEN"] = apify_token
 
     cmd = [
         sys.executable,
@@ -419,6 +426,7 @@ def build_facebook_posts(since: str, before: str, use_defaults: bool = False) ->
         sample_percent = None
         sample_seed = 42
         batch_size = 10
+        apify_token = ""
     else:
         # MODO ESPECÍFICO: preguntar parámetros
         print("\n=== Facebook posts ===")
@@ -429,11 +437,12 @@ def build_facebook_posts(since: str, before: str, use_defaults: bool = False) ->
         sample_percent = prompt_float("Sampling % de páginas (opcional)", allow_blank=True)
         sample_seed = prompt_int("Semilla de sampling", 42)
         batch_size = prompt_int("Batch size", 10)
+        apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
 
-    apify_token = prompt_secret("Apify token", "APIFY_TOKEN", required=True)
     env = {}
-    if apify_token and apify_token != os.getenv("APIFY_TOKEN", ""):
-        env["APIFY_TOKEN"] = apify_token
+    if not use_defaults and apify_token:
+        if apify_token != os.getenv("APIFY_TOKEN", ""):
+            env["APIFY_TOKEN"] = apify_token
 
     cmd = [
         sys.executable,
