@@ -20,6 +20,15 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
+# Cargar variables de entorno desde .env.local
+try:
+    from dotenv import load_dotenv
+    env_file = Path(__file__).resolve().parent.parent / ".env.local"
+    if env_file.exists():
+        load_dotenv(str(env_file))
+except ImportError:
+    pass  # dotenv no está instalado, usar variables de entorno del sistema
+
 # Importar configuración centralizada de queries
 from queries_config import (
     YOUTUBE_CHANNELS,
