@@ -4,14 +4,14 @@ r"""
 ║                                                                           ║
 ║   💬 EXTRACTOR DE COMENTARIOS FACEBOOK VÍA APIFY                         ║
 ║                                                                           ║
-║   Descarga comentarios de posts usando URLs generadas por:              ║
-║   2_extractors_facebook_urls.py                                          ║
+║   Descarga comentarios de posts usando CSV con columna post_url/url:    ║
+║   (normalmente generado por 5_extractors_facebook_posts.py)             ║
 ║                                                                           ║
 ║   ⚠️  REQUERIDO: --input-csv (no descarga posts)                         ║
 ║                                                                           ║
 ║   Uso:                                                                   ║
 ║   python 4_extractors_facebook_comentarios.py \\                         ║
-║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_urls.csv \\   ║
+║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook \\                                            ║
 ║     --max-comments 200                                                   ║
@@ -783,20 +783,20 @@ def ejecutar_prompt_interactivo(args: argparse.Namespace) -> argparse.Namespace:
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Baja SOLO comentarios de Facebook vía Apify desde CSV de URLs",
+        description="Baja SOLO comentarios de Facebook vía Apify desde CSV con post_url/url",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Uso:
 
-  1) Generar URLs (usar extractor 2):
-     python 2_extractors_facebook_urls.py \\
+  1) Generar posts (usar extractor 5):
+      python 5_extractors_facebook_posts.py \
        --pages TampicoGob monicavtampico \\
        --since 2026-03-01 --before 2026-03-12 \\
        --output-dir ./Facebook
 
   2) Bajar comentarios:
      python 4_extractors_facebook_comentarios.py \\
-       --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_urls.csv \\
+       --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
        --since 2026-03-01 --before 2026-03-12 \\
        --output-dir ./Facebook \\
        --max-comments 200
@@ -804,7 +804,7 @@ Uso:
     )
 
     parser.add_argument("--input-csv", required=True,
-                        help="CSV con URLs de posts (generado por 2_extractors_facebook_urls.py)")
+                        help="CSV con URLs de posts (por ejemplo, generado por 5_extractors_facebook_posts.py)")
     parser.add_argument("--max-comments", type=int, default=200,
                         help="Máximo de comentarios por post (default: 200)")
     parser.add_argument("--max-urls", type=int, default=None,
@@ -857,7 +857,7 @@ def main():
     input_csv = args.input_csv
     if not input_csv:
         print("❌ --input-csv es REQUERIDO.")
-        print("   Debe ser un CSV generado por 2_extractors_facebook_urls.py")
+        print("   Debe contener columna post_url/url (ej. generado por 5_extractors_facebook_posts.py)")
         sys.exit(1)
 
     # Leer URLs desde CSV

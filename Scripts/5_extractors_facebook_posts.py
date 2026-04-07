@@ -5,7 +5,7 @@
 ║   📝 EXTRACTOR DE POSTS FACEBOOK VÍA APIFY                               ║
 ║                                                                           ║
 ║   Modo A (sin CSV): Descargo posts directamente desde páginas             ║
-║   Modo B (con CSV): Descargo posts de URLs específicas (de 2_extractors)  ║
+║   Modo B (con CSV): Descargo posts de URLs específicas (CSV con post_url)  ║
 ║                                                                           ║
 ║   IMPORTANTE: Solo descarga posts, NUNCA comentarios                      ║
 ║                                                                           ║
@@ -17,7 +17,7 @@
 ║                                                                           ║
 ║   Uso Modo B (desde URLs):                                               ║
 ║   python 5_extractors_facebook_posts.py \\                               ║
-║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_urls.csv \\   ║
+║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook                                              ║
 ║                                                                           ║
@@ -243,7 +243,7 @@ def normalize_post_item(item: dict) -> dict:
 
 
 def leer_urls_csv(input_csv: str) -> list[str]:
-    """Lee URLs desde CSV generado por 2_extractors_facebook_urls.py"""
+    """Lee URLs desde CSV con columna post_url/url/URL."""
     if not os.path.exists(input_csv):
         raise FileNotFoundError(f"No existe: {input_csv}")
     
@@ -407,7 +407,7 @@ Modo A - Descarga directa desde páginas:
 
 Modo B - Desde URLs preexistentes (recomendado, más eficiente):
   python 5_extractors_facebook_posts.py \\
-    --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_urls.csv \\
+        --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
     --since 2026-03-01 --before 2026-03-12 \\
     --output-dir ./Facebook
         """,
@@ -415,7 +415,7 @@ Modo B - Desde URLs preexistentes (recomendado, más eficiente):
     parser.add_argument("--pages", nargs="+", default=None,
                         help="Paginas target (handles o URLs). Requerido si NO se usa --input-csv")
     parser.add_argument("--input-csv", default=None,
-                        help="CSV de URLs generado por 2_extractors_facebook_urls.py (Modo B)")
+                        help="CSV con columna post_url/url/URL (Modo B)")
     parser.add_argument("--since", required=True, type=valid_date,
                         help="Fecha inicio YYYY-MM-DD (heredada del orquestador)")
     parser.add_argument("--before", required=True, type=valid_date,
