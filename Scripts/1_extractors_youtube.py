@@ -783,11 +783,14 @@ def main() -> None:
         print(f"❌ Error configurando YouTube API: {exc}")
         sys.exit(1)
 
-    comments_csv = os.path.join(output_dir, f"youtube_comentarios_busquedas_{report_tag}.csv")
-    comments_txt = os.path.join(output_dir, f"youtube_busquedas_{report_tag}.txt")
+    comentarios_base = f"{report_tag}_comentarios"
+    scripts_base = f"{report_tag}_scripts"
 
-    transcripts_csv = os.path.join(output_dir, f"youtube_transcripciones_{report_tag}.csv")
-    transcripts_txt = os.path.join(output_dir, f"youtube_transcripciones_{report_tag}.txt")
+    comments_csv = os.path.join(output_dir, f"{comentarios_base}.csv")
+    comments_txt = os.path.join(output_dir, f"{comentarios_base}.txt")
+
+    transcripts_csv = os.path.join(output_dir, f"{scripts_base}.csv")
+    transcripts_txt = os.path.join(output_dir, f"{scripts_base}.txt")
 
     total_videos_comments = 0
     total_videos_transcripts = 0
