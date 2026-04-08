@@ -9,6 +9,8 @@ Este documento resume, script por script, qué argumentos conviene pedir desde e
 - `03_medios_tampico.py`
 - `04_facebook_comentarios_tampico.py`
 - `05_facebook_posts_tampico.py`
+- `06_consolidador_datos.py`
+- `07_modelado_temas_claude.py`
 - `00_orquestador_general.py`
 
 ## 01 YouTube
@@ -92,6 +94,32 @@ Este documento resume, script por script, qué argumentos conviene pedir desde e
   - `--output-dir`
 - Credenciales:
   - `APIFY_TOKEN`
+
+## 06 Consolidador de datos
+
+- Prompt propio previo: no.
+- Argumentos clave:
+  - `--since`
+  - `--before`
+  - `--base-dir`
+  - `--output-dir`
+
+## 07 Modelado temático con Claude
+
+- Prompt propio previo: no.
+- Argumentos clave:
+  - `--since`
+  - `--before`
+  - `--input-dir`
+  - `--output-dir`
+  - `--model`
+  - `--max-corpus-chars`
+- Credenciales:
+  - `CLAUDE_API_KEY`
+- Dependencia operativa:
+  - Requiere que exista `Datos/{semana}/material_institucional.txt`
+  - Requiere que exista `Datos/{semana}/material_comentarios.txt`
+  - Antes del envío crea un corpus combinado `.txt` dentro de la carpeta semanal de `Datos`
 
 ## Criterio del orquestador
 

@@ -5,12 +5,12 @@ r"""
 ║   💬 EXTRACTOR DE COMENTARIOS FACEBOOK VÍA APIFY                         ║
 ║                                                                           ║
 ║   Descarga comentarios de posts usando CSV con columna post_url/url:    ║
-║   (normalmente generado por 5_extractors_facebook_posts.py)             ║
+║   (normalmente generado por 4_extractors_facebook_posts.py)             ║
 ║                                                                           ║
 ║   ⚠️  REQUERIDO: --input-csv (no descarga posts)                         ║
 ║                                                                           ║
 ║   Uso:                                                                   ║
-║   python 4_extractors_facebook_comentarios.py \\                         ║
+║   python 5_extractors_facebook_comentarios.py \\                         ║
 ║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook \\                                            ║
@@ -64,9 +64,10 @@ def leer_urls_csv(input_csv: str, pages: Optional[List[str]] = None) -> List[str
     vistas = set()
     pages_l = {p.strip().lower() for p in (pages or []) if p.strip()}
 
-    with open(input_csv, "r", encoding="utf-8") as f:
+    with open(input_csv, "r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        campos = reader.fieldnames or []
+        campos = [str(field or "").strip().lstrip("\ufeff") for field in (reader.fieldnames or [])]
+        reader.fieldnames = campos
 
         # Soportar tanto "url" como "post_url"
         col_url = None
@@ -789,13 +790,13 @@ def parse_args():
 Uso:
 
   1) Generar posts (usar extractor 5):
-      python 5_extractors_facebook_posts.py \
+      python 4_extractors_facebook_posts.py \
        --pages TampicoGob monicavtampico \\
        --since 2026-03-01 --before 2026-03-12 \\
        --output-dir ./Facebook
 
   2) Bajar comentarios:
-     python 4_extractors_facebook_comentarios.py \\
+     python 5_extractors_facebook_comentarios.py \\
        --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
        --since 2026-03-01 --before 2026-03-12 \\
        --output-dir ./Facebook \\
@@ -804,7 +805,7 @@ Uso:
     )
 
     parser.add_argument("--input-csv", required=True,
-                        help="CSV con URLs de posts (por ejemplo, generado por 5_extractors_facebook_posts.py)")
+                        help="CSV con URLs de posts (por ejemplo, generado por 4_extractors_facebook_posts.py)")
     parser.add_argument("--max-comments", type=int, default=200,
                         help="Máximo de comentarios por post (default: 200)")
     parser.add_argument("--max-urls", type=int, default=None,
@@ -857,7 +858,7 @@ def main():
     input_csv = args.input_csv
     if not input_csv:
         print("❌ --input-csv es REQUERIDO.")
-        print("   Debe contener columna post_url/url (ej. generado por 5_extractors_facebook_posts.py)")
+        print("   Debe contener columna post_url/url (ej. generado por 4_extractors_facebook_posts.py)")
         sys.exit(1)
 
     # Leer URLs desde CSV
@@ -936,7 +937,7 @@ def main():
     if len(df_comentarios) > 0:
         df_comentarios.to_csv(csv_path, index=False, encoding="utf-8-sig")
         with open(txt_path, "w", encoding="utf-8") as f:
-            for text in df_comentarios["texto"].fillna("").astype(str).tolist():
+            for text in df_comentarios["comentario_texto"].fillna("").astype(str).tolist():
                 clean = re.sub(r"\s+", " ", text).strip()
                 if clean:
                     f.write(clean + "\n")

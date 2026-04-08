@@ -1,9 +1,12 @@
+anthropic
 apify-client
 cloudscraper
 google-api-python-client
 googlenewsdecoder
 pandas
 playwright
+python-docx
+python-dotenv
 requests
 trafilatura
 youtube-transcript-api

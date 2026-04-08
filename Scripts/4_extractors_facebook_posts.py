@@ -10,13 +10,13 @@
 ║   IMPORTANTE: Solo descarga posts, NUNCA comentarios                      ║
 ║                                                                           ║
 ║   Uso Modo A (directo):                                                  ║
-║   python 5_extractors_facebook_posts.py \\                               ║
+║   python 4_extractors_facebook_posts.py \\                               ║
 ║     --pages TampicoGob monicavtampico \\                                 ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook                                              ║
 ║                                                                           ║
 ║   Uso Modo B (desde URLs):                                               ║
-║   python 5_extractors_facebook_posts.py \\                               ║
+║   python 4_extractors_facebook_posts.py \\                               ║
 ║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook                                              ║
@@ -42,7 +42,7 @@ import pandas as pd
 from output_naming import build_report_tag
 
 
-ACTOR_POSTS = "scraper_one/facebook-posts-scraper"
+ACTOR_POSTS = "apify/facebook-posts-scraper"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_BASE_DIR = str(REPO_ROOT / "Facebook")
 DEFAULT_PAGES = ["monicavtampico", "TampicoGob"]
@@ -140,6 +140,7 @@ def parse_item_datetime(item: dict) -> Optional[datetime]:
             continue
 
     date_candidates = [
+        item.get("time"),
         item.get("date"),
         item.get("postDate"),
         item.get("publishedAt"),
@@ -204,21 +205,11 @@ def belongs_to_targets(item: dict, target_handles: set[str]) -> bool:
 
 
 def normalize_post_item(item: dict) -> dict:
-    author = item.get("author") if isinstance(item.get("author"), dict) else {}
+    user = item.get("user") if isinstance(item.get("user"), dict) else {}
 
-    post_url = str(
-        item.get("url")
-        or item.get("postUrl")
-        or item.get("postURL")
-        or item.get("facebookUrl")
-        or ""
-    ).strip()
-    page_url = str(
-        item.get("pageUrl")
-        or item.get("authorProfileUrl")
-        or author.get("url")
-        or ""
-    ).strip()
+    # apify/facebook-posts-scraper usa "url" para post y "facebookUrl" para página
+    post_url = str(item.get("url") or item.get("facebookUrl") or "").strip()
+    page_url = str(item.get("facebookUrl") or item.get("inputUrl") or "").strip()
 
     dt = parse_item_datetime(item)
     dt_iso = dt.isoformat(sep=" ") if dt else ""
@@ -226,19 +217,13 @@ def normalize_post_item(item: dict) -> dict:
     return {
         "post_url": post_url,
         "page_url": page_url,
-        "page_handle": extract_handle_from_url(page_url) or extract_handle_from_url(post_url),
-        "post_texto": str(
-            item.get("text")
-            or item.get("postText")
-            or item.get("message")
-            or item.get("content")
-            or ""
-        ).strip(),
+        "page_handle": str(item.get("pageName") or extract_handle_from_url(page_url) or "").strip().lower(),
+        "post_texto": str(item.get("text") or "").strip(),
         "fecha_post": dt_iso,
         "fecha_post_date": dt.date().isoformat() if dt else "",
-        "num_comentarios_post": item.get("commentsCount") or item.get("comments") or 0,
-        "reacciones_post": item.get("reactionsCount") or item.get("likes") or 0,
-        "autor": str(item.get("authorName") or author.get("name") or "").strip(),
+        "num_comentarios_post": item.get("comments") or 0,
+        "reacciones_post": item.get("likes") or 0,
+        "autor": str(user.get("name") or item.get("pageName") or "").strip(),
     }
 
 
@@ -274,11 +259,16 @@ def leer_urls_csv(input_csv: str) -> list[str]:
     return urls
 
 
-def run_posts_batch(client, page_urls: list[str], results_limit: int) -> list[dict]:
+def run_posts_batch(client, page_urls: list[str], results_limit: int, since: Optional[str] = None, before: Optional[str] = None) -> list[dict]:
     run_input = {
-        "pageUrls": page_urls,
+        "startUrls": [{"url": url} for url in page_urls],
         "resultsLimit": results_limit,
+        "captionText": True,
     }
+    if since:
+        run_input["onlyPostsNewerThan"] = since
+    if before:
+        run_input["onlyPostsOlderThan"] = before
 
     try:
         run = client.actor(ACTOR_POSTS).call(run_input=run_input)
@@ -400,13 +390,13 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Modo A - Descarga directa desde páginas:
-  python 5_extractors_facebook_posts.py \\
+  python 4_extractors_facebook_posts.py \\
     --pages TampicoGob monicavtampico \\
     --since 2026-03-01 --before 2026-03-12 \\
     --output-dir ./Facebook
 
 Modo B - Desde URLs preexistentes (recomendado, más eficiente):
-  python 5_extractors_facebook_posts.py \\
+  python 4_extractors_facebook_posts.py \\
         --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
     --since 2026-03-01 --before 2026-03-12 \\
     --output-dir ./Facebook
@@ -546,7 +536,7 @@ def main() -> None:
         batch = page_urls[i:i + args.batch_size]
         batch_num = (i // args.batch_size) + 1
         print(f"\n📦 Batch {batch_num}/{total_batches} ({len(batch)} URL(s))")
-        items = run_posts_batch(client, batch, args.max_posts)
+        items = run_posts_batch(client, batch, args.max_posts, since=args.since, before=args.before)
         all_items.extend(items)
         print(f"   Acumulado: {len(all_items)} items")
         if i + args.batch_size < len(page_urls):
@@ -606,7 +596,7 @@ def main() -> None:
     print(f"CSV: {csv_path}")
     print(f"TXT: {txt_path}")
     print("\n⚠️ IMPORTANTE: Este extractor SOLO descarga posts (sin comentarios).")
-    print("Para comentarios, usa: 4_extractors_facebook_comentarios.py")
+    print("Para comentarios, usa: 5_extractors_facebook_comentarios.py")
 
 
 if __name__ == "__main__":

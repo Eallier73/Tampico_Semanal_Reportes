@@ -69,8 +69,10 @@ PIPELINES = [
     PipelineSpec("1", "youtube", "YouTube", "1_extractors_youtube.py"),
     PipelineSpec("2", "twitter", "Twitter/X", "2_extractors_twitter.py"),
     PipelineSpec("3", "medios_tampico", "Medios Tampico", "3_extractors_medios.py"),
-    PipelineSpec("4", "facebook_posts", "Facebook Posts (incluye URL)", "5_extractors_facebook_posts.py"),
-    PipelineSpec("5", "facebook_comentarios", "Facebook Comentarios (desde posts)", "4_extractors_facebook_comentarios.py"),
+    PipelineSpec("4", "facebook_posts", "Facebook Posts (incluye URL)", "4_extractors_facebook_posts.py"),
+    PipelineSpec("5", "facebook_comentarios", "Facebook Comentarios (desde posts)", "5_extractors_facebook_comentarios.py"),
+    PipelineSpec("6", "consolidador_datos", "Consolidador de Datos", "6_consolidador_datos.py"),
+    PipelineSpec("7", "claude_nlp", "Modelado Tematico con Claude", "7_modelado_temas_claude.py"),
 ]
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
@@ -432,7 +434,7 @@ def build_facebook_posts(since: str, before: str, use_defaults: bool = False) ->
 
     cmd = [
         sys.executable,
-        str(SCRIPTS_DIR / "5_extractors_facebook_posts.py"),
+        str(SCRIPTS_DIR / "4_extractors_facebook_posts.py"),
         "--since", since,
         "--before", before,
         "--output-dir", output_dir,
@@ -479,7 +481,7 @@ def build_facebook_comentarios(since: str, before: str, use_defaults: bool = Fal
 
     cmd = [
         sys.executable,
-        str(SCRIPTS_DIR / "4_extractors_facebook_comentarios.py"),
+        str(SCRIPTS_DIR / "5_extractors_facebook_comentarios.py"),
         "--since", since,
         "--before", before,
         "--output-dir", output_dir,
@@ -492,6 +494,59 @@ def build_facebook_comentarios(since: str, before: str, use_defaults: bool = Fal
         cmd.extend(["--input-csv", input_csv])
     append_optional(cmd, "--max-urls", max_urls)
     append_optional(cmd, "--sample-percent", sample_percent)
+    return cmd, env
+
+
+def build_consolidador_datos(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+    if use_defaults:
+        base_dir = str(REPO_ROOT)
+        output_dir = str(REPO_ROOT / "Datos")
+    else:
+        print("\n=== Consolidador de Datos ===")
+        base_dir = prompt_text("Raiz del repositorio", str(REPO_ROOT))
+        output_dir = prompt_text("Directorio base de salida para datos", str(REPO_ROOT / "Datos"))
+
+    cmd = [
+        sys.executable,
+        str(SCRIPTS_DIR / "6_consolidador_datos.py"),
+        "--since", since,
+        "--before", before,
+        "--base-dir", base_dir,
+        "--output-dir", output_dir,
+    ]
+    return cmd, {}
+
+
+def build_claude_nlp(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+    if use_defaults:
+        input_dir = str(REPO_ROOT / "Datos")
+        output_dir = str(REPO_ROOT / "Claude")
+        model = "claude-opus-4-6"
+        max_corpus_chars = 650000
+        claude_api_key = ""
+    else:
+        print("\n=== Modelado Tematico con Claude ===")
+        input_dir = prompt_text("Directorio base de entrada (Datos)", str(REPO_ROOT / "Datos"))
+        output_dir = prompt_text("Directorio base de salida (Claude)", str(REPO_ROOT / "Claude"))
+        model = prompt_text("Modelo Claude", "claude-opus-4-6")
+        max_corpus_chars = prompt_int("Maximo de caracteres a enviar", 650000)
+        claude_api_key = prompt_secret("Claude API key", "CLAUDE_API_KEY", required=True)
+
+    env = {}
+    if not use_defaults and claude_api_key:
+        if claude_api_key != os.getenv("CLAUDE_API_KEY", ""):
+            env["CLAUDE_API_KEY"] = claude_api_key
+
+    cmd = [
+        sys.executable,
+        str(SCRIPTS_DIR / "7_modelado_temas_claude.py"),
+        "--since", since,
+        "--before", before,
+        "--input-dir", input_dir,
+        "--output-dir", output_dir,
+        "--model", model,
+        "--max-corpus-chars", str(max_corpus_chars),
+    ]
     return cmd, env
 
 
@@ -515,6 +570,10 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
         return build_facebook_posts(since, before, use_defaults)
     if spec.key == "facebook_comentarios":
         return build_facebook_comentarios(since, before, use_defaults, facebook_posts_csv)
+    if spec.key == "consolidador_datos":
+        return build_consolidador_datos(since, before, use_defaults)
+    if spec.key == "claude_nlp":
+        return build_claude_nlp(since, before, use_defaults)
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -536,8 +595,16 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "medios_tampico": "Medios",
         "facebook_posts": "Facebook",
         "facebook_comentarios": "Facebook",
+        "consolidador_datos": "Datos",
+        "claude_nlp": "Claude",
     }
     return labels.get(spec.key)
+
+
+def _weekly_datos_dir_from_consolidador_cmd(since: str, cmd: list[str]) -> Path:
+    output_dir_arg = _extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Datos")
+    datos_tag = build_report_tag(since, "Datos")
+    return Path(output_dir_arg) / datos_tag
 
 
 def weekly_output_dir_for_command(spec: PipelineSpec, since: str, cmd: list[str]) -> Path | None:
@@ -587,6 +654,24 @@ def main() -> None:
         facebook_posts_spec = PIPELINES_BY_CODE["4"]
         selected = [s for s in selected if s.code != "4"]  # Remover duplicados si existe
         selected.insert(0, facebook_posts_spec)  # Agregar al inicio
+
+    # Si se selecciona 7 (Claude) sin 6 (consolidador), agregar 6 antes.
+    selected_codes = {s.code for s in selected}
+    if "7" in selected_codes and "6" not in selected_codes:
+        print("\n⚠️  El pipeline 7 (Claude) requiere los materiales generados por el 6 (Consolidador).")
+        print("   Se ejecutará automáticamente el 6 antes del 7.")
+        consolidador_spec = PIPELINES_BY_CODE["6"]
+        insert_at = next((index for index, item in enumerate(selected) if item.code == "7"), len(selected))
+        selected.insert(insert_at, consolidador_spec)
+
+    selected_codes = {s.code for s in selected}
+    if "6" in selected_codes and "7" in selected_codes:
+        index_6 = next(index for index, item in enumerate(selected) if item.code == "6")
+        index_7 = next(index for index, item in enumerate(selected) if item.code == "7")
+        if index_6 > index_7:
+            consolidador_spec = selected.pop(index_6)
+            index_7 = next(index for index, item in enumerate(selected) if item.code == "7")
+            selected.insert(index_7, consolidador_spec)
     
     # 4️⃣ PASO 4: Configurar según modo
     facebook_posts_csv = ""  # CSV generado por el extractor de posts
@@ -676,25 +761,42 @@ def main() -> None:
         if result.returncode == 0:
             print(f"✅ {spec.label} completado")
             
-            # Si es el extractor de Posts (4), intentar encontrar el CSV generado
+            # Si es el extractor de Posts (4), calcular el path del CSV generado
             if spec.code == "4":
-                facebook_dir = REPO_ROOT / "Facebook"
-                # Buscar el CSV más reciente con patrón [tag]_posts.csv
-                import glob
-                pattern = str(facebook_dir / "*" / "*_posts.csv")
-                csv_files = glob.glob(pattern)
-                if csv_files:
-                    # Usar el más reciente
-                    facebook_posts_csv = max(csv_files, key=os.path.getmtime)
-                    print(f"   📄 CSV detectado: {facebook_posts_csv}")
-                    
-                    # Actualizar comandos pendientes de 5 para usar este CSV
-                    for i, (pending_spec, pending_cmd, _) in enumerate(prepared[prepared.index((spec, cmd, env_overrides))+1:], 
-                                                                         start=prepared.index((spec, cmd, env_overrides))+1):
-                        if pending_spec.code == "5":
-                            if "--input-csv" not in pending_cmd:
-                                pending_cmd.extend(["--input-csv", facebook_posts_csv])
-                                prepared[i] = (pending_spec, pending_cmd, prepared[i][2])
+                output_dir_arg = _extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
+                since_arg = _extract_flag_value(cmd, "--since") or since
+                report_tag = build_report_tag(since_arg, "Facebook")
+                facebook_posts_csv = str(Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv")
+                if os.path.exists(facebook_posts_csv):
+                    print(f"   📄 CSV de posts: {facebook_posts_csv}")
+                else:
+                    print(f"   ⚠️  CSV esperado no encontrado: {facebook_posts_csv}")
+                    facebook_posts_csv = ""
+
+                # Inyectar --input-csv en los comandos pendientes del extractor 5
+                current_idx = next(i for i, (s, _, __) in enumerate(prepared) if s.code == "4" and s is spec)
+                for i in range(current_idx + 1, len(prepared)):
+                    pending_spec, pending_cmd, pending_env = prepared[i]
+                    if pending_spec.code == "5" and facebook_posts_csv:
+                        if "--input-csv" not in pending_cmd:
+                            pending_cmd.extend(["--input-csv", facebook_posts_csv])
+                            prepared[i] = (pending_spec, pending_cmd, pending_env)
+
+            # Si se ejecuta el consolidado, limpiar automaticamente los dos txt semanales de Datos.
+            if spec.code == "6":
+                datos_dir = _weekly_datos_dir_from_consolidador_cmd(since, cmd)
+                limpieza_cmd = [
+                    sys.executable,
+                    str(SCRIPTS_DIR / "limpieza_texto.py"),
+                    "--datos-dir",
+                    str(datos_dir),
+                ]
+                print(f"🧼 Ejecutando limpieza de texto: {datos_dir}")
+                limpieza_result = subprocess.run(limpieza_cmd, env=env, cwd=str(REPO_ROOT))
+                if limpieza_result.returncode == 0:
+                    print("✅ Limpieza de texto completada")
+                else:
+                    print(f"⚠️ Limpieza de texto falló con código {limpieza_result.returncode}")
             continue
 
         print(f"❌ {spec.label} falló con código {result.returncode}")

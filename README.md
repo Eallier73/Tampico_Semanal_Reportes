@@ -16,6 +16,7 @@ Este repo parte de `Datos_Radar`, pero quedó limpiado para uso operativo:
 
 ```text
 Tampico_Semanal_Reportes/
+├── Claude/
 ├── Datos/
 ├── Facebook/
 ├── Medios/
@@ -33,6 +34,8 @@ Tampico_Semanal_Reportes/
 - `Scripts/03_medios_tampico.py`
 - `Scripts/04_facebook_comentarios_tampico.py`
 - `Scripts/05_facebook_posts_tampico.py`
+- `Scripts/6_consolidador_datos.py`
+- `Scripts/7_modelado_temas_claude.py`
 
 ## Variables de entorno
 
@@ -41,6 +44,7 @@ Define las credenciales antes de correr los extractores:
 ```bash
 export YOUTUBE_API_KEY=""
 export APIFY_TOKEN=""
+export CLAUDE_API_KEY=""
 ```
 
 Opcionales para YouTube:
@@ -70,5 +74,6 @@ El detalle script por script de argumentos y prompts quedó en `ORQUESTADOR_ARGU
 ## Notas operativas
 
 - `state/x_state.example.json` es solo una referencia. Debes crear `state/x_state.json` con un `storage_state` válido para correr el extractor de X/Twitter.
-- Las salidas semanales se generan dentro de `Facebook/`, `Medios/`, `Twitter/` y `Youtube/`, usando carpetas como `2026-04-06_Youtube` o `2026-04-06_Facebook`.
+- Las salidas semanales se generan dentro de `Facebook/`, `Medios/`, `Twitter/`, `Youtube/` y `Claude/`, usando carpetas etiquetadas por semana.
+- El análisis temático con Claude toma su insumo desde `Datos/{semana}/`, donde primero se crea un corpus combinado sin borrar los dos materiales originales.
 - `.gitignore` está configurado para no versionar descargas, cachés ni credenciales futuras.

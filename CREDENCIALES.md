@@ -2,7 +2,7 @@
 
 ## Descripción General
 
-Las credenciales de API (YouTube API key, Apify token) se cargan automáticamente desde el archivo `.env.local` que está ignorado en Git.
+Las credenciales de API (YouTube API key, Apify token y Claude API key) se cargan automáticamente desde el archivo `.env.local` que está ignorado en Git.
 
 ## Estructura de Archivos
 
@@ -24,8 +24,9 @@ cp .env.example .env.local
 
 Luego edita `.env.local`:
 ```env
-YOUTUBE_API_KEY=AIzaSyADmTxdJGJN9_wwahbt-qD0OtaqlEmTKEM
-APIFY_TOKEN=deehfWWhKe2lCMbJ4Zs2FgowO3paOC0x0Jql
+YOUTUBE_API_KEY=tu_youtube_api_key
+APIFY_TOKEN=tu_apify_token
+CLAUDE_API_KEY=tu_claude_api_key
 ```
 
 ## Paso 2: Obtener Credenciales
@@ -42,14 +43,19 @@ APIFY_TOKEN=deehfWWhKe2lCMbJ4Zs2FgowO3paOC0x0Jql
 2. En "Your personal API token", copia tu token
 3. Pégalo en `.env.local`
 
+### Claude API Key
+1. Ve a [Anthropic Console](https://console.anthropic.com/)
+2. Crea o selecciona una API key
+3. Copia el valor en `CLAUDE_API_KEY` dentro de `.env.local`
+
 ## Cómo Funciona
 
 ### Carga Automática
-El orquestador carga las variables al iniciar:
+El orquestador y el script de Claude cargan las variables al iniciar:
 
 ```python
 from dotenv import load_dotenv
-load_dotenv('.env.local')  # Carga YOUTUBE_API_KEY y APIFY_TOKEN
+load_dotenv('.env.local')  # Carga YOUTUBE_API_KEY, APIFY_TOKEN y CLAUDE_API_KEY
 ```
 
 ### En Modo Genérico
@@ -69,6 +75,7 @@ Usuario ejecuta: python3 Scripts/00_orquestador_general.py
 → Selecciona "1) POR RED"
 → Para YouTube: "¿YouTube API key?" (sugiere la del .env.local)
 → Para Facebook: "¿Apify token?" (sugiere el del .env.local)
+→ Para Claude: "¿Claude API key?" (sugiere la del .env.local)
 ```
 
 ## Seguridad
@@ -89,7 +96,7 @@ Para verificar que las credenciales se cargan correctamente:
 
 ```bash
 cd Scripts/
-python3 -c "import os; print(f'YouTube: {os.getenv(\"YOUTUBE_API_KEY\", \"NO ENCONTRADO\")}'); print(f'Apify: {os.getenv(\"APIFY_TOKEN\", \"NO ENCONTRADO\")}')"
+python3 -c "import os; print(f'YouTube: {os.getenv(\"YOUTUBE_API_KEY\", \"NO ENCONTRADO\")}'); print(f'Apify: {os.getenv(\"APIFY_TOKEN\", \"NO ENCONTRADO\")}'); print(f'Claude: {os.getenv(\"CLAUDE_API_KEY\", \"NO ENCONTRADO\")}')"
 ```
 
 ## Dependencias
@@ -109,7 +116,7 @@ Ya está incluido en `requirements.txt`.
 - Copia `.env.example` a `.env.local` y llena los valores
 
 **¿Puedo usar variables de entorno del sistema?**
-- Sí, si `.env.local` no existe, usa `$YOUTUBE_API_KEY` y `$APIFY_TOKEN`
+- Sí, si `.env.local` no existe, usa `$YOUTUBE_API_KEY`, `$APIFY_TOKEN` y `$CLAUDE_API_KEY`
 - Prioridad: `.env.local` > variables de sistema
 
 **¿Cómo uso esto en un servidor?**
@@ -118,6 +125,7 @@ Ya está incluido en `requirements.txt`.
   ```bash
   export YOUTUBE_API_KEY="..."
   export APIFY_TOKEN="..."
+  export CLAUDE_API_KEY="..."
   python3 Scripts/00_orquestador_general.py
   ```
 

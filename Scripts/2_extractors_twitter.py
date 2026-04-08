@@ -106,7 +106,9 @@ class TwitterExtractorIAD:
         
         # Archivos de salida segmentados por tipo de contenido
         self.output_posts_institucionales_csv = self.output_dir / f"{self.nombre_semana}_post_institucionales.csv"
+        self.output_posts_institucionales_txt = self.output_dir / f"{self.nombre_semana}_post_institucionales.txt"
         self.output_comentarios_csv = self.output_dir / f"{self.nombre_semana}_comentarios.csv"
+        self.output_comentarios_txt = self.output_dir / f"{self.nombre_semana}_comentarios.txt"
         
         # Configuraciones
         self.max_tweets = max_tweets
@@ -481,12 +483,24 @@ class TwitterExtractorIAD:
                 row = {field: tweet.get(field, "") for field in fieldnames}
                 writer.writerow(row)
 
+        with open(self.output_posts_institucionales_txt, "w", encoding="utf-8") as f:
+            for tweet in posts_institucionales:
+                clean = self.clean_text(tweet.get("text", ""))
+                if clean:
+                    f.write(clean + "\n")
+
         with open(self.output_comentarios_csv, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for tweet in comentarios:
                 row = {field: tweet.get(field, "") for field in fieldnames}
                 writer.writerow(row)
+
+        with open(self.output_comentarios_txt, "w", encoding="utf-8") as f:
+            for tweet in comentarios:
+                clean = self.clean_text(tweet.get("text", ""))
+                if clean:
+                    f.write(clean + "\n")
 
         print(f"✅ Twitter: {len(all_tweets)} tweets guardados")
         print(f"   🏛️ Posts institucionales: {len(posts_institucionales)} -> {self.output_posts_institucionales_csv}")
