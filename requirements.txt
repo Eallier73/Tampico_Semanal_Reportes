@@ -3,6 +3,7 @@ apify-client
 cloudscraper
 google-api-python-client
 googlenewsdecoder
+matplotlib
 pandas
 playwright
 python-docx

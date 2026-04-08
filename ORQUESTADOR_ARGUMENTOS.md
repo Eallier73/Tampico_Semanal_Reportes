@@ -142,6 +142,24 @@ Este documento resume, script por script, qué argumentos conviene pedir desde e
     - Regresion Logistica para direccion de polaridad
     - Correlacion de Pearson para asociacion tema-polaridad
     - Clasificacion de impacto (Alta/Media/Baja) y confianza
+
+  ## 09 Analisis de Temas Guiados
+
+  - Prompt propio previo: no.
+  - Argumentos clave:
+    - `--since`
+    - `--before`
+    - `--input-dir`
+    - `--output-dir`
+    - `--exclude-words-path`
+    - `--input-file` (opcional)
+  - No requiere credenciales
+  - Dependencia operativa:
+    - Requiere que exista `Datos/{semana}/material_institucional.txt`
+    - Requiere que exista `Datos/{semana}/material_comentarios.txt`
+    - Alternativamente se puede usar `--input-file` para forzar un archivo de entrada especifico
+  - Salidas:
+    - `Temas_Guiados/{semana}/`: clasificacion_temas_guiados.csv, distribucion_temas_guiados.png, top75_palabras_temas_guiados.csv, informe_temas_guiados.txt
   - Antes del envío crea un corpus combinado `.txt` dentro de la carpeta semanal de `Datos`
 
 ## Criterio del orquestador
