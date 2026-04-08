@@ -26,6 +26,13 @@ Tampico_Semanal_Reportes/
 └── state/
 ```
 
+Donde:
+
+- `Claude/`: Analisis tematicos generados por Claude (corpus combinado + analisis)
+- `Datos/`: Archivos consolidados y procesados por semana
+- `Influencia_Temas/`: Analisis correlacional de influencia de temas sobre polaridad
+- `Facebook/`, `Medios/`, `Twitter/`, `Youtube/`: Descargas por red/fuente
+
 ## Scripts incluidos
 
 - `Scripts/00_orquestador_general.py`
@@ -36,6 +43,7 @@ Tampico_Semanal_Reportes/
 - `Scripts/05_facebook_posts_tampico.py`
 - `Scripts/6_consolidador_datos.py`
 - `Scripts/7_modelado_temas_claude.py`
+- `Scripts/8_influencia_temas.py`
 
 ## Variables de entorno
 
@@ -75,5 +83,7 @@ El detalle script por script de argumentos y prompts quedó en `ORQUESTADOR_ARGU
 
 - `state/x_state.example.json` es solo una referencia. Debes crear `state/x_state.json` con un `storage_state` válido para correr el extractor de X/Twitter.
 - Las salidas semanales se generan dentro de `Facebook/`, `Medios/`, `Twitter/`, `Youtube/` y `Claude/`, usando carpetas etiquetadas por semana.
+- La carpeta `Influencia_Temas/{semana}/` contiene analisis correlacional de temas sobre polaridad con reportes tecnicos (CSVs) y ejecutivos (KPIs, hallazgos, alertas).
+- El pipeline 8 (Analisis de Influencia) requiere que se ejecute primero el pipeline 6 (Consolidador) para generar `material_institucional.txt` e `material_comentarios.txt`.
 - El análisis temático con Claude toma su insumo desde `Datos/{semana}/`, donde primero se crea un corpus combinado sin borrar los dos materiales originales.
 - `.gitignore` está configurado para no versionar descargas, cachés ni credenciales futuras.

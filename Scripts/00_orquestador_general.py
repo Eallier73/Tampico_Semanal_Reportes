@@ -73,6 +73,7 @@ PIPELINES = [
     PipelineSpec("5", "facebook_comentarios", "Facebook Comentarios (desde posts)", "5_extractors_facebook_comentarios.py"),
     PipelineSpec("6", "consolidador_datos", "Consolidador de Datos", "6_consolidador_datos.py"),
     PipelineSpec("7", "claude_nlp", "Modelado Tematico con Claude", "7_modelado_temas_claude.py"),
+    PipelineSpec("8", "influencia_temas", "Analisis de Influencia de Temas", "8_influencia_temas.py"),
 ]
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
@@ -550,6 +551,32 @@ def build_claude_nlp(since: str, before: str, use_defaults: bool = False) -> tup
     return cmd, env
 
 
+def build_influencia_temas(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
+    if use_defaults:
+        input_dir = str(REPO_ROOT / "Datos")
+        output_dir = str(REPO_ROOT / "Influencia_Temas")
+        stopwords_path = str(REPO_ROOT / "Scripts" / "diccionarios" / "stopwords" / "stop_list_espanol.txt")
+    else:
+        print("\n=== Analisis de Influencia de Temas ===")
+        input_dir = prompt_text("Directorio base de entrada (Datos)", str(REPO_ROOT / "Datos"))
+        output_dir = prompt_text("Directorio base de salida (Influencia_Temas)", str(REPO_ROOT / "Influencia_Temas"))
+        stopwords_path = prompt_text(
+            "Ruta de stopwords",
+            str(REPO_ROOT / "Scripts" / "diccionarios" / "stopwords" / "stop_list_espanol.txt"),
+        )
+
+    cmd = [
+        sys.executable,
+        str(SCRIPTS_DIR / "8_influencia_temas.py"),
+        "--since", since,
+        "--before", before,
+        "--input-dir", input_dir,
+        "--output-dir", output_dir,
+        "--stopwords-path", stopwords_path,
+    ]
+    return cmd, {}
+
+
 def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bool = False, facebook_posts_csv: str = "") -> tuple[list[str], dict[str, str]]:
     if spec.key == "youtube":
         return build_youtube(since, before, use_defaults)
@@ -574,6 +601,8 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
         return build_consolidador_datos(since, before, use_defaults)
     if spec.key == "claude_nlp":
         return build_claude_nlp(since, before, use_defaults)
+    if spec.key == "influencia_temas":
+        return build_influencia_temas(since, before, use_defaults)
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -597,6 +626,7 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "facebook_comentarios": "Facebook",
         "consolidador_datos": "Datos",
         "claude_nlp": "Claude",
+        "influencia_temas": "Influencia_Temas",
     }
     return labels.get(spec.key)
 
@@ -672,6 +702,24 @@ def main() -> None:
             consolidador_spec = selected.pop(index_6)
             index_7 = next(index for index, item in enumerate(selected) if item.code == "7")
             selected.insert(index_7, consolidador_spec)
+
+        # Si se selecciona 8 (Influencia Temas) sin 6 (consolidador), agregar 6 antes.
+        selected_codes = {s.code for s in selected}
+        if "8" in selected_codes and "6" not in selected_codes:
+            print("\n⚠️  El pipeline 8 (Influencia Temas) requiere los materiales generados por el 6 (Consolidador).")
+            print("   Se ejecutará automáticamente el 6 antes del 8.")
+            consolidador_spec = PIPELINES_BY_CODE["6"]
+            insert_at = next((index for index, item in enumerate(selected) if item.code == "8"), len(selected))
+            selected.insert(insert_at, consolidador_spec)
+
+        selected_codes = {s.code for s in selected}
+        if "6" in selected_codes and "8" in selected_codes:
+            index_6 = next((index for index, item in enumerate(selected) if item.code == "6"), None)
+            index_8 = next((index for index, item in enumerate(selected) if item.code == "8"), None)
+            if index_6 is not None and index_8 is not None and index_6 > index_8:
+                consolidador_spec = selected.pop(index_6)
+                index_8 = next(index for index, item in enumerate(selected) if item.code == "8")
+                selected.insert(index_8, consolidador_spec)
     
     # 4️⃣ PASO 4: Configurar según modo
     facebook_posts_csv = ""  # CSV generado por el extractor de posts

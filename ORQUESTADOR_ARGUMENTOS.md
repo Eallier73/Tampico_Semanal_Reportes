@@ -119,6 +119,29 @@ Este documento resume, script por script, qué argumentos conviene pedir desde e
 - Dependencia operativa:
   - Requiere que exista `Datos/{semana}/material_institucional.txt`
   - Requiere que exista `Datos/{semana}/material_comentarios.txt`
+
+  ## 08 Analisis de Influencia de Temas
+
+  - Prompt propio previo: no.
+  - Argumentos clave:
+    - `--since`
+    - `--before`
+    - `--input-dir`
+    - `--output-dir`
+    - `--stopwords-path`
+  - No requiere credenciales
+  - Dependencia operativa:
+    - Requiere que exista `Datos/{semana}/material_institucional.txt`
+    - Requiere que exista `Datos/{semana}/material_comentarios.txt`
+    - Se ejecuta tipicamente despues del pipeline 6 (Consolidador)
+  - Salidas:
+    - `Influencia_Temas/{semana}/tecnico/`: influencia_temas.csv, polaridad_documentos.csv
+    - `Influencia_Temas/{semana}/ejecutivo/`: 00_resumen_ejecutivo.md, 01_kpis_polaridad_por_tema.csv, 01b_kpis_polaridad_por_subtema.csv, 02_top_hallazgos_polaridad.csv, 03_alertas_polaridad.csv
+  - Métodos empleados:
+    - Ridge Regression para coeficientes de influencia
+    - Regresion Logistica para direccion de polaridad
+    - Correlacion de Pearson para asociacion tema-polaridad
+    - Clasificacion de impacto (Alta/Media/Baja) y confianza
   - Antes del envío crea un corpus combinado `.txt` dentro de la carpeta semanal de `Datos`
 
 ## Criterio del orquestador
