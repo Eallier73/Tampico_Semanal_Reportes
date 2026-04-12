@@ -1,0 +1,7 @@
+tema_id,tema,participacion_pct,intensidad_media,impacto_en_polaridad,direccion,confianza,contribucion_pct,coef_ridge,coef_logit,correlacion,num_subtemas
+0,Servicios e Infraestructura Pública,18.28,0.0271,Alta,Polaridad positiva,Alta,16.63,0.162346,0.072334,0.334728,3
+1,Seguridad y Criminalidad,20.65,0.024,Alta,Polaridad positiva,Alta,32.47,0.237704,0.068552,0.269393,4
+2,Medio Ambiente y Servicios de Agua,10.1,-0.0111,Alta,Polaridad negativa,Media,13.01,0.127025,0.024374,0.138014,3
+3,Obra Pública e Inversión,8.26,0.0043,Alta,Polaridad positiva,Alta,9.7,0.283944,0.073441,0.324588,1
+4,Educación y Cultura,14.68,0.0269,Alta,Polaridad positiva,Alta,20.58,0.301316,0.081798,0.436019,2
+6,Gobernanza y Administración Pública,10.47,0.0094,Alta,Polaridad positiva,Alta,7.61,0.222748,0.064326,0.416673,1

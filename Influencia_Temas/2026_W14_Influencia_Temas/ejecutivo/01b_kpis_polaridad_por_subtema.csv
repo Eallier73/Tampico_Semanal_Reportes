@@ -1,0 +1,15 @@
+tema_id,subtema,nombre_completo,participacion_pct,intensidad_media,impacto_en_polaridad,direccion,confianza,contribucion_pct,coef_ridge,coef_logit,correlacion
+0,agua,Servicios e Infraestructura Pública - Agua,7.44,0.0076,Alta,Polaridad positiva,Alta,3.51,0.102753,0.053781,0.242363
+0,alumbrado,Servicios e Infraestructura Pública - Alumbrado,4.17,0.0702,Alta,Polaridad positiva,Alta,5.45,0.159636,0.094372,0.282885
+0,basura,Servicios e Infraestructura Pública - Basura,6.67,0.0034,Alta,Polaridad positiva,Alta,7.67,0.224649,0.068849,0.478935
+1,delitos_patrimoniales,Seguridad y Criminalidad - Delitos_patrimoniales,3.23,0.0202,Alta,Polaridad positiva,Media,5.36,0.156918,0.043266,0.187102
+1,prevencion_vigilancia,Seguridad y Criminalidad - Prevencion_vigilancia,9.49,0.0779,Alta,Polaridad positiva,Alta,12.03,0.352389,0.125507,0.336279
+1,violencia_crimen_organizado,Seguridad y Criminalidad - Violencia_crimen_organizado,4.01,0.0109,Alta,Polaridad positiva,Alta,7.67,0.224522,0.057276,0.292219
+1,violencia_personas,Seguridad y Criminalidad - Violencia_personas,3.93,-0.013,Alta,Polaridad negativa,Alta,7.41,0.216987,0.048158,0.261972
+2,drenaje,Medio Ambiente y Servicios de Agua - Drenaje,1.1,-0.066,Alta,Polaridad negativa,Baja,5.52,0.161578,0.006071,0.197512
+2,pavimento,Medio Ambiente y Servicios de Agua - Pavimento,1.23,0.0611,Alta,Polaridad positiva,Media,2.99,0.087578,0.042582,0.105675
+2,vialidad,Medio Ambiente y Servicios de Agua - Vialidad,7.77,-0.0282,Alta,Polaridad negativa,Media,4.51,0.131919,0.024468,0.110854
+3,obras,Obra Pública e Inversión - Obras,8.26,0.0043,Alta,Polaridad positiva,Alta,9.7,0.283944,0.073441,0.324588
+4,cultura,Educación y Cultura - Cultura,8.71,0.0216,Alta,Polaridad positiva,Alta,9.22,0.270129,0.084439,0.421273
+4,educacion,Educación y Cultura - Educacion,5.97,0.0322,Alta,Polaridad positiva,Alta,11.35,0.332502,0.079156,0.450765
+6,gobierno,Gobernanza y Administración Pública - Gobierno,10.47,0.0094,Alta,Polaridad positiva,Alta,7.61,0.222748,0.064326,0.416673

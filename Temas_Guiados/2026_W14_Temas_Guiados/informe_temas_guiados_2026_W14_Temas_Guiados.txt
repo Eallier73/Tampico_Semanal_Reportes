@@ -1,0 +1,42 @@
+ANALISIS DE TEMAS GUIADOS POR PALABRAS CLAVE
+========================================================================
+
+Semana: 2026_W14_Temas_Guiados
+Documentos analizados: 2,486
+No clasificados: 1,914
+Fecha de ejecucion: 2026-04-08 08:13:36
+
+DISTRIBUCION POR TEMA
+------------------------------------------------------------------------
+Tema 0 - Servicios: 120 docs (4.83%)
+Tema 1 - Seguridad: 185 docs (7.44%)
+Tema 2 - Vialidades: 143 docs (5.75%)
+Tema 3 - Obras y proyectos: 64 docs (2.57%)
+Tema 4 - Morena (+ / neutro): 20 docs (0.80%)
+Tema 5 - Morena (-): 35 docs (1.41%)
+Tema 6 - Corrupcion: 5 docs (0.20%)
+No clasificados: 1,914 docs (76.99%)
+
+TOP PALABRAS POR TEMA
+------------------------------------------------------------------------
+Tema 0 - Servicios:
+  agua (55), limpieza (18), basura (11), alumbrado (8), residuos (8), luz (7), limpiar (6), fuga (6), limpia (5), luminarias (4), recoleccion (4), corte (4), suministro (3), postes (2), desechos (2)
+
+Tema 1 - Seguridad:
+  seguridad (78), proteccion (55), vigilancia (35), guardia (29), policia (13), detenido (9), robo (7), delincuencia (7), peligro (5), delincuente (4), alarma (4), ladron (4), delincuentes (3), asalto (2), criminal (2)
+
+Tema 2 - Vialidades:
+  calle (31), calles (31), carretera (21), avenida (16), transito (15), puente (13), contaminacion (10), reparacion (9), aguas (8), camino (8), fuga (6), circulacion (6), esquina (5), transitar (5), avenidas (4)
+
+Tema 3 - Obras y proyectos:
+  proyecto (17), infraestructura (14), mantenimiento (13), puente (13), desarrollo (11), obra (9), proyectos (8), obras (6), rehabilitacion (6), renovacion (5), edificio (5), edificacion (3), construccion (2), ampliacion (2), mejoramiento (1)
+
+Tema 4 - Morena (+ / neutro):
+  lopez (12), movimiento (7), sheinbaum (3), morenistas (2), transformacion (1), obrador (1), amlo (1), morenismo (1), cuarta (1)
+
+Tema 5 - Morena (-):
+  traidores (21), corrupcion (13), corruptos (9), fraude (2), censura (1), mentirosos (1), mugrena (1), rateros (1), comprados (1)
+
+Tema 6 - Corrupcion:
+  corrupcion (13), corruptos (9), complice (3), complices (2), corrupto (2), fraude (2), nepotismo (1), encubrimiento (1), complicidad (1), lavado (1), aviadores (1), enriquecian (1)
+
