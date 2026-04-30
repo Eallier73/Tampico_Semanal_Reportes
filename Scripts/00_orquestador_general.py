@@ -75,6 +75,7 @@ PIPELINES = [
     PipelineSpec("7", "claude_nlp", "Modelado Tematico con Claude", "7_modelado_temas_claude.py"),
     PipelineSpec("8", "influencia_temas", "Analisis de Influencia de Temas", "8_influencia_temas.py"),
     PipelineSpec("9", "temas_guiados", "Analisis de Temas Guiados", "9_temas_guiados.py"),
+    PipelineSpec("10", "publicaciones_institucionales_claude", "Publicaciones Institucionales con Claude", "10_publicaciones_institucionales_claude.py"),
 ]
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
@@ -612,6 +613,55 @@ def build_temas_guiados(since: str, before: str, use_defaults: bool = False) -> 
     return cmd, {}
 
 
+def build_publicaciones_institucionales_claude(
+    since: str,
+    before: str,
+    use_defaults: bool = False,
+) -> tuple[list[str], dict[str, str]]:
+    if use_defaults:
+        twitter_dir = str(REPO_ROOT / "Twitter")
+        facebook_dir = str(REPO_ROOT / "Facebook")
+        youtube_dir = str(REPO_ROOT / "Youtube")
+        output_dir = str(REPO_ROOT / "Claude")
+        model = "claude-opus-4-6"
+        max_corpus_chars = 120000
+        max_doc_chars = 6000
+        sample_seed = 42
+        claude_api_key = ""
+    else:
+        print("\n=== Publicaciones Institucionales con Claude ===")
+        twitter_dir = prompt_text("Directorio base de Twitter", str(REPO_ROOT / "Twitter"))
+        facebook_dir = prompt_text("Directorio base de Facebook", str(REPO_ROOT / "Facebook"))
+        youtube_dir = prompt_text("Directorio base de YouTube", str(REPO_ROOT / "Youtube"))
+        output_dir = prompt_text("Directorio base de salida (Claude)", str(REPO_ROOT / "Claude"))
+        model = prompt_text("Modelo Claude", "claude-opus-4-6")
+        max_corpus_chars = prompt_int("Maximo de caracteres a enviar", 120000)
+        max_doc_chars = prompt_int("Maximo de caracteres por publicacion", 6000)
+        sample_seed = prompt_int("Semilla de muestreo", 42)
+        claude_api_key = prompt_secret("Claude API key", "CLAUDE_API_KEY", required=True)
+
+    env = {}
+    if not use_defaults and claude_api_key:
+        if claude_api_key != os.getenv("CLAUDE_API_KEY", ""):
+            env["CLAUDE_API_KEY"] = claude_api_key
+
+    cmd = [
+        sys.executable,
+        str(SCRIPTS_DIR / "10_publicaciones_institucionales_claude.py"),
+        "--since", since,
+        "--before", before,
+        "--twitter-dir", twitter_dir,
+        "--facebook-dir", facebook_dir,
+        "--youtube-dir", youtube_dir,
+        "--output-dir", output_dir,
+        "--model", model,
+        "--max-corpus-chars", str(max_corpus_chars),
+        "--max-doc-chars", str(max_doc_chars),
+        "--sample-seed", str(sample_seed),
+    ]
+    return cmd, env
+
+
 def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bool = False, facebook_posts_csv: str = "") -> tuple[list[str], dict[str, str]]:
     if spec.key == "youtube":
         return build_youtube(since, before, use_defaults)
@@ -640,6 +690,8 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
         return build_influencia_temas(since, before, use_defaults)
     if spec.key == "temas_guiados":
         return build_temas_guiados(since, before, use_defaults)
+    if spec.key == "publicaciones_institucionales_claude":
+        return build_publicaciones_institucionales_claude(since, before, use_defaults)
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -665,6 +717,7 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "claude_nlp": "Claude",
         "influencia_temas": "Influencia_Temas",
         "temas_guiados": "Temas_Guiados",
+        "publicaciones_institucionales_claude": "Claude",
     }
     return labels.get(spec.key)
 
