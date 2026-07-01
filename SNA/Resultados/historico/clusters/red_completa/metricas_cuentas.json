@@ -1,9 +1,9 @@
 {
   "corpus": "historico consolidado de Tampico",
-  "n_palabras": 2458,
-  "n_aristas_palabra": 27730,
+  "n_palabras": 4039,
+  "n_aristas_palabra": 22975,
   "n_cuentas_sel": 500,
-  "n_aristas_cuenta": 2386,
+  "n_aristas_cuenta": 2409,
   "plataformas": [
     "Facebook",
     "Twitter",

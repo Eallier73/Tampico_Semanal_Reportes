@@ -20,8 +20,8 @@ del historico se indica con `--radar-dir RUTA`.
 
 ```bash
 .venv/bin/python Scripts/11_consolidar_historico_sna.py
-.venv/bin/python Scripts/12_lda_sna.py
-.venv/bin/python Scripts/12b_subclusters_louvain.py --resolution 1.0
+.venv/bin/python Scripts/12_lda_sna.py --k-min 25 --k-max 35 --selection-mode informative
+.venv/bin/python Scripts/12b_subclusters_louvain.py --resolution 1.4 --min-sub-size 3
 .venv/bin/python Scripts/12c_diagnostico_umbrales.py
 .venv/bin/python Scripts/12c_red_completa.py
 .venv/bin/python Scripts/18_cuentas_clusters.py
@@ -32,3 +32,13 @@ del historico se indica con `--radar-dir RUTA`.
 Los resultados se escriben en `SNA/Resultados/historico/`. El diagnostico
 calcula umbrales por capa a partir del percentil 75 del corpus; la red completa
 los utiliza automaticamente, salvo que se indiquen valores por CLI.
+
+El modo `informative` prioriza resolucion: selecciona el mayor numero de temas
+cuya coherencia sea al menos 90% de la mejor del barrido. Para una seleccion
+puramente estadistica se puede usar `--selection-mode coherence`. Los
+subclusters conservan todas sus palabras; `--max-words-per-subcluster` permite
+limitar ese detalle de forma explicita.
+
+`subclusters/subclusters_lectura.csv` funciona como catalogo legible de
+subtemas: incluye nombre automatico, resumen, terminos principales, tamano,
+densidad y peso de cada comunidad.

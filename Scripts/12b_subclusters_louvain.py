@@ -124,12 +124,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--clusters-dir", type=Path, default=DEFAULT_CLUSTERS)
     parser.add_argument(
-        "--resolution", type=float, default=1.0,
+        "--resolution", type=float, default=1.4,
         help="Resolution de Louvain (mas alto = mas sub-clusters)",
     )
     parser.add_argument(
-        "--min-sub-size", type=int, default=5,
+        "--min-sub-size", type=int, default=3,
         help="Sub-clusters con menos palabras se descartan como ruido",
+    )
+    parser.add_argument(
+        "--max-words-per-subcluster", type=int, default=0,
+        help="Palabras guardadas por subcluster; 0 conserva todas",
     )
     args = parser.parse_args()
 
@@ -154,6 +158,7 @@ def main() -> int:
     resumen_rows = []
     paleta_rows = []
     detalle_rows = []
+    lectura_rows = []
 
     # Identificar todos los temas presentes en lda_asignacion.csv
     temas = sorted(df_pesos["tema_id"].unique().tolist())
@@ -195,6 +200,13 @@ def main() -> int:
 
         for sub in sub_info:
             sid = sub["sub_id"]
+            palabras_lectura = sub["palabras"][:12]
+            nombre_subtema = ", ".join(palabras_lectura[:4]).capitalize()
+            resumen_subtema = (
+                f"Subtema T{tema_id:02d}.S{sid:02d} centrado en "
+                f"{', '.join(palabras_lectura[:6])}; conecta tambien "
+                f"{', '.join(palabras_lectura[6:12])}."
+            ).replace("; conecta tambien .", ".")
             # Sub-color: mezclar tema con blanco segun peso
             shade = 0.4 + 0.5 * (sid / max(1, len(sub_info)))
             sub_color = color_tema  # placeholder: mantenemos color del tema
@@ -207,10 +219,26 @@ def main() -> int:
                 "n_aristas": sub["n_aristas"],
                 "densidad": round(sub["densidad"], 3),
                 "peso_total": round(sub["peso_total"], 1),
+                "nombre_subtema": nombre_subtema,
+            })
+            lectura_rows.append({
+                "id_global": f"T{tema_id:02d}_S{sid:02d}",
+                "tema_id": tema_id,
+                "sub_id": sid,
+                "nombre_subtema": nombre_subtema,
+                "resumen_subtema": resumen_subtema,
+                "top_terminos": ", ".join(palabras_lectura),
+                "n_palabras": sub["n_palabras"],
+                "n_aristas": sub["n_aristas"],
+                "densidad": round(sub["densidad"], 3),
+                "peso_total": round(sub["peso_total"], 1),
             })
 
             # detalle: palabras + peso LDA
-            for rank, pal in enumerate(sub["palabras"][:30]):
+            palabras_detalle = sub["palabras"]
+            if args.max_words_per_subcluster > 0:
+                palabras_detalle = palabras_detalle[:args.max_words_per_subcluster]
+            for rank, pal in enumerate(palabras_detalle):
                 w_lda = pesos_idx.get((tema_id, pal), 0.0)
                 detalle_rows.append({
                     "tema_id": tema_id,
@@ -225,6 +253,7 @@ def main() -> int:
     pd.DataFrame(resumen_rows).to_csv(out_dir / "subclusters_resumen.csv", index=False)
     pd.DataFrame(paleta_rows).to_csv(out_dir / "subclusters_paleta.csv", index=False)
     pd.DataFrame(detalle_rows).to_csv(out_dir / "subclusters_palabras.csv", index=False)
+    pd.DataFrame(lectura_rows).to_csv(out_dir / "subclusters_lectura.csv", index=False)
 
     # reporte markdown corto
     md = ["# Subclusters Louvain por tema LDA", ""]
@@ -256,7 +285,7 @@ def main() -> int:
             ]
             pals_top = pals_sub[:12]
             md.append(
-                f"- **T{tid:02d}.S{s['sub_id']:02d}** "
+                f"- **T{tid:02d}.S{s['sub_id']:02d} - {s['nombre_subtema']}** "
                 f"({s['n_palabras']} pal, {s['n_aristas']} aristas, "
                 f"densidad {s['densidad']:.2f}): "
                 f"{', '.join(pals_top)}"

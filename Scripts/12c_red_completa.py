@@ -1856,6 +1856,14 @@ def main() -> int:
     sub_path = sna_dir / "subclusters" / "subclusters_palabras.csv"
     if sub_path.exists():
         sdf = pd.read_csv(sub_path)
+        lecturas_path = sna_dir / "subclusters" / "subclusters_lectura.csv"
+        nombres_sub = {}
+        if lecturas_path.exists():
+            lecturas = pd.read_csv(lecturas_path)
+            nombres_sub = {
+                (int(r.tema_id), int(r.sub_id)): str(r.nombre_subtema)
+                for r in lecturas.itertuples()
+            }
         if {"palabra", "tema_id", "sub_id"}.issubset(sdf.columns):
             for (tid, sid), grp in sdf.groupby(["tema_id", "sub_id"]):
                 col_sort = "peso_lda" if "peso_lda" in grp.columns else (
@@ -1867,8 +1875,12 @@ def main() -> int:
                     top10 = grp.nlargest(10, col_sort)
                 else:
                     top10 = grp.head(10)
+                contexto = f"T{int(tid):02d}/S{int(sid):02d}"
+                nombre_sub = nombres_sub.get((int(tid), int(sid)), "")
+                if nombre_sub:
+                    contexto += f" · {nombre_sub}"
                 for _, r in top10.iterrows():
-                    top_by_sub.append([str(r["palabra"]), f"T{int(tid):02d}/S{int(sid):02d}"])
+                    top_by_sub.append([str(r["palabra"]), contexto])
 
     html_path = out_dir / "red_tampico_historico.html"
     render_pyvis(

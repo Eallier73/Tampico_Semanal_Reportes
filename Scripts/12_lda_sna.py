@@ -7,7 +7,8 @@ Pipeline:
   2. Tokeniza y lematiza con spaCy (es_core_news_md) - reusando la misma
      limpieza que en el script anterior, para que el vocabulario sea comparable.
   3. Construye el diccionario gensim y el corpus BoW.
-  4. Barrido de LDA para K en [15..25] y elige el de mayor coherencia c_v.
+  4. Barrido de LDA para K en [25..35] y elige un modelo de alta resolucion
+     dentro de una tolerancia respecto de la mejor coherencia c_v.
   5. Asignacion hard: cada termino va al tema con mayor P(term|tema).
   6. Cohesion intracluster: coocurrencias (ventana=3) entre los terminos
      de cada tema. Output por tema: aristas internas con peso.
@@ -354,11 +355,13 @@ def barrido_lda(
     passes: int = 10,
     iterations: int = 100,
     seed: int = 42,
+    selection_mode: str = "informative",
+    coherence_ratio: float = 0.90,
 ) -> tuple[list[dict], dict, object]:
     """
     Entrena LDA para cada K en [k_min, k_max] y devuelve:
       - lista de resultados del barrido
-      - el mejor modelo (el de mayor coherencia c_v)
+      - el modelo seleccionado segun el criterio configurado
       - el dictionary (para no perderlo)
     """
     from gensim.models import LdaModel
@@ -395,9 +398,25 @@ def barrido_lda(
         })
         modelos[k] = lda
 
-    # K optimo = mayor coherencia c_v
-    mejor = max(resultados, key=lambda r: r["coherencia_c_v"])
-    print(f"         K optimo: {mejor['k']} (c_v={mejor['coherencia_c_v']:.4f})")
+    mejor_cv = max(resultados, key=lambda r: r["coherencia_c_v"])
+    if selection_mode == "coherence":
+        mejor = dict(mejor_cv)
+        criterio = "maxima coherencia c_v"
+    else:
+        umbral = mejor_cv["coherencia_c_v"] * coherence_ratio
+        candidatos = [r for r in resultados if r["coherencia_c_v"] >= umbral]
+        mejor = dict(max(candidatos, key=lambda r: r["k"]))
+        criterio = (
+            f"mayor K con coherencia >= {coherence_ratio:.0%} del maximo "
+            f"({umbral:.4f})"
+        )
+    mejor["criterio_seleccion"] = criterio
+    mejor["coherencia_maxima_barrido"] = mejor_cv["coherencia_c_v"]
+    mejor["k_maxima_coherencia"] = mejor_cv["k"]
+    print(
+        f"         K seleccionado: {mejor['k']} "
+        f"(c_v={mejor['coherencia_c_v']:.4f}; {criterio})"
+    )
     return resultados, mejor, modelos[mejor["k"]]
 
 
@@ -672,6 +691,9 @@ def guardar_resultados(
         "eta": "auto",
         "passes": 10,
         "iterations": 100,
+        "criterio_seleccion": mejor.get("criterio_seleccion", "maxima coherencia c_v"),
+        "coherencia_maxima_barrido": mejor.get("coherencia_maxima_barrido"),
+        "k_maxima_coherencia": mejor.get("k_maxima_coherencia"),
     }
     with open(out_dir / "lda_mejor_modelo.json", "w", encoding="utf-8") as f:
         json.dump(resumen_modelo, f, indent=2, ensure_ascii=False)
@@ -780,7 +802,9 @@ def generar_reporte(
             f"| {r['k']} | {r['coherencia_c_v']:.4f} | {r['perplexity']:.2f} |"
         )
     lines.append("")
-    lines.append(f"**K optimo: {mejor['k']}** (c_v = {mejor['coherencia_c_v']:.4f})")
+    lines.append(f"**K seleccionado: {mejor['k']}** (c_v = {mejor['coherencia_c_v']:.4f})")
+    lines.append("")
+    lines.append(f"**Criterio:** {mejor.get('criterio_seleccion', 'maxima coherencia c_v')}")
     lines.append("")
 
     K = mejor["k"]
@@ -858,8 +882,19 @@ def main() -> None:
         "--txt-path", required=False, default=None,
         help="Ruta al archivo .txt (solo si --input txt)",
     )
-    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=15)
-    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=25)
+    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=25)
+    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=35)
+    parser.add_argument(
+        "--selection-mode", choices=["informative", "coherence"], default="informative",
+        help=(
+            "informative elige el mayor K dentro de la tolerancia de coherencia; "
+            "coherence elige exclusivamente la mayor c_v"
+        ),
+    )
+    parser.add_argument(
+        "--coherence-ratio", type=float, default=0.90,
+        help="Fraccion de la mejor coherencia aceptable en modo informative",
+    )
     parser.add_argument("--passes", type=int, default=10)
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--no-below", type=int, default=5)
@@ -892,6 +927,10 @@ def main() -> None:
     )
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
+    if args.k_min < 2 or args.k_max < args.k_min:
+        parser.error("El rango K debe cumplir 2 <= k-min <= k-max")
+    if not 0.0 < args.coherence_ratio <= 1.0:
+        parser.error("--coherence-ratio debe estar en (0, 1]")
 
     out_dir = args.output_dir if args.input == "csv" else args.output_dir.parent / "clusters_txt"
 
@@ -949,6 +988,8 @@ def main() -> None:
         k_min=args.k_min, k_max=args.k_max,
         passes=args.passes, iterations=args.iterations,
         seed=args.seed,
+        selection_mode=args.selection_mode,
+        coherence_ratio=args.coherence_ratio,
     )
 
     # 5) Asignacion hard
