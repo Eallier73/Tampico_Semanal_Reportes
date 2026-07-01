@@ -1,0 +1,177 @@
+{
+  "timestamp": "2026-07-01T11:49:58.953396+00:00",
+  "fase": "2 - modelado de temas con LDA",
+  "corpus": {
+    "n_docs": 6226
+  },
+  "lda_barrido": [
+    {
+      "k": 4,
+      "coherencia_c_v": 0.5574148986362674,
+      "perplexity": -7.089104682478397
+    },
+    {
+      "k": 5,
+      "coherencia_c_v": 0.578029694326885,
+      "perplexity": -7.13564529463006
+    },
+    {
+      "k": 6,
+      "coherencia_c_v": 0.5758940465781851,
+      "perplexity": -7.166685771342439
+    },
+    {
+      "k": 7,
+      "coherencia_c_v": 0.5206083879225015,
+      "perplexity": -7.1823919611811275
+    },
+    {
+      "k": 8,
+      "coherencia_c_v": 0.5191772955830176,
+      "perplexity": -7.186928085377169
+    },
+    {
+      "k": 9,
+      "coherencia_c_v": 0.5257465438691244,
+      "perplexity": -7.19344238571887
+    },
+    {
+      "k": 10,
+      "coherencia_c_v": 0.4875504321384437,
+      "perplexity": -7.220658796625426
+    }
+  ],
+  "lda_mejor": {
+    "k": 5,
+    "coherencia_c_v": 0.578029694326885,
+    "perplexity": -7.13564529463006,
+    "alpha": "auto",
+    "eta": "auto",
+    "passes": 10,
+    "iterations": 100
+  },
+  "temas": {
+    "0": {
+      "n_terminos": 170,
+      "n_aristas_internas": 2189,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "presidenta",
+        "gracias",
+        "villarreal",
+        "gobernador",
+        "mónica",
+        "alcaldesa",
+        "américo",
+        "exelente",
+        "gobierno",
+        "persona"
+      ]
+    },
+    "1": {
+      "n_terminos": 182,
+      "n_aristas_internas": 5083,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "seguir",
+        "bienestar",
+        "acción",
+        "familia",
+        "colonia",
+        "tampicotecuida",
+        "día",
+        "espacio",
+        "salud",
+        "fortalecer"
+      ]
+    },
+    "2": {
+      "n_terminos": 174,
+      "n_aristas_internas": 1985,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "excelente",
+        "tamaulipas",
+        "altamira",
+        "paz",
+        "cdvictoria",
+        "reynosa",
+        "matamoros",
+        "madero",
+        "slp",
+        "nuevolaredo"
+      ]
+    },
+    "3": {
+      "n_terminos": 200,
+      "n_aristas_internas": 3712,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "méxico",
+        "pasión",
+        "felicidad",
+        "querer",
+        "deber",
+        "pasar",
+        "gente",
+        "mexicano",
+        "partido",
+        "fútbol"
+      ]
+    },
+    "4": {
+      "n_terminos": 200,
+      "n_aristas_internas": 4672,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "tampico",
+        "ciudad",
+        "historia",
+        "impulsar",
+        "desarrollo",
+        "exposición",
+        "económico",
+        "jaiba",
+        "tampiqueño",
+        "importante"
+      ]
+    }
+  },
+  "matriz_entre_temas": [
+    [
+      0,
+      2917,
+      472,
+      274,
+      1806
+    ],
+    [
+      2188,
+      0,
+      214,
+      99,
+      4180
+    ],
+    [
+      613,
+      634,
+      0,
+      603,
+      2101
+    ],
+    [
+      539,
+      364,
+      648,
+      0,
+      862
+    ],
+    [
+      1554,
+      4163,
+      1503,
+      341,
+      0
+    ]
+  ]
+}

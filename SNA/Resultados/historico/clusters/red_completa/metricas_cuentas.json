@@ -1,0 +1,20 @@
+{
+  "corpus": "historico consolidado de Tampico",
+  "n_palabras": 900,
+  "n_aristas_palabra": 2971,
+  "n_cuentas_sel": 137,
+  "n_aristas_cuenta": 615,
+  "plataformas": [
+    "Facebook",
+    "Twitter",
+    "YouTube"
+  ],
+  "params": {
+    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico",
+    "top_n": 500,
+    "min_msgs": 5,
+    "top_k": 5,
+    "peso_min": 1,
+    "peso_arista": 4.0
+  }
+}

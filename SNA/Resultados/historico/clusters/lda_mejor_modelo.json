@@ -1,0 +1,9 @@
+{
+  "k": 5,
+  "coherencia_c_v": 0.578029694326885,
+  "perplexity": -7.13564529463006,
+  "alpha": "auto",
+  "eta": "auto",
+  "passes": 10,
+  "iterations": 100
+}

@@ -1,0 +1,6 @@
+tema_id,n_palabras,fuerza_intra,fuerza_extra,fuerza_total,ratio_endogamia,broker_index,hub_local,eigenvector_interno,aislamiento,veredicto
+0,167,4394.0,2881.0,7275.0,0.604,0.5466,0.0,0.0,0.4521,conector_legitimo
+1,179,12328.0,4127.0,16455.0,0.7492,0.7123,0.0,0.0,0.2151,conector_legitimo
+2,167,4230.0,1529.0,5759.0,0.7345,0.4839,0.0,0.0,0.7092,balanceado
+3,190,5080.0,251.0,5331.0,0.9529,0.5916,-0.0,0.0,0.9523,burbuja_vacia
+4,197,9541.0,5258.0,14799.0,0.6447,0.688,-0.0,0.0,0.0,conector_legitimo
