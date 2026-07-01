@@ -1,130 +1,130 @@
 # Reporte SNA - Fase 2: Modelado de Temas (LDA)
 
-_Generado: 2026-07-01 13:16 UTC_
+_Generado: 2026-07-01 14:17 UTC_
 
 ## 1. Barrido de K
 
 | K | Coherencia c_v | Perplexity |
 |---|---------------:|-----------:|
-| 15 | 0.5081 | -6.95 |
-| 16 | 0.4754 | -6.99 |
-| 17 | 0.4874 | -7.00 |
-| 18 | 0.4885 | -7.00 |
-| 19 | 0.4491 | -7.04 |
-| 20 | 0.4848 | -7.02 |
-| 21 | 0.4198 | -7.07 |
-| 22 | 0.4704 | -7.07 |
-| 23 | 0.4709 | -7.07 |
-| 24 | 0.4702 | -7.10 |
-| 25 | 0.4656 | -7.12 |
+| 15 | 0.4952 | -9.18 |
+| 16 | 0.4732 | -9.26 |
+| 17 | 0.4655 | -9.33 |
+| 18 | 0.4678 | -9.40 |
+| 19 | 0.4520 | -9.48 |
+| 20 | 0.4600 | -9.56 |
+| 21 | 0.4779 | -9.61 |
+| 22 | 0.4478 | -9.70 |
+| 23 | 0.4391 | -9.76 |
+| 24 | 0.4642 | -9.83 |
+| 25 | 0.4511 | -9.91 |
 
-**K optimo: 15** (c_v = 0.5081)
+**K optimo: 15** (c_v = 0.4952)
 
 ## 2. Temas descubiertos
 
-### Tema 0 (97 terminos)
+### Tema 0 (177 terminos)
 
-**Top 10:** proteccion, civil, lluvia, zona, seguridad, bomberos, recorrido, cuida, abril, emergencia
+**Top 10:** deporte, ciudad, invitar, cultura, deportivo, historia, maria, disfrutar, actividad, orgullo
 
-- Aristas internas (coocurrencia ventana=3): **1351**
+- Aristas internas (coocurrencia ventana=3): **7113**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 1 (107 terminos)
+### Tema 1 (182 terminos)
 
-**Top 10:** espacio, familia, convivencia, impulsar, actividad, cultura, deportivo, cultural, disfrutar, pasion
+**Top 10:** madre, mujer, hijo, cartel, mama, policia, salir, justicia, volver, nombre
 
-- Aristas internas (coocurrencia ventana=3): **1916**
+- Aristas internas (coocurrencia ventana=3): **9657**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 2 (83 terminos)
+### Tema 2 (230 terminos)
 
-**Top 10:** seguir, excelente, colonia, bienestar, programa, tampicotecuida, accion, tampicovacontodo, tampiqueno, salud
+**Top 10:** ganar, love, like, comentario, campeon, extorsion, pareja, tecnica, real, santiago
 
-- Aristas internas (coocurrencia ventana=3): **1408**
+- Aristas internas (coocurrencia ventana=3): **3640**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 3 (99 terminos)
+### Tema 3 (207 terminos)
 
-**Top 10:** monica, villarreal, anaya, limpieza, laguna, gob, jornada, agua, basura, visitante
+**Top 10:** pesos, ayuda, necesitar, estudio, mercado, contar, dirigido, cientifico, mante, tarjeta
 
-- Aristas internas (coocurrencia ventana=3): **1242**
+- Aristas internas (coocurrencia ventana=3): **2905**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 4 (111 terminos)
+### Tema 4 (222 terminos)
 
-**Top 10:** mundial, partido, nacional, mexicano, persona, padre, emocion, venir, mal, mes
+**Top 10:** animal, adan, simulacro, impacto, denuncia, rapido, par, lagunario, patrimonio, bache
 
-- Aristas internas (coocurrencia ventana=3): **1221**
+- Aristas internas (coocurrencia ventana=3): **4539**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 5 (71 terminos)
+### Tema 5 (170 terminos)
 
-**Top 10:** tamaulipas, cdvictoria, reynosa, matamoros, altamira, nuevolaredo, cdmadero, nota, cdmx, monterrey
+**Top 10:** calle, zona, colonia, agua, basura, norte, casa, seleccion, lluvia, avenida
 
-- Aristas internas (coocurrencia ventana=3): **573**
+- Aristas internas (coocurrencia ventana=3): **6310**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 6 (88 terminos)
+### Tema 6 (176 terminos)
 
-**Top 10:** dia, revistadebate, gente, libertad, col, papa, marina, exposicion, entregar, sumar
+**Top 10:** desarrollo, impulsar, laguna, obra, junio, carpintero, proyecto, espacio, local, economico
 
-- Aristas internas (coocurrencia ventana=3): **842**
+- Aristas internas (coocurrencia ventana=3): **6886**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 7 (91 terminos)
+### Tema 7 (142 terminos)
 
-**Top 10:** atencion, mantener, limpio, vida, hospital, reporte, calor, medico, morir, banqueta
+**Top 10:** monica, villarreal, presidenta, seguir, municipal, bienestar, accion, gobierno, tampicotecuida, fortalecer
 
-- Aristas internas (coocurrencia ventana=3): **757**
+- Aristas internas (coocurrencia ventana=3): **7790**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 8 (100 terminos)
+### Tema 8 (132 terminos)
 
-**Top 10:** presidenta, nino, gracias, felicidad, felicidades, evento, nina, alcaldesa, bonito, vivir
+**Top 10:** gracias, dia, familia, felicidad, felicidades, excelente, vida, hermoso, ano, feliz
 
-- Aristas internas (coocurrencia ventana=3): **1271**
+- Aristas internas (coocurrencia ventana=3): **5400**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 9 (102 terminos)
+### Tema 9 (152 terminos)
 
-**Top 10:** calle, dejar, senora, proteger, recibir, limpiar, andar, canal, ojala, peaton
+**Top 10:** tampico, tamaulipas, mexico, altamira, cdvictoria, futbol, mundial, matamoros, nota, reynosa
 
-- Aristas internas (coocurrencia ventana=3): **1065**
+- Aristas internas (coocurrencia ventana=3): **3071**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 10 (120 terminos)
+### Tema 10 (236 terminos)
 
-**Top 10:** hora, internet, madre, mujer, ganar, llegar, numero, mayo, acapulco, comentario
+**Top 10:** riobravo, vallehermoso, estudiante, servir, coahuila, torre, uat, vivar, directo, reparacion
 
-- Aristas internas (coocurrencia ventana=3): **1442**
+- Aristas internas (coocurrencia ventana=3): **4869**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 11 (137 terminos)
+### Tema 11 (149 terminos)
 
-**Top 10:** pueblo, pagar, pasar, deber, ano, justicia, hablar, salir, querer, saludo
+**Top 10:** deber, pais, pueblo, pagar, pasar, mal, mexicano, puro, claudia, dinero
 
-- Aristas internas (coocurrencia ventana=3): **2303**
+- Aristas internas (coocurrencia ventana=3): **8987**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 12 (130 terminos)
+### Tema 12 (198 terminos)
 
-**Top 10:** mexico, gobierno, narco, morena, lopez, claudia, politico, corrupto, huachicol, robar
+**Top 10:** lopez, morena, destruir, millon, investigacion, judicial, unidos, votar, ejercito, obrador
 
-- Aristas internas (coocurrencia ventana=3): **2234**
+- Aristas internas (coocurrencia ventana=3): **7208**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 13 (82 terminos)
+### Tema 13 (227 terminos)
 
-**Top 10:** equipo, joven, ciudad, oportunidad, esfuerzo, importante, construir, economico, futuro, campeon
+**Top 10:** mundo, perder, persona, venir, dejar, alma, arbol, mes, semana, dato
 
-- Aristas internas (coocurrencia ventana=3): **894**
+- Aristas internas (coocurrencia ventana=3): **8483**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 14 (92 terminos)
+### Tema 14 (195 terminos)
 
-**Top 10:** fortalecer, municipal, publico, educacion, leer, secretaria, sector, turistico, coordinacion, avanzar
+**Top 10:** gente, querer, gustar, pensar, favor, video, luz, creer, alguien, andar
 
-- Aristas internas (coocurrencia ventana=3): **1331**
+- Aristas internas (coocurrencia ventana=3): **8817**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
 ---
@@ -146,18 +146,18 @@ Cada celda `M[i][j]` = suma de coocurrencias de terminos del tema i con terminos
 
 | De \\ Hacia | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 | T11 | T12 | T13 | T14 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| T0 | 0 | 80 | 522 | 403 | 38 | 125 | 23 | 9 | 76 | 68 | 57 | 0 | 20 | 77 | 362 |
-| T1 | 31 | 0 | 941 | 524 | 30 | 129 | 60 | 81 | 280 | 0 | 14 | 0 | 144 | 297 | 476 |
-| T2 | 149 | 724 | 0 | 1267 | 0 | 77 | 88 | 103 | 1191 | 30 | 0 | 0 | 166 | 426 | 514 |
-| T3 | 205 | 486 | 1489 | 0 | 0 | 106 | 119 | 264 | 1063 | 96 | 14 | 0 | 107 | 314 | 699 |
-| T4 | 58 | 204 | 164 | 97 | 0 | 116 | 90 | 8 | 178 | 0 | 7 | 58 | 196 | 102 | 22 |
-| T5 | 165 | 187 | 234 | 171 | 66 | 0 | 146 | 26 | 92 | 70 | 69 | 116 | 176 | 245 | 354 |
-| T6 | 68 | 196 | 436 | 225 | 70 | 146 | 0 | 24 | 268 | 64 | 37 | 35 | 103 | 107 | 99 |
-| T7 | 23 | 125 | 504 | 502 | 8 | 63 | 43 | 0 | 96 | 47 | 11 | 0 | 18 | 149 | 191 |
-| T8 | 27 | 314 | 1529 | 1086 | 28 | 83 | 175 | 57 | 0 | 18 | 30 | 75 | 196 | 233 | 193 |
-| T9 | 104 | 59 | 250 | 388 | 12 | 99 | 88 | 70 | 53 | 0 | 36 | 77 | 29 | 74 | 84 |
-| T10 | 57 | 106 | 188 | 137 | 19 | 91 | 62 | 11 | 185 | 36 | 0 | 49 | 66 | 77 | 84 |
-| T11 | 0 | 56 | 199 | 105 | 64 | 151 | 55 | 6 | 294 | 54 | 31 | 0 | 274 | 30 | 14 |
-| T12 | 20 | 221 | 411 | 151 | 175 | 183 | 103 | 11 | 325 | 16 | 41 | 191 | 0 | 117 | 298 |
-| T13 | 59 | 384 | 848 | 430 | 33 | 164 | 70 | 89 | 274 | 21 | 11 | 12 | 33 | 0 | 243 |
-| T14 | 195 | 488 | 747 | 798 | 0 | 264 | 47 | 39 | 171 | 15 | 51 | 0 | 173 | 199 | 0 |
+| T0 | 0 | 191 | 0 | 41 | 0 | 336 | 797 | 4770 | 2029 | 5067 | 0 | 41 | 0 | 0 | 94 |
+| T1 | 437 | 0 | 0 | 82 | 0 | 265 | 174 | 1981 | 2547 | 1499 | 0 | 761 | 32 | 336 | 965 |
+| T2 | 313 | 86 | 0 | 139 | 38 | 54 | 48 | 357 | 470 | 765 | 27 | 478 | 78 | 203 | 306 |
+| T3 | 178 | 212 | 109 | 0 | 0 | 216 | 62 | 1466 | 863 | 922 | 0 | 398 | 95 | 521 | 435 |
+| T4 | 271 | 121 | 38 | 17 | 0 | 314 | 202 | 1372 | 530 | 1396 | 53 | 99 | 36 | 55 | 49 |
+| T5 | 407 | 234 | 0 | 0 | 63 | 0 | 455 | 3948 | 1003 | 4232 | 35 | 208 | 0 | 78 | 479 |
+| T6 | 797 | 40 | 0 | 0 | 52 | 283 | 0 | 5622 | 671 | 4780 | 0 | 38 | 0 | 45 | 0 |
+| T7 | 2082 | 307 | 0 | 0 | 0 | 605 | 1388 | 0 | 9342 | 15038 | 0 | 873 | 520 | 78 | 903 |
+| T8 | 904 | 823 | 0 | 0 | 77 | 164 | 274 | 11968 | 0 | 4966 | 0 | 670 | 63 | 650 | 1183 |
+| T9 | 3136 | 388 | 0 | 292 | 0 | 2481 | 2719 | 15263 | 4433 | 0 | 232 | 836 | 188 | 387 | 743 |
+| T10 | 75 | 121 | 15 | 15 | 53 | 87 | 141 | 1234 | 198 | 2158 | 0 | 110 | 45 | 14 | 38 |
+| T11 | 74 | 602 | 47 | 157 | 0 | 208 | 110 | 2955 | 1744 | 2020 | 0 | 0 | 329 | 593 | 1853 |
+| T12 | 22 | 149 | 63 | 76 | 21 | 0 | 120 | 2073 | 399 | 1425 | 0 | 1181 | 0 | 107 | 429 |
+| T13 | 187 | 394 | 0 | 248 | 0 | 223 | 45 | 1552 | 2186 | 1374 | 0 | 930 | 0 | 0 | 1138 |
+| T14 | 94 | 767 | 42 | 120 | 0 | 413 | 0 | 2797 | 2789 | 1604 | 0 | 1718 | 85 | 751 | 0 |

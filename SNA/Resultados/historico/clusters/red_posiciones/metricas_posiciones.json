@@ -1,11 +1,11 @@
 {
   "corpus": "historico consolidado de Tampico",
-  "n_mensajes": 6226,
-  "n_cuentas_total": 3428,
-  "n_posiciones": 29,
-  "n_cuentas_posicion": 951,
-  "n_nodes_html": 671,
-  "n_edges_html": 862,
+  "n_mensajes": 145330,
+  "n_cuentas_total": 45783,
+  "n_posiciones": 42,
+  "n_cuentas_posicion": 13882,
+  "n_nodes_html": 1016,
+  "n_edges_html": 1302,
   "params": {
     "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico",
     "input_csv": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_consolidados.csv",
@@ -18,7 +18,7 @@
     "words_per_position": 12
   },
   "ibea_por_nivel": {
-    "bajo": 17,
-    "medio": 12
+    "bajo": 39,
+    "medio": 3
   }
 }
