@@ -279,6 +279,24 @@ def write_annotation_outputs(
     return summary
 
 
+def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Conserva en HTML solo nodos que sirven para localizar/colorar."""
+    compact: dict[str, dict[str, Any]] = {}
+    for node_id, item in annotations.items():
+        categories = item.get("categories") or []
+        polarity = item.get("polarity") or "neutral"
+        if not categories and polarity == "neutral":
+            continue
+        compact[node_id] = {
+            "categories": categories,
+            "primary_category": item.get("primary_category") or "",
+            "category_confidence": item.get("category_confidence") or 0.0,
+            "polarity": polarity,
+            "polarity_score": item.get("polarity_score") or 0.0,
+        }
+    return compact
+
+
 def inject_guided_layer(
     html_path: Path,
     annotations: dict[str, dict[str, Any]],
@@ -288,7 +306,7 @@ def inject_guided_layer(
 ) -> None:
     """Inyecta un panel no destructivo de localizacion y color en una red vis."""
     source = html_path.read_text(encoding="utf-8")
-    annotations_json = json.dumps(annotations, ensure_ascii=False).replace("</", "<\\/")
+    annotations_json = json.dumps(compact_annotations_for_html(annotations), ensure_ascii=False).replace("</", "<\\/")
     colors_json = json.dumps(category_colors, ensure_ascii=False)
     polarity_json = json.dumps(POLARITY_COLORS, ensure_ascii=False)
     category_buttons = "".join(
@@ -363,7 +381,6 @@ def inject_guided_layer(
     if (!resolveNetwork()) {{
       setTimeout(initGuided, 100); return;
     }}
-    const titleUpdates = [];
     guidedNodes.get().forEach(function(node) {{
       originals[node.id] = {{
         color: node.color,
@@ -372,16 +389,7 @@ def inject_guided_layer(
         borderWidth: node.borderWidth,
         font: node.font
       }};
-      const meta = GUIDED_META[node.id];
-      if (!meta) return;
-      const cats = (meta.categories || []).map(c => c.name + ' (' +
-        Number(c.confidence || c.share || 0).toFixed(2) + ')').join(', ') || 'sin coincidencia';
-      const extra = '<br><b>Temas rastreados:</b> ' + cats +
-        '<br><b>Polaridad:</b> ' + meta.polarity +
-        ' (' + Number(meta.polarity_score || 0).toFixed(2) + ')';
-      titleUpdates.push({{id: node.id, title: String(node.title || node.label || node.id) + extra}});
     }});
-    if (titleUpdates.length) guidedNodes.update(titleUpdates);
     document.querySelectorAll('#guidedPanel [data-category]').forEach(btn =>
       btn.addEventListener('click', () => locate('category', btn.dataset.category)));
     document.querySelectorAll('#guidedPanel [data-polarity]').forEach(btn =>

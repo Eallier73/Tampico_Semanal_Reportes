@@ -917,6 +917,7 @@ def render_pyvis(
             pagerank=float(info["pagerank"]),
             grado=int(info["grado_total"]),
             sospechoso=bool(temas_sospechosos_set and int(info["tema_id"]) in temas_sospechosos_set),
+            hidden=bool(rol not in {"broker", "hub_endogamico"} or int(info["grado_total"]) < 25),
         )
 
     # Aristas: color por tipo, ancho por peso
@@ -936,7 +937,14 @@ def render_pyvis(
             t = (w - wmin) / max(1, wmax - wmin)
             width = 0.3 + t * 5.0
             title = f"{tipo} (w={w:.0f})"
-            net.add_edge(u, v, color=tipo_color[tipo], width=width, title=title)
+            net.add_edge(
+                u,
+                v,
+                color=tipo_color[tipo],
+                width=width,
+                title=title,
+                hidden=tipo != "intra_sub",
+            )
 
     # Opciones de visualizacion: fisica + filtros por grupo/tipo
     net.set_options("""
@@ -945,9 +953,9 @@ def render_pyvis(
         "enabled": true,
         "solver": "forceAtlas2Based",
         "forceAtlas2Based": {
-          "gravitationalConstant": -50,
-          "centralGravity": 0.01,
-          "springLength": 80,
+          "gravitationalConstant": -70,
+          "centralGravity": 0.006,
+          "springLength": 160,
           "springConstant": 0.08,
           "damping": 0.4
         },
@@ -1163,10 +1171,10 @@ def render_pyvis(
             "    <label><input type=\"checkbox\" data-edge=\"#4daf4a\" checked>\n"
             "      <span class=\"swatchL\" style=\"background:#4daf4a\"></span>\n"
             "      Vecinas (verde)</label>\n"
-            "    <label><input type=\"checkbox\" data-edge=\"#377eb8\" checked>\n"
+            "    <label><input type=\"checkbox\" data-edge=\"#377eb8\">\n"
             "      <span class=\"swatchL\" style=\"background:#377eb8\"></span>\n"
             "      Mismo tema (azul)</label>\n"
-            "    <label><input type=\"checkbox\" data-edge=\"#e41a1c\" checked>\n"
+            "    <label><input type=\"checkbox\" data-edge=\"#e41a1c\">\n"
             "      <span class=\"swatchL\" style=\"background:#e41a1c\"></span>\n"
             "      Entre temas (rojo)</label>\n"
             "    <div style=\"color:#bbb;font-size:10px;margin-top:6px\">\n"
@@ -1182,10 +1190,10 @@ def render_pyvis(
             "    <label><input type=\"checkbox\" data-rol=\"hub_endogamico\" checked>\n"
             "      <span class=\"swatch\" style=\"background:#ff7f0e\"></span>\n"
             "      <b>Núcleo</b> — palabras clave de un solo tema</label>\n"
-            "    <label><input type=\"checkbox\" data-rol=\"conector_provincial\" checked>\n"
+            "    <label><input type=\"checkbox\" data-rol=\"conector_provincial\">\n"
             "      <span class=\"swatch\" style=\"background:#2ca02c\"></span>\n"
             "      <b>Conexiones locales</b> — unen dos o tres temas</label>\n"
-            "    <label><input type=\"checkbox\" data-rol=\"periferico\" checked>\n"
+            "    <label><input type=\"checkbox\" data-rol=\"periferico\">\n"
             "      <span class=\"swatch\" style=\"background:#7f7f7f\"></span>\n"
             "      <b>Ruido</b> — palabras sueltas, poco centrales</label>\n"
             "    <hr style=\"border:0; border-top:1px solid #444; margin:6px 0;\">\n"
@@ -1201,8 +1209,8 @@ def render_pyvis(
             "    <div style=\"color:#bbb;font-size:10px;margin-top:-2px;margin-bottom:6px\">\n"
             "      sube para ocultar palabras que casi no salen de su tema</div>\n"
             "    <label>Poco conectadas (mín enlaces):\n"
-            "      <span class=\"rangoVal\" id=\"gradMinV\">0</span></label>\n"
-            "    <input type=\"range\" id=\"gradMin\" min=\"0\" max=\"100\" value=\"0\">\n"
+            "      <span class=\"rangoVal\" id=\"gradMinV\">25</span></label>\n"
+            "    <input type=\"range\" id=\"gradMin\" min=\"0\" max=\"100\" value=\"25\">\n"
             "    <div style=\"color:#bbb;font-size:10px;margin-top:-2px;margin-bottom:6px\">\n"
             "      sube para ocultar palabras con pocas conexiones</div>\n"
             "    <label><input type=\"checkbox\" id=\"soloBrokers\">\n"
@@ -1218,8 +1226,8 @@ def render_pyvis(
             "      <span class=\"rangoVal\" id=\"tamMinV\">100%</span></label>\n"
             "    <input type=\"range\" id=\"tamMin\" min=\"60\" max=\"180\" value=\"100\">\n"
             "    <label>Separación:\n"
-            "      <span class=\"rangoVal\" id=\"springV\">80</span></label>\n"
-            "    <input type=\"range\" id=\"spring\" min=\"20\" max=\"300\" value=\"80\">\n"
+            "      <span class=\"rangoVal\" id=\"springV\">160</span></label>\n"
+            "    <input type=\"range\" id=\"spring\" min=\"20\" max=\"300\" value=\"160\">\n"
             "    <label>Atracción al centro:\n"
             "      <span class=\"rangoVal\" id=\"gravV\">0.01</span></label>\n"
             "    <input type=\"range\" id=\"grav\" min=\"0\" max=\"100\" value=\"1\">\n"
