@@ -1,0 +1,29 @@
+{
+  "n_nodos": 4039,
+  "n_aristas_total": 32022,
+  "aristas_por_tipo": {
+    "intra_cluster": 27845,
+    "intra_sub": 3173,
+    "extra": 1004
+  },
+  "n_componentes_conexas": 19,
+  "tamano_componentes_top10": [
+    3895,
+    109,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "modularidad": 0.1499,
+  "clustering_global": 0.5799,
+  "diametro_gigante": 13,
+  "camino_promedio_gigante": 4.2089,
+  "asortatividad_peso": 0.0574,
+  "n_comunidades_sub": 498,
+  "n_temas": 35
+}

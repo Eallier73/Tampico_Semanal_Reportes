@@ -1,0 +1,23 @@
+{
+  "corpus": "historico consolidado de Tampico",
+  "n_palabras": 4039,
+  "n_aristas_palabra": 22975,
+  "n_cuentas_sel": 500,
+  "n_aristas_cuenta": 2409,
+  "plataformas": [
+    "Facebook",
+    "Twitter",
+    "YouTube"
+  ],
+  "params": {
+    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico",
+    "top_n": 500,
+    "min_msgs": 5,
+    "top_k": 5,
+    "peso_min": 1,
+    "peso_arista": 4.0,
+    "diccionario_temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",
+    "diccionario_positivo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_positivas.txt",
+    "diccionario_negativo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_negativas.txt"
+  }
+}
