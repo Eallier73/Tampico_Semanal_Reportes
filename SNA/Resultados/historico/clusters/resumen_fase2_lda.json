@@ -1,50 +1,70 @@
 {
-  "timestamp": "2026-07-01T11:49:58.953396+00:00",
+  "timestamp": "2026-07-01T13:16:38.255856+00:00",
   "fase": "2 - modelado de temas con LDA",
   "corpus": {
-    "n_docs": 6226
+    "n_docs": 1211
   },
   "lda_barrido": [
     {
-      "k": 4,
-      "coherencia_c_v": 0.5574148986362674,
-      "perplexity": -7.089104682478397
+      "k": 15,
+      "coherencia_c_v": 0.5080845637749032,
+      "perplexity": -6.9521462925393305
     },
     {
-      "k": 5,
-      "coherencia_c_v": 0.578029694326885,
-      "perplexity": -7.13564529463006
+      "k": 16,
+      "coherencia_c_v": 0.4753730789380529,
+      "perplexity": -6.988208538247074
     },
     {
-      "k": 6,
-      "coherencia_c_v": 0.5758940465781851,
-      "perplexity": -7.166685771342439
+      "k": 17,
+      "coherencia_c_v": 0.48742270817311256,
+      "perplexity": -7.0012703439773745
     },
     {
-      "k": 7,
-      "coherencia_c_v": 0.5206083879225015,
-      "perplexity": -7.1823919611811275
+      "k": 18,
+      "coherencia_c_v": 0.48847521595396615,
+      "perplexity": -7.003669346919448
     },
     {
-      "k": 8,
-      "coherencia_c_v": 0.5191772955830176,
-      "perplexity": -7.186928085377169
+      "k": 19,
+      "coherencia_c_v": 0.4490859006696252,
+      "perplexity": -7.043955564513101
     },
     {
-      "k": 9,
-      "coherencia_c_v": 0.5257465438691244,
-      "perplexity": -7.19344238571887
+      "k": 20,
+      "coherencia_c_v": 0.48479973009462085,
+      "perplexity": -7.020308081757143
     },
     {
-      "k": 10,
-      "coherencia_c_v": 0.4875504321384437,
-      "perplexity": -7.220658796625426
+      "k": 21,
+      "coherencia_c_v": 0.41980801574938187,
+      "perplexity": -7.065321033653071
+    },
+    {
+      "k": 22,
+      "coherencia_c_v": 0.47042589208039,
+      "perplexity": -7.06923067925861
+    },
+    {
+      "k": 23,
+      "coherencia_c_v": 0.4708854349968886,
+      "perplexity": -7.0737696045185015
+    },
+    {
+      "k": 24,
+      "coherencia_c_v": 0.47023926337653305,
+      "perplexity": -7.100342286217358
+    },
+    {
+      "k": 25,
+      "coherencia_c_v": 0.46564073001244927,
+      "perplexity": -7.121762924978803
     }
   ],
   "lda_mejor": {
-    "k": 5,
-    "coherencia_c_v": 0.578029694326885,
-    "perplexity": -7.13564529463006,
+    "k": 15,
+    "coherencia_c_v": 0.5080845637749032,
+    "perplexity": -6.9521462925393305,
     "alpha": "auto",
     "eta": "auto",
     "passes": 10,
@@ -52,125 +72,515 @@
   },
   "temas": {
     "0": {
-      "n_terminos": 170,
-      "n_aristas_internas": 2189,
+      "n_terminos": 97,
+      "n_aristas_internas": 1351,
       "n_vinculos_externos": 200,
       "top_10_terminos": [
-        "presidenta",
-        "gracias",
-        "villarreal",
-        "gobernador",
-        "mónica",
-        "alcaldesa",
-        "américo",
-        "exelente",
-        "gobierno",
-        "persona"
+        "proteccion",
+        "civil",
+        "lluvia",
+        "zona",
+        "seguridad",
+        "bomberos",
+        "recorrido",
+        "cuida",
+        "abril",
+        "emergencia"
       ]
     },
     "1": {
-      "n_terminos": 182,
-      "n_aristas_internas": 5083,
+      "n_terminos": 107,
+      "n_aristas_internas": 1916,
       "n_vinculos_externos": 200,
       "top_10_terminos": [
-        "seguir",
-        "bienestar",
-        "acción",
-        "familia",
-        "colonia",
-        "tampicotecuida",
-        "día",
         "espacio",
-        "salud",
-        "fortalecer"
+        "familia",
+        "convivencia",
+        "impulsar",
+        "actividad",
+        "cultura",
+        "deportivo",
+        "cultural",
+        "disfrutar",
+        "pasion"
       ]
     },
     "2": {
-      "n_terminos": 174,
-      "n_aristas_internas": 1985,
+      "n_terminos": 83,
+      "n_aristas_internas": 1408,
       "n_vinculos_externos": 200,
       "top_10_terminos": [
+        "seguir",
         "excelente",
-        "tamaulipas",
-        "altamira",
-        "paz",
-        "cdvictoria",
-        "reynosa",
-        "matamoros",
-        "madero",
-        "slp",
-        "nuevolaredo"
+        "colonia",
+        "bienestar",
+        "programa",
+        "tampicotecuida",
+        "accion",
+        "tampicovacontodo",
+        "tampiqueno",
+        "salud"
       ]
     },
     "3": {
-      "n_terminos": 200,
-      "n_aristas_internas": 3712,
+      "n_terminos": 99,
+      "n_aristas_internas": 1242,
       "n_vinculos_externos": 200,
       "top_10_terminos": [
-        "méxico",
-        "pasión",
-        "felicidad",
-        "querer",
-        "deber",
-        "pasar",
-        "gente",
-        "mexicano",
-        "partido",
-        "fútbol"
+        "monica",
+        "villarreal",
+        "anaya",
+        "limpieza",
+        "laguna",
+        "gob",
+        "jornada",
+        "agua",
+        "basura",
+        "visitante"
       ]
     },
     "4": {
-      "n_terminos": 200,
-      "n_aristas_internas": 4672,
+      "n_terminos": 111,
+      "n_aristas_internas": 1221,
       "n_vinculos_externos": 200,
       "top_10_terminos": [
-        "tampico",
+        "mundial",
+        "partido",
+        "nacional",
+        "mexicano",
+        "persona",
+        "padre",
+        "emocion",
+        "venir",
+        "mal",
+        "mes"
+      ]
+    },
+    "5": {
+      "n_terminos": 71,
+      "n_aristas_internas": 573,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "tamaulipas",
+        "cdvictoria",
+        "reynosa",
+        "matamoros",
+        "altamira",
+        "nuevolaredo",
+        "cdmadero",
+        "nota",
+        "cdmx",
+        "monterrey"
+      ]
+    },
+    "6": {
+      "n_terminos": 88,
+      "n_aristas_internas": 842,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "dia",
+        "revistadebate",
+        "gente",
+        "libertad",
+        "col",
+        "papa",
+        "marina",
+        "exposicion",
+        "entregar",
+        "sumar"
+      ]
+    },
+    "7": {
+      "n_terminos": 91,
+      "n_aristas_internas": 757,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "atencion",
+        "mantener",
+        "limpio",
+        "vida",
+        "hospital",
+        "reporte",
+        "calor",
+        "medico",
+        "morir",
+        "banqueta"
+      ]
+    },
+    "8": {
+      "n_terminos": 100,
+      "n_aristas_internas": 1271,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "presidenta",
+        "nino",
+        "gracias",
+        "felicidad",
+        "felicidades",
+        "evento",
+        "nina",
+        "alcaldesa",
+        "bonito",
+        "vivir"
+      ]
+    },
+    "9": {
+      "n_terminos": 102,
+      "n_aristas_internas": 1065,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "calle",
+        "dejar",
+        "senora",
+        "proteger",
+        "recibir",
+        "limpiar",
+        "andar",
+        "canal",
+        "ojala",
+        "peaton"
+      ]
+    },
+    "10": {
+      "n_terminos": 120,
+      "n_aristas_internas": 1442,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "hora",
+        "internet",
+        "madre",
+        "mujer",
+        "ganar",
+        "llegar",
+        "numero",
+        "mayo",
+        "acapulco",
+        "comentario"
+      ]
+    },
+    "11": {
+      "n_terminos": 137,
+      "n_aristas_internas": 2303,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "pueblo",
+        "pagar",
+        "pasar",
+        "deber",
+        "ano",
+        "justicia",
+        "hablar",
+        "salir",
+        "querer",
+        "saludo"
+      ]
+    },
+    "12": {
+      "n_terminos": 130,
+      "n_aristas_internas": 2234,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "mexico",
+        "gobierno",
+        "narco",
+        "morena",
+        "lopez",
+        "claudia",
+        "politico",
+        "corrupto",
+        "huachicol",
+        "robar"
+      ]
+    },
+    "13": {
+      "n_terminos": 82,
+      "n_aristas_internas": 894,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "equipo",
+        "joven",
         "ciudad",
-        "historia",
-        "impulsar",
-        "desarrollo",
-        "exposición",
-        "económico",
-        "jaiba",
-        "tampiqueño",
-        "importante"
+        "oportunidad",
+        "esfuerzo",
+        "importante",
+        "construir",
+        "economico",
+        "futuro",
+        "campeon"
+      ]
+    },
+    "14": {
+      "n_terminos": 92,
+      "n_aristas_internas": 1331,
+      "n_vinculos_externos": 200,
+      "top_10_terminos": [
+        "fortalecer",
+        "municipal",
+        "publico",
+        "educacion",
+        "leer",
+        "secretaria",
+        "sector",
+        "turistico",
+        "coordinacion",
+        "avanzar"
       ]
     }
   },
   "matriz_entre_temas": [
     [
       0,
-      2917,
-      472,
-      274,
-      1806
+      80,
+      522,
+      403,
+      38,
+      125,
+      23,
+      9,
+      76,
+      68,
+      57,
+      0,
+      20,
+      77,
+      362
     ],
     [
-      2188,
+      31,
       0,
-      214,
+      941,
+      524,
+      30,
+      129,
+      60,
+      81,
+      280,
+      0,
+      14,
+      0,
+      144,
+      297,
+      476
+    ],
+    [
+      149,
+      724,
+      0,
+      1267,
+      0,
+      77,
+      88,
+      103,
+      1191,
+      30,
+      0,
+      0,
+      166,
+      426,
+      514
+    ],
+    [
+      205,
+      486,
+      1489,
+      0,
+      0,
+      106,
+      119,
+      264,
+      1063,
+      96,
+      14,
+      0,
+      107,
+      314,
+      699
+    ],
+    [
+      58,
+      204,
+      164,
+      97,
+      0,
+      116,
+      90,
+      8,
+      178,
+      0,
+      7,
+      58,
+      196,
+      102,
+      22
+    ],
+    [
+      165,
+      187,
+      234,
+      171,
+      66,
+      0,
+      146,
+      26,
+      92,
+      70,
+      69,
+      116,
+      176,
+      245,
+      354
+    ],
+    [
+      68,
+      196,
+      436,
+      225,
+      70,
+      146,
+      0,
+      24,
+      268,
+      64,
+      37,
+      35,
+      103,
+      107,
+      99
+    ],
+    [
+      23,
+      125,
+      504,
+      502,
+      8,
+      63,
+      43,
+      0,
+      96,
+      47,
+      11,
+      0,
+      18,
+      149,
+      191
+    ],
+    [
+      27,
+      314,
+      1529,
+      1086,
+      28,
+      83,
+      175,
+      57,
+      0,
+      18,
+      30,
+      75,
+      196,
+      233,
+      193
+    ],
+    [
+      104,
+      59,
+      250,
+      388,
+      12,
       99,
-      4180
-    ],
-    [
-      613,
-      634,
+      88,
+      70,
+      53,
       0,
-      603,
-      2101
+      36,
+      77,
+      29,
+      74,
+      84
     ],
     [
-      539,
-      364,
-      648,
+      57,
+      106,
+      188,
+      137,
+      19,
+      91,
+      62,
+      11,
+      185,
+      36,
       0,
-      862
+      49,
+      66,
+      77,
+      84
     ],
     [
-      1554,
-      4163,
-      1503,
-      341,
+      0,
+      56,
+      199,
+      105,
+      64,
+      151,
+      55,
+      6,
+      294,
+      54,
+      31,
+      0,
+      274,
+      30,
+      14
+    ],
+    [
+      20,
+      221,
+      411,
+      151,
+      175,
+      183,
+      103,
+      11,
+      325,
+      16,
+      41,
+      191,
+      0,
+      117,
+      298
+    ],
+    [
+      59,
+      384,
+      848,
+      430,
+      33,
+      164,
+      70,
+      89,
+      274,
+      21,
+      11,
+      12,
+      33,
+      0,
+      243
+    ],
+    [
+      195,
+      488,
+      747,
+      798,
+      0,
+      264,
+      47,
+      39,
+      171,
+      15,
+      51,
+      0,
+      173,
+      199,
       0
     ]
   ]

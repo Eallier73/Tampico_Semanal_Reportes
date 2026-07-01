@@ -1,7 +1,7 @@
 {
-  "k": 5,
-  "coherencia_c_v": 0.578029694326885,
-  "perplexity": -7.13564529463006,
+  "k": 15,
+  "coherencia_c_v": 0.5080845637749032,
+  "perplexity": -6.9521462925393305,
   "alpha": "auto",
   "eta": "auto",
   "passes": 10,

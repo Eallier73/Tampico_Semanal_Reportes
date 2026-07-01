@@ -7,7 +7,7 @@ Pipeline:
   2. Tokeniza y lematiza con spaCy (es_core_news_md) - reusando la misma
      limpieza que en el script anterior, para que el vocabulario sea comparable.
   3. Construye el diccionario gensim y el corpus BoW.
-  4. Barrido de LDA para K en [5..10] y elige el de mayor coherencia c_v.
+  4. Barrido de LDA para K en [15..25] y elige el de mayor coherencia c_v.
   5. Asignacion hard: cada termino va al tema con mayor P(term|tema).
   6. Cohesion intracluster: coocurrencias (ventana=3) entre los terminos
      de cada tema. Output por tema: aristas internas con peso.
@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import unicodedata
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,6 +54,15 @@ _RE_PRONOMBRE_PEGADO = re.compile(
     r"\s+(él|ella|ellos|ellas|yo|tú|nosotros|nosotras|vosotros|vosotras|"
     r"me|te|se|nos|os|lo|le|les|la|las|los|mi|tu|su|mis|tus|sus)$"
 )
+
+_GENERIC_LEMMAS = {
+    "aplauso", "bien", "bonito", "bravo", "excelente", "felicidad",
+    "felicidades", "genial", "gracias", "hermoso", "saludo", "saludos",
+    "trabajo",
+}
+_LEMMA_ALIASES = {
+    "exelente": "excelente",
+}
 
 
 # ===========================================================================
@@ -213,6 +223,97 @@ def lematizar_textos(
             print(f"         {i + 1}/{len(textos_proc)}...")
     print(f"         Lemas descartados por pronombre pegado: {n_pronombres_descartados}")
     return lemas_por_doc
+
+
+def normalizar_lemas(docs: list[list[str]]) -> list[list[str]]:
+    """Unifica acentos y variantes ortograficas despues de lematizar."""
+    salida: list[list[str]] = []
+    for doc in docs:
+        normalizado = []
+        for lemma in doc:
+            ascii_lemma = "".join(
+                char for char in unicodedata.normalize("NFKD", lemma)
+                if not unicodedata.combining(char)
+            ).lower()
+            normalizado.append(_LEMMA_ALIASES.get(ascii_lemma, ascii_lemma))
+        salida.append(normalizado)
+    return salida
+
+
+def preparar_corpus_modelado(
+    df: pd.DataFrame,
+    lemas_por_mensaje: list[list[str]],
+    max_frecuencia_contexto: int = 5,
+    max_lemas_contexto: int = 500,
+) -> tuple[list[list[str]], pd.DataFrame]:
+    """Depura y agrega mensajes por publicacion para el modelado tematico.
+
+    Los mensajes originales no se modifican. Los duplicados se retiran solo
+    del corpus LDA para que su frecuencia no determine los temas.
+    """
+    rows: list[dict[str, object]] = []
+    vistos: set[str] = set()
+    descartados_genericos = 0
+    descartados_duplicados = 0
+
+    for pos, (_, row) in enumerate(df.iterrows()):
+        lemas = lemas_por_mensaje[pos]
+        if not lemas or (len(lemas) <= 3 and set(lemas) <= _GENERIC_LEMMAS):
+            descartados_genericos += 1
+            continue
+        firma = " ".join(lemas)
+        if firma in vistos:
+            descartados_duplicados += 1
+            continue
+        vistos.add(firma)
+
+        def valor(nombre: str) -> str:
+            raw = row.get(nombre, "")
+            return "" if pd.isna(raw) else str(raw).strip()
+
+        plataforma = valor("plataforma")
+        contexto = valor("url_contexto")
+        origen = valor("url_origen")
+        tipo_registro = valor("tipo_registro")
+        registro_id = str(row.get("id", pos))
+        referencia = origen if tipo_registro == "publicacion_institucional" else contexto or origen
+        contexto_id = f"{plataforma}|{referencia or registro_id}"
+        rows.append({
+            "contexto_id": contexto_id,
+            "plataforma": plataforma,
+            "lemas_mensaje": lemas,
+        })
+
+    grupos: list[dict[str, object]] = []
+    for contexto_id, grupo in pd.DataFrame(rows).groupby("contexto_id", sort=False):
+        frecuencias: Counter[str] = Counter()
+        lemas_contexto: list[str] = []
+        for lemas in grupo["lemas_mensaje"]:
+            for lemma in lemas:
+                if frecuencias[lemma] >= max_frecuencia_contexto:
+                    continue
+                frecuencias[lemma] += 1
+                lemas_contexto.append(lemma)
+        if len(lemas_contexto) > max_lemas_contexto:
+            paso = len(lemas_contexto) / max_lemas_contexto
+            lemas_contexto = [
+                lemas_contexto[int(i * paso)] for i in range(max_lemas_contexto)
+            ]
+        if lemas_contexto:
+            grupos.append({
+                "contexto_id": contexto_id,
+                "plataforma": str(grupo["plataforma"].iloc[0]),
+                "n_mensajes_utiles": int(len(grupo)),
+                "n_lemas": len(lemas_contexto),
+                "lemas": " ".join(lemas_contexto),
+            })
+
+    corpus_df = pd.DataFrame(grupos)
+    print("[2b/8] Preparando corpus por conversacion...")
+    print(f"         Mensajes genericos/vacios descartados: {descartados_genericos}")
+    print(f"         Duplicados exactos descartados: {descartados_duplicados}")
+    print(f"         Conversaciones modeladas: {len(corpus_df)}")
+    return [str(value).split() for value in corpus_df["lemas"]], corpus_df
 
 
 # ===========================================================================
@@ -556,6 +657,8 @@ def guardar_resultados(
     extra_dir = out_dir / "extracluster"
     intra_dir.mkdir(exist_ok=True)
     extra_dir.mkdir(exist_ok=True)
+    for old_path in [*intra_dir.glob("tema_*.csv"), *extra_dir.glob("tema_*.csv")]:
+        old_path.unlink()
 
     # 1) Barrido
     pd.DataFrame(barrido).to_csv(out_dir / "lda_barrido.csv", index=False, encoding="utf-8")
@@ -699,7 +802,7 @@ def generar_reporte(
     lines.append("---")
     lines.append("")
     lines.append("**Archivos generados:**")
-    lines.append("- `lda_barrido.csv` - resultados del barrido K=5..10")
+    lines.append("- `lda_barrido.csv` - resultados del barrido de K configurado")
     lines.append("- `lda_mejor_modelo.json` - metadata del modelo optimo")
     lines.append("- `lda_asignacion.csv` - termino, tema_id, peso")
     lines.append("- `temas_terminos.csv` - top 20 terminos por tema")
@@ -755,14 +858,22 @@ def main() -> None:
         "--txt-path", required=False, default=None,
         help="Ruta al archivo .txt (solo si --input txt)",
     )
-    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=4)
-    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=10)
+    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=15)
+    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=25)
     parser.add_argument("--passes", type=int, default=10)
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--no-below", type=int, default=5)
     parser.add_argument("--no-above", type=float, default=0.6)
     parser.add_argument("--ventana-intra", type=int, default=3)
     parser.add_argument("--ventana-extra", type=int, default=12)
+    parser.add_argument(
+        "--max-frecuencia-contexto", type=int, default=5,
+        help="Maximas repeticiones de un lema dentro de cada conversacion",
+    )
+    parser.add_argument(
+        "--max-lemas-contexto", type=int, default=500,
+        help="Tamano maximo del documento agregado por conversacion",
+    )
     parser.add_argument(
         "--excluir-terminos",
         type=str,
@@ -810,9 +921,22 @@ def main() -> None:
     stop_extra_set: set[str] = set()
     if args.stop_extra:
         stop_extra_set = {t.strip() for t in args.stop_extra.split(",") if t.strip()}
-    lemas_docs = lematizar_textos(textos, stopwords_extra=stop_extra_set)
-    docs_vacios = sum(1 for d in lemas_docs if not d)
-    print(f"         Documentos sin lemas: {docs_vacios}/{len(lemas_docs)}")
+    lemas_mensajes = normalizar_lemas(
+        lematizar_textos(textos, stopwords_extra=stop_extra_set)
+    )
+    docs_vacios = sum(1 for d in lemas_mensajes if not d)
+    print(f"         Documentos sin lemas: {docs_vacios}/{len(lemas_mensajes)}")
+
+    corpus_modelado_df: pd.DataFrame | None = None
+    if args.input == "csv":
+        lemas_docs, corpus_modelado_df = preparar_corpus_modelado(
+            df,
+            lemas_mensajes,
+            max_frecuencia_contexto=args.max_frecuencia_contexto,
+            max_lemas_contexto=args.max_lemas_contexto,
+        )
+    else:
+        lemas_docs = lemas_mensajes
 
     # 3) Diccionario + corpus
     dictionary, corpus = construir_diccionario_y_corpus(
@@ -861,7 +985,7 @@ def main() -> None:
         out_dir, barrido, mejor, lda_model,
         df_asig, terminos_por_tema, intra, extra,
         matriz_entre=matriz_entre, top_pares_entre=top_pares_entre,
-        n_docs=len(textos),
+        n_docs=len(lemas_docs),
     )
     generar_reporte(
         out_dir, barrido, mejor, terminos_por_tema, intra, extra,
@@ -874,9 +998,13 @@ def main() -> None:
             "plataforma": df.get("plataforma", ""),
             "usuario": df.get("usuario", ""),
             "tipo_registro": df.get("tipo_registro", ""),
-            "lemas": [" ".join(lemas) for lemas in lemas_docs],
+            "lemas": [" ".join(lemas) for lemas in lemas_mensajes],
         })
         cache.to_csv(out_dir / "documentos_lematizados.csv", index=False, encoding="utf-8")
+        if corpus_modelado_df is not None:
+            corpus_modelado_df.to_csv(
+                out_dir / "corpus_modelado.csv", index=False, encoding="utf-8"
+            )
 
     print("=" * 70)
     print(f"[SNA Fase 2 - LDA] OK resultados en {out_dir}")

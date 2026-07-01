@@ -3,54 +3,54 @@
   "clusters_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico/clusters",
   "capas": {
     "intra_cluster": {
-      "n_aristas": 9380,
+      "n_aristas": 13003,
       "min": 1.0,
-      "media": 2.347654584221748,
-      "max": 137.0,
+      "media": 2.099054064446666,
+      "max": 68.0,
       "p50": 1.0,
       "p75": 2.0,
       "p90": 4.0,
       "p95": 6.0,
-      "p99": 15.209999999999127
+      "p99": 13.0
     },
     "intra_sub": {
-      "n_aristas": 3965,
+      "n_aristas": 6507,
       "min": 1.0,
-      "media": 4.102900378310214,
-      "max": 370.0,
+      "media": 3.1349316121100355,
+      "max": 407.0,
       "p50": 2.0,
-      "p75": 4.0,
-      "p90": 8.0,
-      "p95": 13.0,
-      "p99": 34.36000000000013
+      "p75": 3.0,
+      "p90": 6.0,
+      "p95": 9.0,
+      "p99": 23.0
     },
     "sin_subcluster": {
-      "n_aristas": 4296,
+      "n_aristas": 340,
       "min": 1.0,
-      "media": 1.5884543761638734,
-      "max": 39.0,
+      "media": 1.3470588235294119,
+      "max": 9.0,
       "p50": 1.0,
-      "p75": 2.0,
-      "p90": 3.0,
-      "p95": 4.0,
-      "p99": 7.0
+      "p75": 1.0,
+      "p90": 2.0,
+      "p95": 3.0,
+      "p99": 5.0
     },
     "extra": {
-      "n_aristas": 1000,
-      "min": 9.0,
-      "media": 26.619,
-      "max": 317.0,
-      "p50": 19.0,
-      "p75": 27.25,
-      "p90": 46.10000000000002,
-      "p95": 74.04999999999995,
-      "p99": 124.04999999999995
+      "n_aristas": 3000,
+      "min": 5.0,
+      "media": 17.484,
+      "max": 339.0,
+      "p50": 12.0,
+      "p75": 19.0,
+      "p90": 30.0,
+      "p95": 44.0,
+      "p99": 94.00999999999976
     }
   },
   "umbrales_sugeridos": {
-    "umbral_intra_sub": 4.0,
+    "umbral_intra_sub": 3.0,
     "umbral_intra_cluster": 2.0,
-    "umbral_extra": 27.25,
+    "umbral_extra": 19.0,
     "criterio": "percentil 75 de cada capa"
   }
 }

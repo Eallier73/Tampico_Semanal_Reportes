@@ -1,22 +1,20 @@
 {
-  "n_nodos": 900,
-  "n_aristas_total": 8226,
+  "n_nodos": 1494,
+  "n_aristas_total": 9202,
   "aristas_por_tipo": {
-    "intra_cluster": 6897,
-    "intra_sub": 1204,
-    "extra": 125
+    "intra_cluster": 6752,
+    "intra_sub": 2186,
+    "extra": 264
   },
-  "n_componentes_conexas": 3,
+  "n_componentes_conexas": 1,
   "tamano_componentes_top10": [
-    896,
-    2,
-    2
+    1494
   ],
-  "modularidad": 0.2957,
-  "clustering_global": 0.4495,
-  "diametro_gigante": 9,
-  "camino_promedio_gigante": 3.3042,
-  "asortatividad_peso": -0.0251,
-  "n_comunidades_sub": 36,
-  "n_temas": 5
+  "modularidad": 0.3569,
+  "clustering_global": 0.4942,
+  "diametro_gigante": 10,
+  "camino_promedio_gigante": 4.3716,
+  "asortatividad_peso": 0.0812,
+  "n_comunidades_sub": 87,
+  "n_temas": 15
 }
