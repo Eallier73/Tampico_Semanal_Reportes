@@ -18,6 +18,16 @@ del historico se indica con `--radar-dir RUTA`.
 
 ## Ejecucion
 
+Desde la GUI del orquestador se puede seleccionar el pipeline
+`11) Generar Analisis SNA Historico` para ejecutar toda la secuencia, incluidas
+las redes guiadas. El mismo flujo se puede lanzar directamente con:
+
+```bash
+.venv/bin/python Scripts/20_generar_analisis_sna.py
+```
+
+La secuencia manual equivalente es:
+
 ```bash
 .venv/bin/python Scripts/11_consolidar_historico_sna.py
 .venv/bin/python Scripts/12_lda_sna.py --k-min 25 --k-max 35 --selection-mode informative
@@ -27,6 +37,9 @@ del historico se indica con `--radar-dir RUTA`.
 .venv/bin/python Scripts/18_cuentas_clusters.py
 .venv/bin/python Scripts/12d_red_cuentas.py
 .venv/bin/python Scripts/19_red_posiciones_discursivas.py
+.venv/bin/python Scripts/12c_red_completa_guiada.py
+.venv/bin/python Scripts/12d_red_cuentas_guiada.py
+.venv/bin/python Scripts/19_red_posiciones_guiada.py
 ```
 
 Los resultados se escriben en `SNA/Resultados/historico/`. El diagnostico

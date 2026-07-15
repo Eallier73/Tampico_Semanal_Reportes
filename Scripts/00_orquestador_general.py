@@ -76,6 +76,7 @@ PIPELINES = [
     PipelineSpec("8", "influencia_temas", "Analisis de Influencia de Temas", "8_influencia_temas.py"),
     PipelineSpec("9", "temas_guiados", "Analisis de Temas Guiados", "9_temas_guiados.py"),
     PipelineSpec("10", "publicaciones_institucionales_claude", "Publicaciones Institucionales con Claude", "10_publicaciones_institucionales_claude.py"),
+    PipelineSpec("11", "analisis_sna", "Generar Analisis SNA Historico", "20_generar_analisis_sna.py"),
 ]
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
@@ -692,6 +693,8 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
         return build_temas_guiados(since, before, use_defaults)
     if spec.key == "publicaciones_institucionales_claude":
         return build_publicaciones_institucionales_claude(since, before, use_defaults)
+    if spec.key == "analisis_sna":
+        return [sys.executable, str(SCRIPTS_DIR / spec.filename)], {}
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -718,6 +721,7 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "influencia_temas": "Influencia_Temas",
         "temas_guiados": "Temas_Guiados",
         "publicaciones_institucionales_claude": "Claude",
+        "analisis_sna": "SNA/Resultados/historico",
     }
     return labels.get(spec.key)
 
@@ -798,6 +802,21 @@ def main() -> None:
                 consolidador_spec = selected.pop(index_6)
                 index_dep = next(index for index, item in enumerate(selected) if item.code == dependent_code)
                 selected.insert(index_dep, consolidador_spec)
+
+    selected_codes = {s.code for s in selected}
+    if "11" in selected_codes:
+        sna_index = next(index for index, item in enumerate(selected) if item.code == "11")
+        source_indexes = [
+            index for index, item in enumerate(selected)
+            if item.code in {"1", "2", "4", "5"}
+        ]
+        if source_indexes and sna_index < max(source_indexes):
+            sna_spec = selected.pop(sna_index)
+            insert_at = max(
+                index for index, item in enumerate(selected)
+                if item.code in {"1", "2", "4", "5"}
+            ) + 1
+            selected.insert(insert_at, sna_spec)
     
     # 4️⃣ PASO 4: Configurar según modo
     facebook_posts_csv = ""  # CSV generado por el extractor de posts
