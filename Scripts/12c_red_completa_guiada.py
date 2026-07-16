@@ -868,6 +868,26 @@ def render_pyvis(
         pos = (g - gmin) / max(1, gmax - gmin)
         tam_map[n] = 12 + int((pos ** 2.15) * 295)  # 12..307
 
+    # Posiciones iniciales deterministas por tema. Evitan ejecutar fisica
+    # sobre miles de nodos al abrir el HTML y reducen el tiempo de carga.
+    layout_pos: dict[str, tuple[float, float]] = {}
+    topic_ids = sorted(nodos_df["tema_id"].dropna().astype(int).unique())
+    columns = max(1, math.ceil(math.sqrt(len(topic_ids))))
+    spacing = 1050.0
+    for topic_index, topic_id in enumerate(topic_ids):
+        center_x = (topic_index % columns - (columns - 1) / 2) * spacing
+        center_y = (topic_index // columns - (math.ceil(len(topic_ids) / columns) - 1) / 2) * spacing
+        topic_rows = nodos_df[nodos_df["tema_id"].astype(int) == topic_id].sort_values(
+            ["grado_total", "pagerank"], ascending=[False, False]
+        )
+        for rank, row in enumerate(topic_rows.itertuples(index=False), 1):
+            angle = rank * 2.399963229728653
+            radius = 34.0 * math.sqrt(rank)
+            layout_pos[str(row.palabra)] = (
+                round(center_x + math.cos(angle) * radius, 2),
+                round(center_y + math.sin(angle) * radius, 2),
+            )
+
     # Color por rol
     rol_color = {
         "hub_endogamico": "#ff7f0e",
@@ -908,6 +928,8 @@ def render_pyvis(
             color=color,
             size=tam_map[n],
             font={"size": font_size, "color": "#ffffff", "face": "arial"},
+            x=layout_pos.get(str(n), (0.0, 0.0))[0],
+            y=layout_pos.get(str(n), (0.0, 0.0))[1],
             group=f"T{info['tema_id']:02d}",
             # campos personalizados para los filtros JS
             rol=str(info["rol"]),
@@ -950,16 +972,16 @@ def render_pyvis(
     net.set_options("""
     {
       "physics": {
-        "enabled": true,
+        "enabled": false,
         "solver": "forceAtlas2Based",
         "forceAtlas2Based": {
-          "gravitationalConstant": -70,
-          "centralGravity": 0.006,
-          "springLength": 160,
+          "gravitationalConstant": -50,
+          "centralGravity": 0.01,
+          "springLength": 80,
           "springConstant": 0.08,
           "damping": 0.4
         },
-        "stabilization": {"iterations": 200}
+        "stabilization": {"enabled": false}
       },
       "interaction": {
         "hover": true,
@@ -1022,6 +1044,14 @@ def render_pyvis(
         }
     node_meta_js = json.dumps(node_meta, ensure_ascii=False)
     topic_info_js = json.dumps(topic_info or {}, ensure_ascii=False)
+    topic_metrics = {}
+    for _, row in metricas_tema.iterrows():
+        topic_metrics[str(int(row["tema_id"]))] = {
+            "volume": float(row.get("fuerza_total", 0)),
+            "centrality": float(row.get("broker_index", 0)),
+            "connectivity": float(row.get("fuerza_extra", 0)),
+        }
+    topic_metrics_js = json.dumps(topic_metrics, ensure_ascii=False)
 
     css_fix = (
         "<style>\n"
@@ -1198,6 +1228,13 @@ def render_pyvis(
             "      <b>Ruido</b> — palabras sueltas, poco centrales</label>\n"
             "    <hr style=\"border:0; border-top:1px solid #444; margin:6px 0;\">\n"
             "    <h4 style=\"margin-top:4px\">Por conversación</h4>\n"
+            "    <label>Ordenar por</label>\n"
+            "    <select id=\"topicOrder\">\n"
+            "      <option value=\"volume\">Volumen</option>\n"
+            "      <option value=\"centrality\">Centralidad</option>\n"
+            "      <option value=\"connectivity\">Conectividad entre temas</option>\n"
+            "      <option value=\"topic\">Numero de tema</option>\n"
+            "    </select>\n"
             "    <div id=\"temaChecks\"></div>\n"
             "    <label><input type=\"checkbox\" id=\"allTemas\" checked>mostrar todas</label>\n"
             "  </div>\n"
@@ -1226,12 +1263,14 @@ def render_pyvis(
             "      <span class=\"rangoVal\" id=\"tamMinV\">100%</span></label>\n"
             "    <input type=\"range\" id=\"tamMin\" min=\"60\" max=\"180\" value=\"100\">\n"
             "    <label>Separación:\n"
-            "      <span class=\"rangoVal\" id=\"springV\">160</span></label>\n"
-            "    <input type=\"range\" id=\"spring\" min=\"20\" max=\"300\" value=\"160\">\n"
+            "      <span class=\"rangoVal\" id=\"springV\">100%</span></label>\n"
+            "    <input type=\"range\" id=\"spring\" min=\"50\" max=\"180\" value=\"100\">\n"
             "    <label>Atracción al centro:\n"
             "      <span class=\"rangoVal\" id=\"gravV\">0.01</span></label>\n"
             "    <input type=\"range\" id=\"grav\" min=\"0\" max=\"100\" value=\"1\">\n"
             "    <button id=\"resetPhysics\" style=\"margin-top:6px;background:#444;color:#fff;border:1px solid #666;padding:3px 8px;border-radius:3px;cursor:pointer;\">Reorganizar</button>\n"
+            "    <button id=\"stopPhysics\" style=\"margin-top:6px;background:#444;color:#fff;border:1px solid #666;padding:3px 8px;border-radius:3px;cursor:pointer;\">Detener</button>\n"
+            "    <button id=\"fitNetwork\" style=\"margin-top:6px;background:#444;color:#fff;border:1px solid #666;padding:3px 8px;border-radius:3px;cursor:pointer;\">Encajar</button>\n"
             "  </div>\n"
             "</div></div>\n"
             "  <h4>Buscar conversación, tema o palabra</h4>\n"
@@ -1386,13 +1425,32 @@ def render_pyvis(
                     "    var code = topicCode(t);\n"
                     "    var title = info.title || 'Tema por palabras clave';\n"
                     "    var summary = info.summary || 'Tema definido por sus palabras más frecuentes y sus conexiones dentro de la red.';\n"
-                    "    var words = Array.isArray(info.words) && info.words.length ? info.words.slice(0, 60) : topicWordsFromNodes(t, 60);\n"
-                    "    return '<div class=\"topic-filter-card\">'\n"
+                    "    var words = Array.isArray(info.words) && info.words.length ? info.words.slice(0, 15) : topicWordsFromNodes(t, 15);\n"
+                    "    return '<div class=\"topic-filter-card\" data-tema-card=\"'+t+'\">'\n"
                     "      + '<label class=\"topic-filter-title\"><input type=\"checkbox\" data-tema=\"'+t+'\" checked> '\n"
-                    "      + '<b>'+code+'</b> · '+escapeHtml(title)+'</label>'\n"
+                    "      + '<b>'+code+'</b> · '+escapeHtml(title)+' <span class=\"topic-order-score\"></span></label>'\n"
                     "      + '<p>'+escapeHtml(summary)+'</p>'\n"
                     "      + '<div class=\"topic-words\">'+wordChips(words)+'</div>'\n"
                     "      + '</div>';\n"
+                    "  }\n"
+                    "  function sortTemaChecks() {\n"
+                    "    var mode = document.getElementById('topicOrder').value;\n"
+                    "    var list = document.getElementById('temaChecks');\n"
+                    "    var cards = Array.from(list.querySelectorAll('[data-tema-card]'));\n"
+                    "    cards.sort(function(a,b){\n"
+                    "      var ta = a.dataset.temaCard, tb = b.dataset.temaCard;\n"
+                    "      if (mode === 'topic') return Number(ta) - Number(tb);\n"
+                    "      var ma = (TOPIC_METRICS[ta] || {})[mode] || 0;\n"
+                    "      var mb = (TOPIC_METRICS[tb] || {})[mode] || 0;\n"
+                    "      return (mb - ma) || (Number(ta) - Number(tb));\n"
+                    "    });\n"
+                    "    cards.forEach(function(card){\n"
+                    "      var t = card.dataset.temaCard;\n"
+                    "      var score = card.querySelector('.topic-order-score');\n"
+                    "      var value = (TOPIC_METRICS[t] || {})[mode] || 0;\n"
+                    "      score.textContent = mode === 'topic' ? '' : '('+Math.round(value * 1000) / 1000+')';\n"
+                    "      list.appendChild(card);\n"
+                    "    });\n"
                     "  }\n"
                     "  function setupTemaChecks() {\n"
                     "    var setT = {};\n"
@@ -1413,7 +1471,9 @@ def render_pyvis(
                     "    document.querySelectorAll('#temaChecks .topic-word').forEach(function(w){\n"
                     "      w.addEventListener('click', function(e){ e.stopPropagation(); focusNode(w.dataset.id); });\n"
                     "    });\n"
+                    "    sortTemaChecks();\n"
                     "  }\n"
+                    "  document.getElementById('topicOrder').addEventListener('change', sortTemaChecks);\n"
                     "  document.getElementById('allTemas').addEventListener('change', function(e){\n"
                     "    var ch = e.target.checked;\n"
                     "    document.querySelectorAll('#temaChecks input').forEach(function(c){ c.checked = ch; });\n"
@@ -1583,7 +1643,8 @@ def render_pyvis(
         "      var v = parseFloat(el.value);\n"
         "      out.textContent = fmt ? fmt(v * mult) : (v * mult);\n"
         "      if (id === 'tamMin') updateNodeSizes();\n"
-        "      else if (id === 'spring' || id === 'grav') updatePhysics();\n"
+        "      else if (id === 'spring') updateSeparation();\n"
+        "      else if (id === 'grav') updatePhysics();\n"
         "      else rebuildNodeVisibility();\n"
         "    });\n"
         "  }\n"
@@ -1602,8 +1663,25 @@ def render_pyvis(
         "    });\n"
         "    nodes.update(updates);\n"
         "  }\n"
+        "  var lastSeparation = 100;\n"
+        "  function updateSeparation() {\n"
+        "    var next = parseInt(document.getElementById('spring').value, 10);\n"
+        "    var ratio = next / lastSeparation;\n"
+        "    var positions = network.getPositions();\n"
+        "    var ids = Object.keys(positions);\n"
+        "    if (ids.length && isFinite(ratio) && ratio > 0) {\n"
+        "      var cx = 0, cy = 0;\n"
+        "      ids.forEach(function(id){ cx += positions[id].x; cy += positions[id].y; });\n"
+        "      cx /= ids.length; cy /= ids.length;\n"
+        "      ids.forEach(function(id){\n"
+        "        network.moveNode(id, cx + (positions[id].x-cx)*ratio, cy + (positions[id].y-cy)*ratio);\n"
+        "      });\n"
+        "    }\n"
+        "    lastSeparation = next;\n"
+        "    network.setOptions({physics:{forceAtlas2Based:{springLength:Math.round(30 + next * 0.7)}}});\n"
+        "  }\n"
         "  function updatePhysics() {\n"
-        "    var sp = parseInt(document.getElementById('spring').value, 10);\n"
+        "    var sp = Math.round(30 + parseInt(document.getElementById('spring').value, 10) * 0.7);\n"
         "    var gv = parseInt(document.getElementById('grav').value, 10) / 1000;\n"
         "    network.setOptions({\n"
         "      physics: {\n"
@@ -1619,7 +1697,7 @@ def render_pyvis(
         "    bindRange('endoMin', 'endoMinV', 0.01);\n"
         "    bindRange('gradMin', 'gradMinV', 1);\n"
         "    bindRange('tamMin', 'tamMinV', 1, function(v){ return Math.round(v)+'%'; });\n"
-        "    bindRange('spring', 'springV', 1);\n"
+        "    bindRange('spring', 'springV', 1, function(v){ return Math.round(v)+'%'; });\n"
         "    bindRange('grav', 'gravV', 0.0001);\n"
         "  }\n"
         "  /* === INIT === */\n"
@@ -1657,17 +1735,21 @@ def render_pyvis(
         "    syncPanelOffsets();\n"
         "    setupSearch();\n"
         "    setupRanges();\n"
-        "    updateNodeSizes();\n"
         "    bindTooltip();\n"
         "    initTables();\n"
-        "    // Re-aplicar visibilidad inicial\n"
-        "    rebuildNodeVisibility();\n"
-        "    rebuildEdgeVisibility();\n"
-        "    // Reset física\n"
+        "    // Controles manuales de organizacion.\n"
         "    document.getElementById('resetPhysics').addEventListener('click', function(){\n"
-        "      network.setOptions({physics: {enabled: true, stabilization: {iterations: 200}}});\n"
-        "      network.stabilize(200);\n"
+        "      network.setOptions({physics: {enabled: true, stabilization: {enabled: false}}});\n"
+        "      network.startSimulation();\n"
         "    });\n"
+        "    document.getElementById('stopPhysics').addEventListener('click', function(){\n"
+        "      network.stopSimulation();\n"
+        "      network.setOptions({physics: {enabled: false}});\n"
+        "    });\n"
+        "    document.getElementById('fitNetwork').addEventListener('click', function(){\n"
+        "      network.fit({animation:{duration:400}});\n"
+        "    });\n"
+        "    requestAnimationFrame(function(){ network.fit({animation:false}); });\n"
         "  });\n"
         "</script>\n"
     )
@@ -1682,6 +1764,7 @@ def render_pyvis(
         "  var TOP_GLOBAL = " + json.dumps(top_global, ensure_ascii=False) + ";\n"
         "  var TOP_TEMA = " + json.dumps(top_by_tema, ensure_ascii=False) + ";\n"
         "  var TOP_SUB = " + json.dumps(top_by_sub, ensure_ascii=False) + ";\n"
+        "  var TOPIC_METRICS = " + topic_metrics_js + ";\n"
         "  var TOPIC_INFO = " + topic_info_js + ";\n"
         "  var NODE_META = " + node_meta_js + ";\n"
         "  var EDGE_INFO = " + edge_info_js + ";\n"

@@ -40,6 +40,18 @@ POLARITY_COLORS = {
     "mixta": "#f2c744",
     "neutral": "#777777",
 }
+STANCE_COLORS = {
+    "apoyo_defensa": "#2b83ba",
+    "critica_oposicion": "#d7191c",
+    "mixta_disputa": "#fdae61",
+    "sin_postura": "#777777",
+}
+STANCE_LABELS = {
+    "apoyo_defensa": "Apoyo/defensa",
+    "critica_oposicion": "Crítica/oposición",
+    "mixta_disputa": "Mixta/disputa",
+    "sin_postura": "Sin postura",
+}
 
 
 def normalize(value: Any) -> str:
@@ -146,6 +158,7 @@ def annotate_word(word: str, lexicons: GuidedLexicons) -> dict[str, Any]:
     else:
         polarity = "neutral"
         polarity_score = 0.0
+    stance = stance_from_score(polarity_score, int(in_positive) + int(in_negative))
     primary = categories[0] if categories else None
     return {
         "kind": "palabra",
@@ -156,6 +169,9 @@ def annotate_word(word: str, lexicons: GuidedLexicons) -> dict[str, Any]:
         "delta_pmi": primary["delta_pmi"] if primary else 0.0,
         "polarity": polarity,
         "polarity_score": polarity_score,
+        "stance": stance,
+        "stance_label": STANCE_LABELS[stance],
+        "stance_score": polarity_score,
         "positive_hits": int(in_positive),
         "negative_hits": int(in_negative),
         "matched_weight": int(bool(categories) or in_positive or in_negative),
@@ -222,6 +238,7 @@ def aggregate_words(
     polarity_score = (
         (positive_hits - negative_hits) / polarity_total if polarity_total else 0.0
     )
+    stance = stance_from_score(polarity_score, polarity_total)
     primary = categories[0] if categories else None
     return {
         "kind": kind,
@@ -232,10 +249,24 @@ def aggregate_words(
         "delta_pmi": 0.0,
         "polarity": polarity,
         "polarity_score": round(polarity_score, 4),
+        "stance": stance,
+        "stance_label": STANCE_LABELS[stance],
+        "stance_score": round(polarity_score, 4),
         "positive_hits": round(positive_hits, 2),
         "negative_hits": round(negative_hits, 2),
         "matched_weight": round(matched_weight, 2),
     }
+
+
+def stance_from_score(score: float, evidence_weight: float) -> str:
+    """Mapea polaridad agregada a apoyo/defensa vs critica/oposicion."""
+    if evidence_weight <= 0:
+        return "sin_postura"
+    if score >= 0.20:
+        return "apoyo_defensa"
+    if score <= -0.20:
+        return "critica_oposicion"
+    return "mixta_disputa"
 
 
 def write_annotation_outputs(
@@ -248,9 +279,11 @@ def write_annotation_outputs(
     rows = []
     category_counts: Counter[str] = Counter()
     polarity_counts: Counter[str] = Counter()
+    stance_counts: Counter[str] = Counter()
     for node_id, item in annotations.items():
         category_counts.update(cat["name"] for cat in item.get("categories", []))
         polarity_counts[item.get("polarity", "neutral")] += 1
+        stance_counts[item.get("stance", "sin_postura")] += 1
         rows.append({
             "node_id": node_id,
             "tipo_nodo": item.get("kind", ""),
@@ -260,6 +293,9 @@ def write_annotation_outputs(
             "categorias": " | ".join(cat["name"] for cat in item.get("categories", [])),
             "polaridad": item.get("polarity", "neutral"),
             "polaridad_score": item.get("polarity_score", 0.0),
+            "postura": item.get("stance", "sin_postura"),
+            "postura_etiqueta": item.get("stance_label", STANCE_LABELS["sin_postura"]),
+            "postura_score": item.get("stance_score", 0.0),
             "coincidencias_positivas": item.get("positive_hits", 0),
             "coincidencias_negativas": item.get("negative_hits", 0),
             "peso_coincidente": item.get("matched_weight", 0),
@@ -269,8 +305,10 @@ def write_annotation_outputs(
         "n_nodos": len(annotations),
         "n_nodos_con_categoria": sum(bool(v.get("categories")) for v in annotations.values()),
         "n_nodos_con_polaridad": sum(v.get("polarity") != "neutral" for v in annotations.values()),
+        "n_nodos_con_postura": sum(v.get("stance") != "sin_postura" for v in annotations.values()),
         "categorias": dict(category_counts.most_common()),
         "polaridades": dict(polarity_counts.most_common()),
+        "posturas": dict(stance_counts.most_common()),
         "fuentes": {key: str(value) for key, value in source_paths.items()},
     }
     (out_dir / f"{prefix}_resumen.json").write_text(
@@ -293,6 +331,9 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
             "category_confidence": item.get("category_confidence") or 0.0,
             "polarity": polarity,
             "polarity_score": item.get("polarity_score") or 0.0,
+            "stance": item.get("stance") or "sin_postura",
+            "stance_label": item.get("stance_label") or STANCE_LABELS["sin_postura"],
+            "stance_score": item.get("stance_score") or item.get("polarity_score") or 0.0,
         }
     return compact
 
@@ -309,6 +350,7 @@ def inject_guided_layer(
     annotations_json = json.dumps(compact_annotations_for_html(annotations), ensure_ascii=False).replace("</", "<\\/")
     colors_json = json.dumps(category_colors, ensure_ascii=False)
     polarity_json = json.dumps(POLARITY_COLORS, ensure_ascii=False)
+    stance_json = json.dumps(STANCE_COLORS, ensure_ascii=False)
     category_buttons = "".join(
         f'<button class="guided-target" data-category="{html.escape(category)}">'
         f'<span style="background:{color}"></span>{html.escape(category)}</button>'
@@ -342,6 +384,7 @@ def inject_guided_layer(
       <option value="original">Estructura original</option>
       <option value="category">Tema rastreado</option>
       <option value="polarity">Polaridad</option>
+      <option value="stance">Postura discursiva</option>
     </select>
   </label>
   <h4>Temas rastreados</h4>
@@ -354,6 +397,12 @@ def inject_guided_layer(
     <button data-polarity="negativa">Negativa</button>
     <button data-polarity="mixta">Mixta</button>
   </div>
+  <h4>Postura discursiva</h4>
+  <div class="guided-row">
+    <button data-stance="apoyo_defensa">Apoyo/defensa</button>
+    <button data-stance="critica_oposicion">Crítica/oposición</button>
+    <button data-stance="mixta_disputa">Mixta/disputa</button>
+  </div>
   <div class="guided-row"><button id="guidedReset">Restaurar vista</button></div>
   <div id="guidedStats">Preparando capa guiada...</div>
 </div>
@@ -362,6 +411,7 @@ def inject_guided_layer(
   const GUIDED_META = {annotations_json};
   const CATEGORY_COLORS = {colors_json};
   const POLARITY_COLORS = {polarity_json};
+  const STANCE_COLORS = {stance_json};
   const originals = {{}};
   let guidedFocus = null;
   let guidedNodes = null;
@@ -394,6 +444,8 @@ def inject_guided_layer(
       btn.addEventListener('click', () => locate('category', btn.dataset.category)));
     document.querySelectorAll('#guidedPanel [data-polarity]').forEach(btn =>
       btn.addEventListener('click', () => locate('polarity', btn.dataset.polarity)));
+    document.querySelectorAll('#guidedPanel [data-stance]').forEach(btn =>
+      btn.addEventListener('click', () => locate('stance', btn.dataset.stance)));
     document.getElementById('guidedColorMode').addEventListener('change', recolor);
     document.getElementById('guidedConfidence').addEventListener('input', function() {{
       document.getElementById('guidedConfidenceValue').textContent = confidence().toFixed(2);
@@ -402,8 +454,9 @@ def inject_guided_layer(
     document.getElementById('guidedReset').addEventListener('click', resetGuided);
     const categorized = Object.values(GUIDED_META).filter(m => (m.categories || []).length).length;
     const polarized = Object.values(GUIDED_META).filter(m => m.polarity && m.polarity !== 'neutral').length;
+    const positioned = Object.values(GUIDED_META).filter(m => m.stance && m.stance !== 'sin_postura').length;
     document.getElementById('guidedStats').innerHTML = '<b>' + categorized +
-      '</b> nodos con tema rastreado · <b>' + polarized + '</b> con polaridad';
+      '</b> con tema · <b>' + polarized + '</b> con polaridad · <b>' + positioned + '</b> con postura';
   }}
   function categoryMatch(meta, category) {{
     return (meta.categories || []).some(c => c.name === category &&
@@ -411,11 +464,15 @@ def inject_guided_layer(
   }}
   function matchesFocus(meta, focus) {{
     if (!focus || !meta) return false;
-    return focus.kind === 'category' ? categoryMatch(meta, focus.value) : meta.polarity === focus.value;
+    if (focus.kind === 'category') return categoryMatch(meta, focus.value);
+    if (focus.kind === 'polarity') return meta.polarity === focus.value;
+    return meta.stance === focus.value;
   }}
   function setActiveButton(kind, value) {{
     document.querySelectorAll('#guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
-    const selector = kind === 'category' ? '[data-category="' + value + '"]' : '[data-polarity="' + value + '"]';
+    let selector = '[data-stance="' + value + '"]';
+    if (kind === 'category') selector = '[data-category="' + value + '"]';
+    else if (kind === 'polarity') selector = '[data-polarity="' + value + '"]';
     const btn = document.querySelector('#guidedPanel ' + selector);
     if (btn) btn.classList.add('guided-active');
   }}
@@ -424,11 +481,12 @@ def inject_guided_layer(
   }}
   function focusColor(meta, focus) {{
     if (focus.kind === 'category') return {{background: CATEGORY_COLORS[focus.value] || '#777', border:'#ffffff'}};
-    return {{background: POLARITY_COLORS[meta.polarity] || '#777', border:'#ffffff'}};
+    if (focus.kind === 'polarity') return {{background: POLARITY_COLORS[meta.polarity] || '#777', border:'#ffffff'}};
+    return {{background: STANCE_COLORS[meta.stance] || '#777', border:'#ffffff'}};
   }}
   function locate(kind, value) {{
     guidedFocus = {{kind: kind, value: value}};
-    document.getElementById('guidedColorMode').value = kind === 'category' ? 'category' : 'polarity';
+    document.getElementById('guidedColorMode').value = kind;
     setActiveButton(kind, value);
     recolor();
     const ids = Object.keys(GUIDED_META).filter(id => {{
@@ -467,6 +525,8 @@ def inject_guided_layer(
         color = {{background: CATEGORY_COLORS[meta.primary_category], border:'#f5f5f5'}};
       }} else if (meta && mode === 'polarity') {{
         color = {{background: POLARITY_COLORS[meta.polarity] || '#777', border:'#f5f5f5'}};
+      }} else if (meta && mode === 'stance') {{
+        color = {{background: STANCE_COLORS[meta.stance] || '#777', border:'#f5f5f5'}};
       }}
       updates.push({{id:node.id, color:color, borderWidth:borderWidth, size:size, font:font}});
     }});

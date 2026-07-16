@@ -77,8 +77,6 @@ def cargar_corpus(path: Path) -> pd.DataFrame:
     print(f"[1/8] Cargando corpus: {path.name}")
     df = pd.read_csv(path, encoding="utf-8-sig", low_memory=False, on_bad_lines="skip")
     df.columns = [c.strip() for c in df.columns]
-    if "plataforma" in df.columns:
-        df = df[~df["plataforma"].astype(str).str.contains("medio", case=False, na=False)]
     return df
 
 

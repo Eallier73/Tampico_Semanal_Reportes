@@ -318,10 +318,6 @@ def build_pyvis_html(nodos_palabras, aristas_palabras, cuentas_sel,
 <body>
 
 <div id="topBar">
-  <div class="grp" style="background: #1a2a1a;">
-    <a class="bak" href="red_tampico_historico.html">volver a red de palabras</a>
-  </div>
-
   <div class="grp">
     <h4>Mostrar</h4>
     <label><input type="checkbox" id="showCuentas" checked> Cuentas (top por msgs)</label>
@@ -356,10 +352,12 @@ def build_pyvis_html(nodos_palabras, aristas_palabras, cuentas_sel,
 
   <div class="grp">
     <h4>Visual</h4>
-    <label>Separación: <span id="springV">80</span>
-      <input type="range" id="spring" min="20" max="400" value="80"></label>
+    <label>Separación: <span id="springV">100%</span>
+      <input type="range" id="spring" min="50" max="180" value="100"></label>
     <label>Reorganizar
-      <button id="resetPhysics" style="margin-left:6px">↻</button></label>
+      <button id="resetPhysics" style="margin-left:6px">↻</button>
+      <button id="stopPhysics" style="margin-left:4px">Detener</button>
+      <button id="fitNetwork" style="margin-left:4px">Encajar</button></label>
   </div>
 </div>
 
@@ -416,7 +414,7 @@ window.__PALABRAS_INDEX__ = {json.dumps({p: True for p in nodos_palabras}, ensur
     physics: {{
       enabled: true,
       barnesHut: {{ gravitationalConstant: -8000, springLength: 80, springConstant: 0.04 }},
-      stabilization: {{ iterations: 200 }}
+      stabilization: {{ enabled: false }}
     }},
     interaction: {{
       hover: true, tooltipDelay: 100,
@@ -575,21 +573,42 @@ window.__PALABRAS_INDEX__ = {json.dumps({p: True for p in nodos_palabras}, ensur
   document.getElementById('showPalabras').addEventListener('change', rebuildVisibility);
 
   // Sliders de visual
+  var lastSeparation = 100;
   document.getElementById('spring').addEventListener('input', function(e) {{
-    document.getElementById('springV').textContent = e.target.value;
-    network.setOptions({{ physics: {{ barnesHut: {{ springLength: parseInt(e.target.value) }} }} }});
+    var next = parseInt(e.target.value, 10);
+    document.getElementById('springV').textContent = next + '%';
+    var ratio = next / lastSeparation;
+    var positions = network.getPositions();
+    var ids = Object.keys(positions);
+    if (ids.length && Number.isFinite(ratio) && ratio > 0) {{
+      var cx = 0, cy = 0;
+      ids.forEach(function(id) {{ cx += positions[id].x; cy += positions[id].y; }});
+      cx /= ids.length; cy /= ids.length;
+      ids.forEach(function(id) {{
+        network.moveNode(
+          id,
+          cx + (positions[id].x - cx) * ratio,
+          cy + (positions[id].y - cy) * ratio
+        );
+      }});
+    }}
+    lastSeparation = next;
+    network.setOptions({{ physics: {{ barnesHut: {{ springLength: Math.round(30 + next * 0.7) }} }} }});
   }});
   document.getElementById('resetPhysics').addEventListener('click', function() {{
-    network.setOptions({{ physics: {{ enabled: true, stabilization: {{ iterations: 200 }} }} }});
-    network.stabilize(200);
+    network.setOptions({{ physics: {{ enabled: true, stabilization: {{ enabled: false }} }} }});
+    network.startSimulation();
+  }});
+  document.getElementById('stopPhysics').addEventListener('click', function() {{
+    network.stopSimulation();
+    network.setOptions({{ physics: {{ enabled: false }} }});
+  }});
+  document.getElementById('fitNetwork').addEventListener('click', function() {{
+    network.fit({{ animation: {{ duration: 400 }} }});
   }});
   // Init
   window.__rebuild = rebuildVisibility;  // debug
   rebuildVisibility();
-  // Stabilize hook
-  network.once('stabilizationIterationsDone', function() {{
-    rebuildVisibility();
-  }});
 }})();
 </script>
 </body>
@@ -655,7 +674,7 @@ def main():
     html = build_pyvis_html(nodos, aristas, cuentas_sel, aristas_cuenta, plataformas)
     out_html.write_text(html, encoding="utf-8")
 
-    print("      aplicando temas rastreados y polaridad")
+    print("      aplicando temas rastreados, polaridad y postura")
     lexicons = load_lexicons(
         args.diccionario_temas,
         args.diccionario_positivo,
@@ -677,7 +696,7 @@ def main():
         out_html,
         annotations,
         lexicons.category_colors,
-        "Cuentas, temas rastreados y polaridad",
+        "Cuentas, temas, polaridad y postura",
         panel_top_px=228,
     )
     write_annotation_outputs(

@@ -780,10 +780,49 @@ def build_html(
 ) -> str:
     vis_css, vis_js = extract_vis_assets(base)
     topics = sorted(topic_info)
+
+    position_topics = {
+        str(node["id"]): int(node["tema"])
+        for node in nodes if node.get("kind") == "posicion"
+    }
+    topic_neighbors: defaultdict[int, set[str]] = defaultdict(set)
+    neighbor_topics: defaultdict[str, set[int]] = defaultdict(set)
+    topic_connections: defaultdict[int, int] = defaultdict(int)
+    for edge in edges:
+        position_id = None
+        neighbor_id = None
+        if str(edge.get("from")) in position_topics:
+            position_id, neighbor_id = str(edge["from"]), str(edge.get("to"))
+        elif str(edge.get("to")) in position_topics:
+            position_id, neighbor_id = str(edge["to"]), str(edge.get("from"))
+        if position_id is None or neighbor_id is None:
+            continue
+        topic_id = position_topics[position_id]
+        topic_connections[topic_id] += 1
+        if edge.get("kind") in {"posicion_cuenta", "posicion_palabra"}:
+            topic_neighbors[topic_id].add(neighbor_id)
+            neighbor_topics[neighbor_id].add(topic_id)
+
+    topic_metrics = {}
+    for tid in topics:
+        bridge_score = sum(
+            max(0, len(neighbor_topics[neighbor]) - 1)
+            for neighbor in topic_neighbors.get(tid, set())
+        )
+        topic_metrics[tid] = {
+            "volume": int(meta.get(f"T{tid:02d}", {}).get("n_cuentas", 0)),
+            "centrality": int(bridge_score),
+            "connectivity": int(topic_connections.get(tid, 0)),
+        }
     topic_checks = "\n".join(
-        f'<label><input type="checkbox" class="topic" data-topic="{tid}" checked> '
+        f'<label class="topic-item" data-topic="{tid}" '
+        f'data-volume="{topic_metrics[tid]["volume"]}" '
+        f'data-centrality="{topic_metrics[tid]["centrality"]}" '
+        f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
+        f'<input type="checkbox" class="topic" data-topic="{tid}" checked> '
         f'<span class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></span>'
-        f'T{tid:02d} · {html.escape(topic_info[tid].get("title", ""))}</label>'
+        f'T{tid:02d} · {html.escape(topic_info[tid].get("title", ""))}'
+        f' <small class="topic-score"></small></label>'
         for tid in topics
     )
 
@@ -808,10 +847,12 @@ def build_html(
   h2 {{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#aaa; margin:14px 0 6px; }}
   label {{ display:block; font-size:12px; margin:5px 0; line-height:1.3; }}
   input[type="text"] {{ width:100%; box-sizing:border-box; padding:7px; background:#101010; color:#fff; border:1px solid #444; border-radius:4px; }}
+  select {{ width:100%; box-sizing:border-box; padding:6px; background:#101010; color:#fff; border:1px solid #444; border-radius:4px; }}
   input[type="range"] {{ width:100%; }}
   button {{ background:#333; color:#fff; border:1px solid #555; border-radius:4px; padding:5px 8px; cursor:pointer; }}
   .grp {{ border:1px solid #333; border-radius:6px; padding:8px; margin-bottom:10px; background:#191919; }}
   .sw {{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }}
+  .topic-score {{ color:#888; }}
   .pill {{ display:inline-block; padding:2px 6px; margin:2px 3px 2px 0; border-radius:10px; background:#26384a; font-size:11px; }}
   .metric {{ display:grid; grid-template-columns:1fr auto; gap:6px; font-size:12px; border-bottom:1px solid #2b2b2b; padding:4px 0; }}
   .muted {{ color:#aaa; font-size:12px; line-height:1.35; }}
@@ -845,13 +886,22 @@ def build_html(
   </div>
   <div class="grp">
     <h2>Temas</h2>
-    {topic_checks}
+    <label>Ordenar por</label>
+    <select id="topicOrder">
+      <option value="volume">Volumen (cuentas)</option>
+      <option value="centrality">Centralidad (puentes)</option>
+      <option value="connectivity">Conectividad (enlaces)</option>
+      <option value="topic">Numero de tema</option>
+    </select>
+    <div id="topicList">{topic_checks}</div>
   </div>
   <div class="grp">
     <h2>Visual</h2>
-    <label>Separacion <span id="springV">170</span></label>
-    <input id="spring" type="range" min="80" max="360" value="170">
+    <label>Separacion <span id="springV">100%</span></label>
+    <input id="spring" type="range" min="50" max="180" value="100">
     <button id="reset">Reorganizar</button>
+    <button id="stopPhysics">Detener</button>
+    <button id="fitNetwork">Encajar</button>
   </div>
 </aside>
 <main id="network"></main>
@@ -873,11 +923,29 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
     enabled: false,
     solver: 'forceAtlas2Based',
     forceAtlas2Based: {{ gravitationalConstant: -95, centralGravity: 0.012, springLength: 170, springConstant: 0.06, damping: 0.45 }},
-    stabilization: {{ iterations: 250 }}
+    stabilization: {{ enabled: false }}
   }},
   interaction: {{ hover:true, tooltipDelay:100, navigationButtons:true, keyboard:true }}
 }});
 window.network = network;
+
+function sortTopicMenu() {{
+  const mode = document.getElementById('topicOrder').value;
+  const list = document.getElementById('topicList');
+  const labels = Array.from(list.querySelectorAll('.topic-item'));
+  labels.sort((a, b) => {{
+    if (mode === 'topic') return Number(a.dataset.topic) - Number(b.dataset.topic);
+    return Number(b.dataset[mode] || 0) - Number(a.dataset[mode] || 0) ||
+      Number(a.dataset.topic) - Number(b.dataset.topic);
+  }});
+  labels.forEach(label => {{
+    const score = label.querySelector('.topic-score');
+    score.textContent = mode === 'topic' ? '' : `(${{label.dataset[mode] || 0}})`;
+    list.appendChild(label);
+  }});
+}}
+document.getElementById('topicOrder').addEventListener('change', sortTopicMenu);
+sortTopicMenu();
 
 function activeTopics() {{
   const s = {{}};
@@ -984,14 +1052,36 @@ function render(id) {{
 document.querySelectorAll('input').forEach(el => {{
   if (el.id !== 'search' && el.id !== 'spring') el.addEventListener('change', rebuild);
 }});
+let lastSeparation = 100;
 document.getElementById('spring').addEventListener('input', e => {{
-  document.getElementById('springV').textContent = e.target.value;
-  network.setOptions({{physics: {{forceAtlas2Based: {{springLength: parseInt(e.target.value, 10)}}}}}});
+  const next = parseInt(e.target.value, 10);
+  document.getElementById('springV').textContent = next + '%';
+  const ratio = next / lastSeparation;
+  const positions = network.getPositions();
+  const ids = Object.keys(positions);
+  if (ids.length && Number.isFinite(ratio) && ratio > 0) {{
+    let cx = 0, cy = 0;
+    ids.forEach(id => {{ cx += positions[id].x; cy += positions[id].y; }});
+    cx /= ids.length; cy /= ids.length;
+    ids.forEach(id => network.moveNode(
+      id,
+      cx + (positions[id].x - cx) * ratio,
+      cy + (positions[id].y - cy) * ratio
+    ));
+  }}
+  lastSeparation = next;
+  network.setOptions({{physics: {{forceAtlas2Based: {{springLength: Math.round(60 + next * 0.8)}}}}}});
 }});
 document.getElementById('reset').addEventListener('click', () => {{
-  network.setOptions({{physics: {{enabled:true, stabilization: {{iterations:250}}}}}});
-  network.stabilize(250);
-  setTimeout(() => network.fit({{animation:true}}), 700);
+  network.setOptions({{physics: {{enabled:true, stabilization: {{enabled:false}}}}}});
+  network.startSimulation();
+}});
+document.getElementById('stopPhysics').addEventListener('click', () => {{
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false}}}});
+}});
+document.getElementById('fitNetwork').addEventListener('click', () => {{
+  network.fit({{animation:{{duration:400}}}});
 }});
 document.getElementById('search').addEventListener('keydown', e => {{
   if (e.key !== 'Enter') return;
@@ -1010,17 +1100,8 @@ document.getElementById('search').addEventListener('keydown', e => {{
 network.on('click', p => {{
   if (p.nodes.length) render(p.nodes[0]);
 }});
-network.once('stabilizationIterationsDone', () => {{
-  rebuild();
-  setTimeout(() => network.fit({{animation:true}}), 500);
-}});
 rebuild();
-setTimeout(() => network.fit({{animation:false}}), 1500);
-setTimeout(() => network.fit({{animation:true}}), 4500);
-setTimeout(() => {{
-  network.stopSimulation();
-  network.fit({{animation:false}});
-}}, 8000);
+requestAnimationFrame(() => network.fit({{animation:false}}));
 </script>
 </body>
 </html>

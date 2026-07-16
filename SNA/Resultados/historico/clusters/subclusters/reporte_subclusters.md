@@ -1,601 +1,576 @@
 # Subclusters Louvain por tema LDA
 
-- Generado: 2026-07-01T09:28:04
+- Generado: 2026-07-15T13:30:39
 - Corpus: historico consolidado de Tampico
 - Resolution: 1.4
 - Min sub-cluster size: 3
 
 | Tema | n_palabras | n_nodos | n_aristas | n_subclusters |
 |---:|---:|---:|---:|---:|
-| T00 | 131 | 131 | 2165 | 11 |
-| T01 | 157 | 157 | 4549 | 19 |
-| T02 | 146 | 146 | 2604 | 17 |
-| T03 | 54 | 54 | 363 | 3 |
-| T04 | 147 | 147 | 2457 | 14 |
-| T05 | 114 | 114 | 1918 | 11 |
-| T06 | 121 | 121 | 2654 | 13 |
-| T07 | 109 | 109 | 2573 | 13 |
-| T08 | 162 | 162 | 2770 | 16 |
-| T09 | 134 | 134 | 1489 | 16 |
-| T10 | 160 | 160 | 4630 | 19 |
-| T11 | 108 | 108 | 3679 | 18 |
-| T12 | 159 | 158 | 3139 | 12 |
-| T13 | 146 | 146 | 4618 | 20 |
-| T14 | 124 | 124 | 3113 | 17 |
-| T15 | 129 | 129 | 2315 | 11 |
-| T16 | 129 | 127 | 1620 | 12 |
-| T17 | 173 | 173 | 5819 | 19 |
-| T18 | 86 | 86 | 2178 | 10 |
-| T19 | 135 | 135 | 1357 | 12 |
-| T20 | 166 | 166 | 1805 | 14 |
-| T21 | 79 | 79 | 1561 | 10 |
-| T22 | 144 | 144 | 3039 | 14 |
-| T23 | 119 | 119 | 3123 | 15 |
-| T24 | 139 | 139 | 4999 | 21 |
-| T25 | 146 | 146 | 2392 | 16 |
-| T26 | 100 | 100 | 1604 | 13 |
-| T27 | 70 | 70 | 1823 | 7 |
-| T28 | 133 | 133 | 1497 | 10 |
-| T29 | 122 | 121 | 1345 | 12 |
-| T30 | 173 | 173 | 2785 | 16 |
-| T31 | 162 | 162 | 3308 | 15 |
-| T32 | 122 | 122 | 2731 | 14 |
-| T33 | 90 | 90 | 1934 | 14 |
-| T34 | 112 | 112 | 1022 | 11 |
+| T00 | 130 | 130 | 3048 | 14 |
+| T01 | 82 | 82 | 1368 | 8 |
+| T02 | 169 | 169 | 2265 | 10 |
+| T03 | 86 | 86 | 1457 | 8 |
+| T04 | 169 | 169 | 4532 | 18 |
+| T05 | 124 | 124 | 2781 | 13 |
+| T06 | 118 | 118 | 3145 | 12 |
+| T07 | 136 | 136 | 1980 | 12 |
+| T08 | 163 | 163 | 5524 | 23 |
+| T09 | 126 | 126 | 3561 | 13 |
+| T10 | 160 | 160 | 3763 | 14 |
+| T11 | 77 | 77 | 1356 | 9 |
+| T12 | 132 | 132 | 2979 | 12 |
+| T13 | 57 | 57 | 687 | 7 |
+| T14 | 122 | 122 | 3007 | 12 |
+| T15 | 114 | 114 | 3225 | 14 |
+| T16 | 131 | 131 | 5416 | 18 |
+| T17 | 145 | 145 | 3083 | 13 |
+| T18 | 111 | 111 | 2443 | 12 |
+| T19 | 148 | 148 | 2407 | 13 |
+| T20 | 131 | 131 | 1776 | 14 |
+| T21 | 126 | 126 | 2134 | 14 |
+| T22 | 117 | 117 | 4134 | 10 |
+| T23 | 131 | 131 | 2913 | 14 |
+| T24 | 150 | 150 | 3393 | 14 |
+| T25 | 130 | 130 | 1428 | 10 |
+| T26 | 85 | 85 | 706 | 8 |
+| T27 | 120 | 120 | 3201 | 16 |
+| T28 | 141 | 141 | 2689 | 13 |
+| T29 | 113 | 113 | 2118 | 13 |
+| T30 | 125 | 125 | 3101 | 14 |
+| T31 | 113 | 113 | 4945 | 15 |
+| T32 | 153 | 153 | 4596 | 18 |
+| T33 | 136 | 136 | 5508 | 20 |
+| T34 | 104 | 104 | 1928 | 12 |
 
 ## Lectura rapida por tema
 
-### T00 (131 palabras, 11 sub-clusters)
-- **T00.S00 - Maria, corina, machado, venezolano** (9 pal, 24 aristas, densidad 0.67): maria, corina, machado, venezolano, gonzalez, edmundo, vicepresidenta, extraccion, correismo
-- **T00.S01 - Hora, representar, unido, firme** (17 pal, 63 aristas, densidad 0.46): hora, representar, unido, firme, decidir, caminar, malandro, respaldar, aplauso, pachuca, factor, congresista
-- **T00.S02 - Politica, periodista, amenaza, dictador** (21 pal, 89 aristas, densidad 0.42): politica, periodista, amenaza, dictador, lamentable, acordar, cia, corrupta, formula, preocupado, ahorro, noticias
-- **T00.S03 - Venezuela, libertad, colombia, permanecer** (12 pal, 30 aristas, densidad 0.46): venezuela, libertad, colombia, permanecer, milei, nicaragua, dedicado, ruso, lancha, movistar, libertario, envivo
-- **T00.S04 - Internacional, marco, liderazgo, rubio** (17 pal, 47 aristas, densidad 0.35): internacional, marco, liderazgo, rubio, global, coincidir, solido, municipales, ganado, coleccion, confiable, previo
-- **T00.S05 - Fuerza, valiente, secuestrar, terrorismo** (17 pal, 56 aristas, densidad 0.41): fuerza, valiente, secuestrar, terrorismo, belleza, nahle, caca, decidido, fake, cuitlahuac, palabras, duermar
-- **T00.S06 - Maduro, regimen, nicolas, mcm** (8 pal, 16 aristas, densidad 0.57): maduro, regimen, nicolas, mcm, odiar, dispuesto, debil, dudser
-- **T00.S07 - Silla, jodido, cola, aparato** (12 pal, 27 aristas, densidad 0.41): silla, jodido, cola, aparato, recoger, funcional, corrar, hrs, trabajando, orquesta, acompanano, pulmon
-- **T00.S08 - Aliado, cabello, estadounidense, padrino** (9 pal, 18 aristas, densidad 0.50): aliado, cabello, estadounidense, padrino, diosdado, mendez, maton, news, vladimir
-- **T00.S09 - Democracia, beso, abuelito, posesion** (6 pal, 7 aristas, densidad 0.47): democracia, beso, abuelito, posesion, estancia, delfin
-- **T00.S10 - Lucha, resistencia, rol** (3 pal, 2 aristas, densidad 0.67): lucha, resistencia, rol
+### T00 (130 palabras, 14 sub-clusters)
+- **T00.S00 - Turistico, turismo, visitante, destino** (10 pal, 37 aristas, densidad 0.82): turistico, turismo, visitante, destino, promocion, atraer, restaurante, canaco, posicionar, manzur
+- **T00.S01 - Reconocimiento, obtener, premio, destacado** (17 pal, 79 aristas, densidad 0.58): reconocimiento, obtener, premio, destacado, ganador, merecido, doble, apostar, reflejo, motor, huella, orgullosamente
+- **T00.S02 - Capital, reducir, invertir, particular** (19 pal, 91 aristas, densidad 0.53): capital, reducir, invertir, particular, deuda, bolsa, anual, moderno, millonario, predio, mencho, macuspano
+- **T00.S03 - Internacional, espana, competencia, agenda** (8 pal, 22 aristas, densidad 0.79): internacional, espana, competencia, agenda, fest, jazz, explanada, band
+- **T00.S04 - Nivel, alto, advertir, fuga** (7 pal, 16 aristas, densidad 0.76): nivel, alto, advertir, fuga, escaso, asfaltico, calibre
+- **T00.S05 - Identidad, educativo, plantel, vocacion** (10 pal, 30 aristas, densidad 0.67): identidad, educativo, plantel, vocacion, distinguir, plazo, tecnica, secundaria, del, incompleto
+- **T00.S06 - Brava, porteno, corona, regular** (11 pal, 29 aristas, densidad 0.53): brava, porteno, corona, regular, deportiva, amplio, certamen, facilidad, participant, altos, definicion
+- **T00.S07 - Abril, fiestas, reina, caballero** (6 pal, 8 aristas, densidad 0.53): abril, fiestas, reina, caballero, embarazo, valentina
+- **T00.S08 - Representar, convertir, decada, pieza** (8 pal, 17 aristas, densidad 0.61): representar, convertir, decada, pieza, vencer, capitan, basurero, abelardo
+- **T00.S09 - Abierto, directamente, ejercicio, apuntar** (13 pal, 35 aristas, densidad 0.45): abierto, directamente, ejercicio, apuntar, comprender, banqueta, pepe, tenis, alumbrado, bordo, tula, lanza
+- **T00.S10 - Ofrecer, riqueza, inauguracion, vacante** (8 pal, 16 aristas, densidad 0.57): ofrecer, riqueza, inauguracion, vacante, valorar, avila, visa, samuel
+- **T00.S11 - Historico, edificio, propietario, preservar** (4 pal, 6 aristas, densidad 1.00): historico, edificio, propietario, preservar
+- **T00.S12 - Destacar, consolidar, referente, proyectar** (4 pal, 6 aristas, densidad 1.00): destacar, consolidar, referente, proyectar
+- **T00.S13 - Global, significativo, crucero, ocampo** (5 pal, 6 aristas, densidad 0.60): global, significativo, crucero, ocampo, propiciar
 
-### T01 (157 palabras, 19 sub-clusters)
-- **T01.S00 - Juan, imagen, cuando, limpiar** (24 pal, 87 aristas, densidad 0.32): juan, imagen, cuando, limpiar, pablo, iglesia, piedad, cerro, reaccion, autentico, martin, fiel
-- **T01.S01 - Corrupto, bola, ratero, prianista** (10 pal, 36 aristas, densidad 0.80): corrupto, bola, ratero, prianista, cinico, armadas, abusar, secta, trasero, descaro
-- **T01.S02 - Jajaja, miedo, risa, normal** (11 pal, 32 aristas, densidad 0.58): jajaja, miedo, risa, normal, jajajajajajaja, literalmente, parecido, camisa, tele, asesinado, mauricio
-- **T01.S03 - Cosa, tirar, camara, bote** (9 pal, 20 aristas, densidad 0.56): cosa, tirar, camara, bote, comun, evidente, perfectamente, chavista, entiendan
-- **T01.S04 - Mentiroso, atacar, inocente, hipocrita** (9 pal, 32 aristas, densidad 0.89): mentiroso, atacar, inocente, hipocrita, traicion, morenarco, publicar, cuello, ban
-- **T01.S05 - Carcel, falta, ajeno, mero** (7 pal, 17 aristas, densidad 0.81): carcel, falta, ajeno, mero, castigo, sinverguenza, oscuro
-- **T01.S06 - Quitar, estupido, bajar, ocupar** (6 pal, 12 aristas, densidad 0.80): quitar, estupido, bajar, ocupar, chisme, broma
-- **T01.S07 - Manejar, imposible, chapo, impedir** (14 pal, 43 aristas, densidad 0.47): manejar, imposible, chapo, impedir, lastimar, caos, barbaridad, reclamar, autobus, intervenir, licencia, nacido
-- **T01.S08 - Capaz, esconder, coludido, horror** (11 pal, 30 aristas, densidad 0.55): capaz, esconder, coludido, horror, habia, senado, pesadilla, misa, caridad, apoir, calzada
-- **T01.S09 - Che, per, tommavi** (3 pal, 3 aristas, densidad 1.00): che, per, tommavi
-- **T01.S10 - Loco, carro, cerebro, lavar** (9 pal, 26 aristas, densidad 0.72): loco, carro, cerebro, lavar, carne, carga, caseta, policias, likes
-- **T01.S11 - Pendejo, miserable, imbecil, chiapas** (9 pal, 24 aristas, densidad 0.67): pendejo, miserable, imbecil, chiapas, despedir, cita, sal, pedazo, ligero
-- **T01.S12 - Delincuente, destruir, cometer, har** (6 pal, 12 aristas, densidad 0.80): delincuente, destruir, cometer, har, arder, boric
-- **T01.S13 - Ignorante, moren, gastar, espalda** (7 pal, 15 aristas, densidad 0.71): ignorante, moren, gastar, espalda, existencia, multar, sencillez
-- **T01.S14 - Cara, asco, venganza, microfono** (5 pal, 7 aristas, densidad 0.70): cara, asco, venganza, microfono, cerveza
-- **T01.S15 - Ala, duro, notar, pin** (5 pal, 8 aristas, densidad 0.80): ala, duro, notar, pin, latam
-- **T01.S16 - Huevo, ridiculo, payaso, patada** (5 pal, 9 aristas, densidad 0.90): huevo, ridiculo, payaso, patada, emocional
-- **T01.S17 - Quot, aguantar, fallido, cortar** (4 pal, 5 aristas, densidad 0.83): quot, aguantar, fallido, cortar
-- **T01.S18 - Palacio, desestabilizar, paga** (3 pal, 2 aristas, densidad 0.67): palacio, desestabilizar, paga
+### T01 (82 palabras, 8 sub-clusters)
+- **T01.S00 - Villarreal, monica, alcaldesa, fortalece** (4 pal, 6 aristas, densidad 1.00): villarreal, monica, alcaldesa, fortalece
+- **T01.S01 - Desarrollo, impulsar, local, promover** (34 pal, 233 aristas, densidad 0.41): desarrollo, impulsar, local, promover, economia, fomentar, emprendedor, colaboracion, laredo, club, uat, garza
+- **T01.S02 - Presidenta, excelente, transformacion, villareal** (11 pal, 39 aristas, densidad 0.71): presidenta, excelente, transformacion, villareal, tampiquenos, bienvenido, hermosa, cuarta, clinica, andrea, blindado
+- **T01.S03 - Anaya, gobernador, americo, zacil** (4 pal, 5 aristas, densidad 0.83): anaya, gobernador, americo, zacil
+- **T01.S04 - Laguna, carpintero, ecologia, pavimentacion** (9 pal, 20 aristas, densidad 0.56): laguna, carpintero, ecologia, pavimentacion, funcional, abandono, fidel, bulevar, zaragoza
+- **T01.S05 - Invitacion, sosa, olga, senadora** (8 pal, 20 aristas, densidad 0.71): invitacion, sosa, olga, senadora, diputada, nader, chucho, lucero
+- **T01.S06 - Riobravo, mante, vallehermoso, jovenes** (6 pal, 12 aristas, densidad 0.80): riobravo, mante, vallehermoso, jovenes, nld, sanfernando
+- **T01.S07 - Encabezar, inaugurar, rehabilitacion, huasteca** (6 pal, 10 aristas, densidad 0.67): encabezar, inaugurar, rehabilitacion, huasteca, pintura, reflector
 
-### T02 (146 palabras, 17 sub-clusters)
-- **T02.S00 - Ano, hija, pareja, gustavo** (12 pal, 24 aristas, densidad 0.36): ano, hija, pareja, gustavo, miss, igualmente, casado, conchita, plenamente, juanjo, yerno, campeones
-- **T02.S01 - Muerte, muerto, victima, asesino** (15 pal, 53 aristas, densidad 0.51): muerte, muerto, victima, asesino, asesinato, quemar, catolico, monton, hallar, decente, feminicidio, sospechoso
-- **T02.S02 - Recordar, tratar, color, azul** (9 pal, 28 aristas, densidad 0.78): recordar, tratar, color, azul, carta, cuestion, signo, tramo, vibrar
-- **T02.S03 - Recibir, campana, comenzar, merecido** (15 pal, 45 aristas, densidad 0.43): recibir, campana, comenzar, merecido, efecto, sitio, respectivo, revision, noches, disenar, asistencia, retiro
-- **T02.S04 - Robo, blanco, consecuencia, intencion** (12 pal, 43 aristas, densidad 0.65): robo, blanco, consecuencia, intencion, impune, originario, exacto, sabiar, onu, estariar, webo, farsant
-- **T02.S05 - Numero, lejos, modelo, definir** (12 pal, 30 aristas, densidad 0.46): numero, lejos, modelo, definir, republicano, traje, transparente, personalmente, incluido, apoco, accionar, led
-- **T02.S06 - Riobravo, vallehermoso, universitario, sanfernando** (4 pal, 5 aristas, densidad 0.83): riobravo, vallehermoso, universitario, sanfernando
-- **T02.S07 - Votar, man, votacion, prd** (10 pal, 23 aristas, densidad 0.51): votar, man, votacion, prd, full, army, manta, conteo, talk, sempre
-- **T02.S08 - Joven, brazo, superar, tachira** (6 pal, 9 aristas, densidad 0.60): joven, brazo, superar, tachira, paradero, castellanos
-- **T02.S09 - Ojo, chingo, aburrido, moneda** (8 pal, 15 aristas, densidad 0.54): ojo, chingo, aburrido, moneda, surgir, personalidad, aprendan, alcohol
-- **T02.S10 - Sufrir, relacion, declaracion, adentro** (7 pal, 14 aristas, densidad 0.67): sufrir, relacion, declaracion, adentro, elite, rabia, austero
-- **T02.S11 - Cuerpo, salvar, entero, sobrevivir** (8 pal, 14 aristas, densidad 0.50): cuerpo, salvar, entero, sobrevivir, ovario, cecilia, caracteristica, aquino
-- **T02.S12 - Razon, cansar, practica, narca** (8 pal, 15 aristas, densidad 0.54): razon, cansar, practica, narca, sopa, consideracion, beber, aventura
-- **T02.S13 - Detener, liberar, implicado, batman** (4 pal, 5 aristas, densidad 0.83): detener, liberar, implicado, batman
-- **T02.S14 - Luchar, apagar, humillar, censura** (5 pal, 7 aristas, densidad 0.70): luchar, apagar, humillar, censura, fotos
-- **T02.S15 - Pagina, naturaleza, cuidate, tepeyac** (6 pal, 7 aristas, densidad 0.47): pagina, naturaleza, cuidate, tepeyac, nesecitir, ciudades
-- **T02.S16 - Puta, violador, abusador, hartar** (5 pal, 9 aristas, densidad 0.90): puta, violador, abusador, hartar, psicopata
+### T02 (169 palabras, 10 sub-clusters)
+- **T02.S00 - Love, like, time, thank** (40 pal, 462 aristas, densidad 0.59): love, like, time, thank, see, know, get, much, day, even, money, going
+- **T02.S01 - Libertad, expresion, responsabilidad, brutal** (5 pal, 7 aristas, densidad 0.70): libertad, expresion, responsabilidad, brutal, privar
+- **T02.S02 - Participacion, oro, medalla, baile** (16 pal, 50 aristas, densidad 0.42): participacion, oro, medalla, baile, posada, disco, reunido, alumna, divertir, entrenadora, conade, creativo
+- **T02.S03 - Inicio, preparar, plataforma, aportar** (25 pal, 61 aristas, densidad 0.20): inicio, preparar, plataforma, aportar, gustavo, television, petro, reality, establecimiento, finanza, cumplido, tiendas
+- **T02.S04 - Wow, diaz, genial, tono** (22 pal, 82 aristas, densidad 0.35): wow, diaz, genial, tono, canasta, perra, jaibo, subida, pisar, farsa, gay, ocupado
+- **T02.S05 - Sonar, cancion, simplemente, cantante** (14 pal, 42 aristas, densidad 0.46): sonar, cancion, simplemente, cantante, invitado, coming, var, chocar, latinoamerica, mortal, narca, funcionarios
+- **T02.S06 - Torres, castro, competir, licenciado** (19 pal, 53 aristas, densidad 0.31): torres, castro, competir, licenciado, delegado, diputados, tenor, trato, ofelia, gestionar, ocupacion, beto
+- **T02.S07 - Originario, carne, desgraciadamente, proyeccion** (11 pal, 21 aristas, densidad 0.38): originario, carne, desgraciadamente, proyeccion, luisa, desempenar, invento, miranda, army, washington, cenar
+- **T02.S08 - Youtube, dama, hierro, irapuato** (9 pal, 15 aristas, densidad 0.42): youtube, dama, hierro, irapuato, vibra, ingeniero, celaya, movilizar, prehospitalario
+- **T02.S09 - Central, shembaum, republicano, amarillo** (8 pal, 13 aristas, densidad 0.46): central, shembaum, republicano, amarillo, presionar, pluma, candidatura, barcelona
 
-### T03 (54 palabras, 3 sub-clusters)
-- **T03.S00 - Tampico, tamaulipas, beca, cesar** (9 pal, 13 aristas, densidad 0.36): tampico, tamaulipas, beca, cesar, registrado, ideal, esencia, acompanenme, llevo
-- **T03.S01 - Reynosa, matamoros, nuevolaredo, nld** (6 pal, 12 aristas, densidad 0.80): reynosa, matamoros, nuevolaredo, nld, nuevoleon, agencia
-- **T03.S03 - Monterrey, leer, ganador, leal** (35 pal, 118 aristas, densidad 0.20): monterrey, leer, ganador, leal, laredo, toluca, aficion, convocatoria, sorprender, cafe, capitulo, gabriela
+### T03 (86 palabras, 8 sub-clusters)
+- **T03.S00 - Mundial, partido, futbol, seleccion** (9 pal, 26 aristas, densidad 0.72): mundial, partido, futbol, seleccion, mexicana, copa, gigante, natalia, partidista
+- **T03.S01 - Final, liga, estadio, jugar** (10 pal, 38 aristas, densidad 0.84): final, liga, estadio, jugar, division, campeonato, franquicia, femenil, pachuca, mediocampista
+- **T03.S02 - Energia, electrico, superar, colocar** (15 pal, 61 aristas, densidad 0.58): energia, electrico, superar, colocar, petrolero, dolares, electricidad, produccion, arrancar, falla, promedio, indicador
+- **T03.S03 - Equipo, tampiqueno, talento, juventud** (9 pal, 24 aristas, densidad 0.67): equipo, tampiqueno, talento, juventud, favorito, taco, brillar, sustentable, hot
+- **T03.S04 - Participar, cruz, carrera, fernando** (20 pal, 71 aristas, densidad 0.37): participar, cruz, carrera, fernando, azul, nunez, exitoso, dulce, mira, circuito, bienvenida, tamayo
+- **T03.S05 - Deportivo, deporte, torneo, cancha** (7 pal, 17 aristas, densidad 0.81): deportivo, deporte, torneo, cancha, organizador, campeona, alberca
+- **T03.S06 - Traer, cuarto, planeta, canada** (11 pal, 25 aristas, densidad 0.46): traer, cuarto, planeta, canada, seguidor, estar, habitar, estacionamiento, atropello, loma, trinidad
+- **T03.S07 - Estrella, extra, empresarios, enfermera** (5 pal, 4 aristas, densidad 0.40): estrella, extra, empresarios, enfermera, recipient
 
-### T04 (147 palabras, 14 sub-clusters)
-- **T04.S00 - Virgen, guadalupe, camino, santo** (21 pal, 80 aristas, densidad 0.38): virgen, guadalupe, camino, santo, regalar, manto, contigo, espiritual, santos, templo, inmenso, bajada
-- **T04.S01 - Lider, michoacan, extorsion, secuestro** (16 pal, 42 aristas, densidad 0.35): lider, michoacan, extorsion, secuestro, cobro, sinaloa, dirigir, cjng, arrasar, senalamiento, giro, estacionar
-- **T04.S02 - Cruz, sanchez, turno, castro** (16 pal, 42 aristas, densidad 0.35): cruz, sanchez, turno, castro, roja, matutino, rincon, vespertino, ayude, horas, enamorar, erick
-- **T04.S03 - Tranquilo, chico, correcto, balacera** (13 pal, 41 aristas, densidad 0.53): tranquilo, chico, correcto, balacera, amable, talla, pinchi, desconocer, aprox, amigable, rival, corralon
-- **T04.S04 - Banda, soldado, operar, presidencial** (15 pal, 47 aristas, densidad 0.45): banda, soldado, operar, presidencial, candidata, mafioso, narcotraficante, secuestrador, parado, mirada, tabasqueno, botox
-- **T04.S05 - Empresario, gato, diferencia, intervencion** (9 pal, 28 aristas, densidad 0.78): empresario, gato, diferencia, intervencion, violento, consumir, despido, subida, arreglado
-- **T04.S06 - Admirar, considerar, limon, mami** (15 pal, 41 aristas, densidad 0.39): admirar, considerar, limon, mami, hermanos, monte, gay, chinga, hermosillo, picar, votante, fierro
-- **T04.S07 - Semana, santa, auxilio, triunfar** (5 pal, 5 aristas, densidad 0.50): semana, santa, auxilio, triunfar, imperdible
-- **T04.S08 - Vicky, davila, apellido, muneca** (5 pal, 7 aristas, densidad 0.70): vicky, davila, apellido, muneca, recompensa
-- **T04.S09 - Tierra, portar, reina, asumir** (5 pal, 9 aristas, densidad 0.90): tierra, portar, reina, asumir, atreveir
-- **T04.S10 - Personaje, preferir, panista, quizas** (9 pal, 20 aristas, densidad 0.56): personaje, preferir, panista, quizas, pollo, ardar, prepotente, pos, mentar
-- **T04.S11 - Llamado, acaso, colombiano, presa** (8 pal, 14 aristas, densidad 0.50): llamado, acaso, colombiano, presa, estructura, pelea, compatriota, procurar
-- **T04.S12 - Denunciar, fuego, sangre, conviccion** (6 pal, 12 aristas, densidad 0.80): denunciar, fuego, sangre, conviccion, incendiar, miserabl
-- **T04.S13 - Senora, bendita, masacre, gallo** (4 pal, 4 aristas, densidad 0.67): senora, bendita, masacre, gallo
+### T04 (169 palabras, 18 sub-clusters)
+- **T04.S00 - Negocio, precio, producto, costar** (23 pal, 124 aristas, densidad 0.49): negocio, precio, producto, costar, tienda, barato, incremento, gasto, asalto, vacio, caja, verdura
+- **T04.S01 - Madre, hijo, hija, alli** (10 pal, 32 aristas, densidad 0.71): madre, hijo, hija, alli, asesinar, puta, manipulacion, pedazo, nieta, simbolico
+- **T04.S02 - Malo, vender, bote, pelea** (10 pal, 21 aristas, densidad 0.47): malo, vender, bote, pelea, decente, fruta, mezcla, isabel, insecto, mango
+- **T04.S03 - Grave, solucion, imss, placa** (10 pal, 32 aristas, densidad 0.71): grave, solucion, imss, placa, audiencia, empatia, contigo, peticion, procedimiento, charla
+- **T04.S04 - Comprar, carro, afuera, obligar** (12 pal, 35 aristas, densidad 0.53): comprar, carro, afuera, obligar, ignorancia, manifestar, adquirir, reparar, parado, especificamente, erick, graduar
+- **T04.S05 - Meter, gato, interesar, montaje** (13 pal, 43 aristas, densidad 0.55): meter, gato, interesar, montaje, tia, violacion, ignorar, soportar, desesperado, cientifico, tope, politicos
+- **T04.S06 - Pronto, perdida, resignacion, urgir** (9 pal, 18 aristas, densidad 0.50): pronto, perdida, resignacion, urgir, vato, doloroso, podcast, sensible, apagon
+- **T04.S07 - Aca, horrible, pegar, cola** (12 pal, 34 aristas, densidad 0.52): aca, horrible, pegar, cola, jajajaj, golpear, temblar, escoria, pancho, gala, tajada, tonka
+- **T04.S08 - Entrar, alo, uds, autorizar** (9 pal, 22 aristas, densidad 0.61): entrar, alo, uds, autorizar, mecanico, injusto, sufrimiento, innecesario, metal
+- **T04.S09 - Madres, disparar, salvo, amanecer** (5 pal, 8 aristas, densidad 0.80): madres, disparar, salvo, amanecer, santos
+- **T04.S10 - Castigo, acaso, colombiano, repartir** (12 pal, 27 aristas, densidad 0.41): castigo, acaso, colombiano, repartir, lastimar, blanca, tambo, dormido, coger, tumbar, amedrentar, remesa
+- **T04.S11 - Aceptar, lejos, terrorismo, elite** (10 pal, 21 aristas, densidad 0.47): aceptar, lejos, terrorismo, elite, issste, marcado, cuestionar, defensor, construido, pampita
+- **T04.S12 - Serar, cobarde, presirvienta, rumbo** (8 pal, 21 aristas, densidad 0.75): serar, cobarde, presirvienta, rumbo, perseguir, reaccion, apoyamos, cerro
+- **T04.S13 - Borrar, volar, potencia, voltear** (8 pal, 12 aristas, densidad 0.43): borrar, volar, potencia, voltear, mariposa, monarca, fotos, creencia
+- **T04.S14 - Dueno, renta, gratis, excepcion** (6 pal, 14 aristas, densidad 0.93): dueno, renta, gratis, excepcion, proximamente, oculto
+- **T04.S15 - Cara, complice, fox, jajajar** (4 pal, 6 aristas, densidad 1.00): cara, complice, fox, jajajar
+- **T04.S16 - Suceder, raro, vino, egresar** (4 pal, 5 aristas, densidad 0.83): suceder, raro, vino, egresar
+- **T04.S17 - Recuperar, interesante, apollo, apollar** (4 pal, 5 aristas, densidad 0.83): recuperar, interesante, apollo, apollar
 
-### T05 (114 palabras, 11 sub-clusters)
-- **T05.S00 - Caer, cualquiera, canal, regresar** (20 pal, 108 aristas, densidad 0.57): caer, cualquiera, canal, regresar, revisar, funcionar, simplemente, hotel, rojo, mencho, informado, capturar
-- **T05.S01 - Calle, vecino, col, infraestructura** (17 pal, 61 aristas, densidad 0.45): calle, vecino, col, infraestructura, drenaje, esquina, desazolve, benito, examen, olor, planta, motivar
-- **T05.S02 - Zona, norte, centro, enero** (6 pal, 12 aristas, densidad 0.80): zona, norte, centro, enero, fotografia, agil
-- **T05.S03 - Frente, refugio, frio, temporal** (9 pal, 28 aristas, densidad 0.78): frente, refugio, frio, temporal, temperatura, habilitar, ubicacion, establecido, pronostico
-- **T05.S04 - Lluvia, emergencia, afectado, temporada** (9 pal, 26 aristas, densidad 0.72): lluvia, emergencia, afectado, temporada, afectacion, huracan, identificar, proteccionciviltampico, cuadro
-- **T05.S05 - Octubre, martes, enfermedad, jazz** (12 pal, 30 aristas, densidad 0.46): octubre, martes, enfermedad, jazz, tampiquena, apostar, orleans, fresco, orgullosamente, excelencia, sonado, tapia
-- **T05.S06 - Foto, oficial, cartilla, domicilio** (11 pal, 23 aristas, densidad 0.42): foto, oficial, cartilla, domicilio, pasear, visa, manifestar, compartar, aduanas, tramitar, senalado
-- **T05.S07 - Rio, activo, alerta, anuncio** (11 pal, 22 aristas, densidad 0.40): rio, activo, alerta, anuncio, lagunario, decomiso, raul, pico, samuel, lanza, visibilidad
-- **T05.S08 - Puerta, ortiz, dominguez, josefa** (6 pal, 10 aristas, densidad 0.67): puerta, ortiz, dominguez, josefa, problematica, mazatlan
-- **T05.S09 - Veracruz, rica, poza, insultar** (5 pal, 7 aristas, densidad 0.70): veracruz, rica, poza, insultar, oportunista
-- **T05.S10 - Situacion, atento, bloqueo, secundario** (8 pal, 13 aristas, densidad 0.46): situacion, atento, bloqueo, secundario, chava, fallo, trago, irregular
+### T05 (124 palabras, 13 sub-clusters)
+- **T05.S00 - Autoridad, confirmar, acudir, report** (9 pal, 34 aristas, densidad 0.94): autoridad, confirmar, acudir, report, alerta, habitante, seguimiento, revision, aviso
+- **T05.S01 - Detener, responsable, presunto, resultar** (8 pal, 27 aristas, densidad 0.96): detener, responsable, presunto, resultar, conductor, detencion, sujeto, huir
+- **T05.S02 - Camara, comercio, considerar, integrante** (17 pal, 63 aristas, densidad 0.46): camara, comercio, considerar, integrante, expresar, septiembre, empresarial, rostro, denominado, videovigilancia, lady, adquisicion
+- **T05.S03 - Persona, fisico, alejandro, sexual** (13 pal, 30 aristas, densidad 0.39): persona, fisico, alejandro, sexual, alito, cuantos, cuida, violento, aplauso, veronica, apoyado, desmentir
+- **T05.S04 - Playa, miramar, vacacional, hotelero** (4 pal, 5 aristas, densidad 0.83): playa, miramar, vacacional, hotelero
+- **T05.S05 - Informacion, domicilio, febrero, curp** (10 pal, 26 aristas, densidad 0.58): informacion, domicilio, febrero, curp, evidencia, contacto, nacimiento, difundido, antecedente, oreja
+- **T05.S06 - Nota, preocupar, naval, eduardo** (13 pal, 43 aristas, densidad 0.55): nota, preocupar, naval, eduardo, comandante, rafael, vicealmirante, vera, victor, gira, completar, irma
+- **T05.S07 - Supuesto, diario, mando, sueldo** (17 pal, 62 aristas, densidad 0.46): supuesto, diario, mando, sueldo, televisa, enterar, secta, despido, contratacion, incentivo, tar, casar
+- **T05.S08 - Investigacion, republica, carpeta, imputado** (6 pal, 13 aristas, densidad 0.87): investigacion, republica, carpeta, imputado, vinculacion, acusado
+- **T05.S09 - Denuncia, denunciar, comunicacion, exclusivo** (7 pal, 16 aristas, densidad 0.76): denuncia, denunciar, comunicacion, exclusivo, delicado, grabacion, platica
+- **T05.S10 - Directo, servidor, ciudadana, tecnologico** (10 pal, 24 aristas, densidad 0.53): directo, servidor, ciudadana, tecnologico, reflexion, llamada, quintana, roo, humildad, desazolve
+- **T05.S11 - Ilegal, involucrado, ocurrido, atrapado** (7 pal, 13 aristas, densidad 0.62): ilegal, involucrado, ocurrido, atrapado, pintado, finales, exclusivamente
+- **T05.S12 - Armadas, fuerzas, armamento** (3 pal, 3 aristas, densidad 1.00): armadas, fuerzas, armamento
 
-### T06 (121 palabras, 13 sub-clusters)
-- **T06.S00 - Obra, urbano, transformar, obras** (13 pal, 62 aristas, densidad 0.80): obra, urbano, transformar, obras, publicas, beneficiar, movilidad, concreto, pavimentacion, inaugurar, comprender, asfaltico
-- **T06.S01 - Acuerdo, empresa, generar, producto** (20 pal, 81 aristas, densidad 0.43): acuerdo, empresa, generar, producto, directo, mensual, solucionar, compartido, completamente, legislador, urban, culero
-- **T06.S02 - Abrir, metro, convertir, crecer** (20 pal, 74 aristas, densidad 0.39): abrir, metro, convertir, crecer, maximo, exponer, conectar, disenado, negocios, reves, campos, potencial
-- **T06.S03 - Local, economia, emprendedor, impulso** (11 pal, 29 aristas, densidad 0.53): local, economia, emprendedor, impulso, comercio, marca, dirigido, climatico, productor, lucero, vai
-- **T06.S04 - Desarrollo, economico, nora, izaguirre** (5 pal, 8 aristas, densidad 0.80): desarrollo, economico, nora, izaguirre, sustentable
-- **T06.S05 - Cabildo, aprobar, sesion, ordinaria** (5 pal, 10 aristas, densidad 1.00): cabildo, aprobar, sesion, ordinaria, presidir
-- **T06.S06 - Impulsar, turismo, historico, motor** (6 pal, 12 aristas, densidad 0.80): impulsar, turismo, historico, motor, proyectar, oferta
-- **T06.S07 - Secretario, fundamental, regidor, elena** (11 pal, 30 aristas, densidad 0.55): secretario, fundamental, regidor, elena, rogelio, regidora, ambiental, silvia, recursos, encargado, herrera
-- **T06.S08 - Proyecto, clave, estrategico, alianza** (5 pal, 8 aristas, densidad 0.80): proyecto, clave, estrategico, alianza, emprendimiento
-- **T06.S09 - Instituto, colaboracion, convenio, tamaulipeco** (9 pal, 22 aristas, densidad 0.61): instituto, colaboracion, convenio, tamaulipeco, otorgar, jovenes, apertura, peraza, adquirir
-- **T06.S10 - Plan, materia, integracion, publica** (7 pal, 13 aristas, densidad 0.62): plan, materia, integracion, publica, favorecer, periodo, trinidad
-- **T06.S11 - Inicio, feria, comercial, armas** (6 pal, 10 aristas, densidad 0.67): inicio, feria, comercial, armas, cumplimiento, valentin
-- **T06.S12 - Oportunidad, inversion, conversar** (3 pal, 2 aristas, densidad 0.67): oportunidad, inversion, conversar
+### T06 (118 palabras, 12 sub-clusters)
+- **T06.S00 - Cultura, cultural, musica, arte** (12 pal, 49 aristas, densidad 0.74): cultura, cultural, musica, arte, llenar, festival, artistico, musical, danza, visual, agrupacion, influencer
+- **T06.S01 - Recibir, grupo, dif, gratuito** (28 pal, 164 aristas, densidad 0.43): recibir, grupo, dif, gratuito, dirigido, asociacion, rueda, resaltar, discapacidad, inclusion, silla, gerardo
+- **T06.S02 - Tradicion, fiesta, celebracion, union** (11 pal, 49 aristas, densidad 0.89): tradicion, fiesta, celebracion, union, navideno, espiritu, aniversario, desfile, espectacular, contento, simbolo
+- **T06.S03 - Evento, encuentro, reunir, asistente** (10 pal, 32 aristas, densidad 0.71): evento, encuentro, reunir, asistente, edicion, disciplina, benjamin, constancia, electronico, combo
+- **T06.S04 - Marco, recinto, ferial, feria** (7 pal, 19 aristas, densidad 0.91): marco, recinto, ferial, feria, pino, encendido, monumental
+- **T06.S05 - Actividad, estudiante, concluir, primaria** (12 pal, 37 aristas, densidad 0.56): actividad, estudiante, concluir, primaria, vacacion, regidor, lectura, intercambio, senalamiento, individual, cedillo, presencial
+- **T06.S06 - Tarde, noche, gusto, calido** (12 pal, 38 aristas, densidad 0.58): tarde, noche, gusto, calido, racha, durar, capitulo, negocios, alvaro, locatario, paquete, apartar
+- **T06.S07 - Plaza, presentacion, armas, estelar** (5 pal, 8 aristas, densidad 0.80): plaza, presentacion, armas, estelar, ozuluama
+- **T06.S08 - Disfrutar, experiencia, invitar, tampiquena** (4 pal, 6 aristas, densidad 1.00): disfrutar, experiencia, invitar, tampiquena
+- **T06.S09 - Compartir, especial, unir, amistad** (6 pal, 14 aristas, densidad 0.93): compartir, especial, unir, amistad, salazar, lazo
+- **T06.S10 - Flores, magico, omar, penal** (8 pal, 14 aristas, densidad 0.50): flores, magico, omar, penal, parroquia, felicito, alertar, espectador
+- **T06.S11 - Recorrido, visita, realizamos** (3 pal, 3 aristas, densidad 1.00): recorrido, visita, realizamos
 
-### T07 (109 palabras, 13 sub-clusters)
-- **T07.S00 - Civil, proteccion, bomberos, antonio** (11 pal, 44 aristas, densidad 0.80): civil, proteccion, bomberos, antonio, marin, cuida, flores, consejo, coordinador, certificacion, alvarado
-- **T07.S01 - Gobernador, americo, conjunto, resultado** (19 pal, 99 aristas, densidad 0.58): gobernador, americo, conjunto, resultado, cercano, reflejar, disciplina, bandera, expo, comite, entusiasmo, simbolo
-- **T07.S02 - Accion, prevencion, reforzar, coordinado** (12 pal, 41 aristas, densidad 0.62): accion, prevencion, reforzar, coordinado, preventivo, gob, dengue, llanta, jornadas, interinstitucional, violencias, indicador
-- **T07.S03 - Orden, operativo, guardia, elemento** (11 pal, 45 aristas, densidad 0.82): orden, operativo, guardia, elemento, vigilancia, permanente, valioso, corporacion, combate, incidente, arduo
-- **T07.S04 - Importante, cuidar, necesario, acta** (11 pal, 30 aristas, densidad 0.55): importante, cuidar, necesario, acta, triunfo, abusivo, escudo, correo, podcast, play, bandido
-- **T07.S05 - Sistema, poblacion, riesgo, oportuno** (13 pal, 51 aristas, densidad 0.65): sistema, poblacion, riesgo, oportuno, indicacion, reiterar, aviso, asimismo, cerrado, firmeza, obedecer, exhortar
-- **T07.S06 - Dependencia, respuesta, distinto, instruccion** (7 pal, 20 aristas, densidad 0.95): dependencia, respuesta, distinto, instruccion, capacidad, eficiente, ciudadana
-- **T07.S07 - Control, integral, cecodiat, especializado** (4 pal, 6 aristas, densidad 1.00): control, integral, cecodiat, especializado
-- **T07.S08 - Reunion, encabezado, seguimiento, institucional** (4 pal, 6 aristas, densidad 1.00): reunion, encabezado, seguimiento, institucional
-- **T07.S09 - Incluir, ruta, protocolo, pieza** (6 pal, 11 aristas, densidad 0.73): incluir, ruta, protocolo, pieza, llegada, afluencia
-- **T07.S10 - Herramienta, digital, aplicacion, artificial** (4 pal, 6 aristas, densidad 1.00): herramienta, digital, aplicacion, artificial
-- **T07.S11 - Voluntad, descanso, gallardo, brillir** (4 pal, 5 aristas, densidad 0.83): voluntad, descanso, gallardo, brillir
-- **T07.S12 - Integridad, salvaguardar, conducta** (3 pal, 2 aristas, densidad 0.67): integridad, salvaguardar, conducta
+### T07 (136 palabras, 12 sub-clusters)
+- **T07.S00 - Calor, maximo, aire, cielo** (10 pal, 37 aristas, densidad 0.82): calor, maximo, aire, cielo, sol, extremo, piel, ola, noreste, anticipar
+- **T07.S01 - Real, america, salvador, man** (12 pal, 33 aristas, densidad 0.50): real, america, salvador, man, bomba, latina, lomas, montana, morelia, good, destruido, let
+- **T07.S02 - Agua, mar, lagunario, reserva** (11 pal, 23 aristas, densidad 0.42): agua, mar, lagunario, reserva, dorado, abasto, infeccion, toro, localizado, numeroso, cria
+- **T07.S03 - Carolina, tomas, durango, escrito** (15 pal, 37 aristas, densidad 0.35): carolina, tomas, durango, escrito, renunciar, gimnasia, bronce, mosciatti, tlaxcala, toha, boric, modalidad
+- **T07.S04 - Victoria, campeon, festejo, transmitir** (17 pal, 47 aristas, densidad 0.35): victoria, campeon, festejo, transmitir, transmision, cine, hijas, hrs, ademas, entretenimiento, iluminacion, seleccionado
+- **T07.S05 - Papa, recuerdo, pertenecer, che** (15 pal, 51 aristas, densidad 0.49): papa, recuerdo, pertenecer, che, original, flor, abuela, chapultepec, novia, beisbol, revolucionario, roma
+- **T07.S06 - Maestro, dirigir, salida, profesor** (13 pal, 33 aristas, densidad 0.42): maestro, dirigir, salida, profesor, aclarar, aula, banderazo, literario, camaron, aplicado, literatura, orquesta
+- **T07.S07 - Iglesia, amado, jesucristo, misa** (11 pal, 29 aristas, densidad 0.53): iglesia, amado, jesucristo, misa, descanse, silvia, ritual, brillir, elizabeth, acompane, antiguedad
+- **T07.S08 - Bajar, idiota, terrible, piedad** (12 pal, 31 aristas, densidad 0.47): bajar, idiota, terrible, piedad, acuerdir, proteja, omiso, util, oigar, preocupir, brujeria, colapsado
+- **T07.S09 - Mensaje, difundir, cubano, humanismo** (10 pal, 23 aristas, densidad 0.51): mensaje, difundir, cubano, humanismo, magia, dominicana, cristina, zamora, dicha, multimedios
+- **T07.S10 - Tierra, batalla, independencia, conmemorar** (7 pal, 13 aristas, densidad 0.62): tierra, batalla, independencia, conmemorar, culto, lodo, luchadora
+- **T07.S11 - Kongjiro, thomaskong, tthomastc** (3 pal, 3 aristas, densidad 1.00): kongjiro, thomaskong, tthomastc
 
-### T08 (162 palabras, 16 sub-clusters)
-- **T08.S00 - Alimento, genial, sonrisa, positivo** (19 pal, 77 aristas, densidad 0.45): alimento, genial, sonrisa, positivo, comision, contacto, envidia, reto, noble, divertir, industria, placer
-- **T08.S01 - Negro, alli, provocar, tren** (15 pal, 56 aristas, densidad 0.53): negro, alli, provocar, tren, ciento, checar, pinches, villa, inundacion, aguilar, volado, monstruo
-- **T08.S02 - Mexicana, revolucion, desfile, cuarta** (10 pal, 24 aristas, densidad 0.53): mexicana, revolucion, desfile, cuarta, preservacion, fuir, nancy, columna, grupos, publicado
-- **T08.S03 - Verde, area, arbol, sembrar** (7 pal, 17 aristas, densidad 0.81): verde, area, arbol, sembrar, palo, deplorable, anular
-- **T08.S04 - Bendigar, inutil, complice, cuidir** (13 pal, 42 aristas, densidad 0.54): bendigar, inutil, complice, cuidir, disfruten, carajo, pariente, cono, veracruzano, ordaz, princesa, fatal
-- **T08.S05 - Medio, ambiente, acceso, estatales** (5 pal, 8 aristas, densidad 0.80): medio, ambiente, acceso, estatales, sobresalir
-- **T08.S06 - Libro, rosa, stand, porunavidasexy** (7 pal, 14 aristas, densidad 0.67): libro, rosa, stand, porunavidasexy, texto, fantasia, explanada
-- **T08.S07 - Demasiado, sentar, oler, people** (13 pal, 36 aristas, densidad 0.46): demasiado, sentar, oler, people, menso, art, debate, help, muchacha, thanks, still, cinica
-- **T08.S08 - Quedar, cuanta, justificar, modos** (9 pal, 16 aristas, densidad 0.44): quedar, cuanta, justificar, modos, troca, secundaria, procedimiento, margen, bernal
-- **T08.S09 - Hidalgo, casas, mante, armada** (8 pal, 11 aristas, densidad 0.39): hidalgo, casas, mante, armada, falsa, sexta, semaforo, restablecer
-- **T08.S10 - Peligroso, lengua, amparo, mentirosa** (12 pal, 34 aristas, densidad 0.52): peligroso, lengua, amparo, mentirosa, miente, mira, ciro, enfrentamiento, perverso, parecierar, vulgar, tras
-- **T08.S11 - Trabajador, diputado, larga, aportar** (8 pal, 16 aristas, densidad 0.57): trabajador, diputado, larga, aportar, apoyamos, sombrero, sale, disfrazar
-- **T08.S12 - Mexicanos, radio, felices, fracaso** (11 pal, 19 aristas, densidad 0.34): mexicanos, radio, felices, fracaso, americana, contribucion, trabajadores, ligado, urna, anticipado, manzana
-- **T08.S13 - Expresidente, avila, socialista, fidel** (12 pal, 25 aristas, densidad 0.38): expresidente, avila, socialista, fidel, adolfo, sancionar, seccion, camacho, perimetral, coincidencia, sustitucion, carrizales
-- **T08.S14 - Afuera, nepotismo, zacatecas, terapia** (7 pal, 13 aristas, densidad 0.62): afuera, nepotismo, zacatecas, terapia, golden, tepic, molly
-- **T08.S15 - Existir, extranar, chismoso, pense** (6 pal, 10 aristas, densidad 0.67): existir, extranar, chismoso, pense, moises, cosechar
+### T08 (163 palabras, 23 sub-clusters)
+- **T08.S00 - Robar, carcel, rata, asta** (9 pal, 29 aristas, densidad 0.81): robar, carcel, rata, asta, robado, parasito, traicionar, tranza, vear
+- **T08.S01 - Cualquiera, donde, guerra, confianza** (14 pal, 48 aristas, densidad 0.53): cualquiera, donde, guerra, confianza, ideologia, dron, pantalla, herida, fundacion, individuo, lema, voluntario
+- **T08.S02 - Verde, blanco, aprender, comun** (11 pal, 41 aristas, densidad 0.74): verde, blanco, aprender, comun, arbol, ensenar, sembrar, campos, temer, ejido, asfalto
+- **T08.S03 - Creer, argentina, puras, china** (12 pal, 36 aristas, densidad 0.55): creer, argentina, puras, china, avion, diablo, casualidad, argentino, literal, pariente, mmds, incrustado
+- **T08.S04 - Miedo, aparte, gastar, porfavor** (16 pal, 68 aristas, densidad 0.57): miedo, aparte, gastar, porfavor, osea, neta, salio, asustar, onda, desmadre, divino, puto
+- **T08.S05 - Cosa, etc, estupidez, americano** (10 pal, 29 aristas, densidad 0.64): cosa, etc, estupidez, americano, reportaje, reves, hueso, ovni, arco, ponce
+- **T08.S06 - Gente, ala, reaccionar, punta** (4 pal, 5 aristas, densidad 0.83): gente, ala, reaccionar, punta
+- **T08.S07 - Mirar, mentiroso, inteligente, moreno** (11 pal, 29 aristas, densidad 0.53): mirar, mentiroso, inteligente, moreno, internet, amo, miren, carteles, helicoptero, magnifico, guillermo
+- **T08.S08 - Entender, importar, quot, oir** (7 pal, 15 aristas, densidad 0.71): entender, importar, quot, oir, chocolate, oigan, pedido
+- **T08.S09 - Deberiar, chino, chile, vendar** (6 pal, 11 aristas, densidad 0.73): deberiar, chino, chile, vendar, probar, irregular
+- **T08.S10 - Ojala, porque, opinar, pesimo** (7 pal, 20 aristas, densidad 0.95): ojala, porque, opinar, pesimo, pendejada, abandonado, abuelo
+- **T08.S11 - Puro, pobre, podrido** (3 pal, 3 aristas, densidad 1.00): puro, pobre, podrido
+- **T08.S12 - Perro, aser, rato, pinch** (6 pal, 14 aristas, densidad 0.93): perro, aser, rato, pinch, mata, ubeir
+- **T08.S13 - Mano, augusto, lavar, actitud** (7 pal, 12 aristas, densidad 0.57): mano, augusto, lavar, actitud, acordar, marte, silva
+- **T08.S14 - Subir, tirar, rapido, manejar** (6 pal, 8 aristas, densidad 0.53): subir, tirar, rapido, manejar, ring, medrano
+- **T08.S15 - Moren, ignorante, fila, desgraciado** (5 pal, 9 aristas, densidad 0.90): moren, ignorante, fila, desgraciado, relato
+- **T08.S16 - Duro, pelear, plata, apellido** (5 pal, 9 aristas, densidad 0.90): duro, pelear, plata, apellido, olviden
+- **T08.S17 - Salir, letra, jurar, psicologico** (4 pal, 5 aristas, densidad 0.83): salir, letra, jurar, psicologico
+- **T08.S18 - Unico, insulto, acerca, argumentar** (5 pal, 7 aristas, densidad 0.70): unico, insulto, acerca, argumentar, cancelacion
+- **T08.S19 - Empleado, cansado, refineria, rayo** (5 pal, 6 aristas, densidad 0.60): empleado, cansado, refineria, rayo, garantia
+- **T08.S20 - Dema, abajo, ningun** (3 pal, 3 aristas, densidad 1.00): dema, abajo, ningun
+- **T08.S21 - Culpa, abusar, secreto** (3 pal, 2 aristas, densidad 0.67): culpa, abusar, secreto
+- **T08.S22 - Disque, yar, violar, codigo** (4 pal, 6 aristas, densidad 1.00): disque, yar, violar, codigo
 
-### T09 (134 palabras, 16 sub-clusters)
-- **T09.S00 - Llamar, argentina, marido, patetico** (9 pal, 23 aristas, densidad 0.64): llamar, argentina, marido, patetico, tiktok, recien, demandar, mamir, portugal
-- **T09.S01 - Pio, tonka, femenil, tomicic** (9 pal, 17 aristas, densidad 0.47): pio, tonka, femenil, tomicic, zurda, look, potente, moyano, moni
-- **T09.S02 - Chile, mar, ovni, alien** (12 pal, 27 aristas, densidad 0.41): chile, mar, ovni, alien, chileno, queso, mole, serca, plazo, ataquir, tqm, verano
-- **T09.S03 - Camion, ropa, caliente, recolector** (7 pal, 12 aristas, densidad 0.57): camion, ropa, caliente, recolector, helicoptero, rivera, estirar
-- **T09.S04 - Escribir, letra, gol, anotar** (11 pal, 24 aristas, densidad 0.44): escribir, letra, gol, anotar, agradecido, literal, pastel, morado, echeverria, distincion, remember
-- **T09.S05 - Mierda, fraude, trafico, candidato** (9 pal, 20 aristas, densidad 0.56): mierda, fraude, trafico, candidato, provecho, quiza, granja, reeleccion, lavin
-- **T09.S06 - Mirar, avion, esque, nose** (7 pal, 12 aristas, densidad 0.57): mirar, avion, esque, nose, sumiso, mentado, pesito
-- **T09.S07 - Velocidad, objeto, insulto, exceso** (10 pal, 18 aristas, densidad 0.40): velocidad, objeto, insulto, exceso, adn, caza, disponible, asustado, ultimahora, moncayo
-- **T09.S08 - Nefasto, colocar, energetico, divino** (9 pal, 20 aristas, densidad 0.56): nefasto, colocar, energetico, divino, ofrenda, llama, retroceso, apostol, clasificacion
-- **T09.S09 - Fingir, ciudadmadero, enlace, citar** (7 pal, 13 aristas, densidad 0.62): fingir, ciudadmadero, enlace, citar, ejecutar, arroyo, max
-- **T09.S10 - Falso, mentir, izquierda, disponer** (4 pal, 5 aristas, densidad 0.83): falso, mentir, izquierda, disponer
-- **T09.S11 - Contestar, hipocresia, observar, referir** (8 pal, 18 aristas, densidad 0.64): contestar, hipocresia, observar, referir, coger, soberbia, acerca, oigan
-- **T09.S12 - Devolver, vos, prometer, mina** (7 pal, 12 aristas, densidad 0.57): devolver, vos, prometer, mina, sonreir, pampita, ternura
-- **T09.S13 - Nombrar, uresti, twitter, repente** (10 pal, 16 aristas, densidad 0.36): nombrar, uresti, twitter, repente, disfrute, vocal, ing, tulipan, incansablemente, lio
-- **T09.S14 - Causar, ocasion, soportar, morelia** (6 pal, 9 aristas, densidad 0.60): causar, ocasion, soportar, morelia, camila, atentado
-- **T09.S15 - Base, predio, alcanza, juanita** (9 pal, 11 aristas, densidad 0.31): base, predio, alcanza, juanita, ocampo, adicional, formal, conmemoramos, magdalena
+### T09 (126 palabras, 13 sub-clusters)
+- **T09.S00 - Mexico, pais, mexicano, viva** (5 pal, 10 aristas, densidad 1.00): mexico, pais, mexicano, viva, inegi
+- **T09.S01 - Claudia, sheinbaum, pardo, dra** (8 pal, 25 aristas, densidad 0.89): claudia, sheinbaum, pardo, dra, sheimbaum, doctora, gabinete, porra
+- **T09.S02 - Jalisco, california, puebla, tabasco** (17 pal, 86 aristas, densidad 0.63): jalisco, california, puebla, tabasco, guanajuato, michoacan, guadalajara, chihuahua, oaxaca, zocalo, tijuana, chiapas
+- **T09.S03 - Frontera, territorio, bravo, presidentar** (18 pal, 83 aristas, densidad 0.54): frontera, territorio, bravo, presidentar, grado, especialmente, ingresar, inundacion, informado, fresco, sierra, potencial
+- **T09.S04 - Veracruz, gobernadora, nahle, sensacion** (8 pal, 18 aristas, densidad 0.64): veracruz, gobernadora, nahle, sensacion, esposo, precidenta, sanar, maquina
+- **T09.S05 - Amlo, obrador, mexicanos, pemex** (6 pal, 15 aristas, densidad 1.00): amlo, obrador, mexicanos, pemex, andres, mananera
+- **T09.S06 - Desaparecer, vivienda, propiedad, patron** (12 pal, 38 aristas, densidad 0.58): desaparecer, vivienda, propiedad, patron, infonavit, mitad, ejemplar, invasor, certeza, inmediatamente, sucedido, desplome
+- **T09.S07 - Delincuencia, movimiento, inseguridad, revolucion** (11 pal, 40 aristas, densidad 0.73): delincuencia, movimiento, inseguridad, revolucion, prianistas, campesino, gobernante, felipe, priista, balazo, hidrico
+- **T09.S08 - Viejo, tren, pura, funcionar** (10 pal, 33 aristas, densidad 0.73): viejo, tren, pura, funcionar, corto, lagartija, consumir, onu, decena, carretero
+- **T09.S09 - Linea, tramite, telefono, anuncio** (11 pal, 30 aristas, densidad 0.55): linea, tramite, telefono, anuncio, localizar, credencial, distribucion, trasero, indispensable, prestamo, estacionado
+- **T09.S10 - Unidos, droga, mercancia, intervenir** (7 pal, 15 aristas, densidad 0.71): unidos, droga, mercancia, intervenir, tratado, oriente, isla
+- **T09.S11 - Reportero, narcogobierno, jente, medicamento** (7 pal, 18 aristas, densidad 0.86): reportero, narcogobierno, jente, medicamento, mentiras, hagan, mantenido
+- **T09.S12 - Monreal, ricardo, delgado, pilar** (6 pal, 9 aristas, densidad 0.60): monreal, ricardo, delgado, pilar, esperado, adquirido
 
-### T10 (160 palabras, 19 sub-clusters)
-- **T10.S00 - Judicial, reforma, juez, constitucion** (20 pal, 105 aristas, densidad 0.55): judicial, reforma, juez, constitucion, electoral, ministro, superior, juicio, norma, tribunal, constitucional, ministra
-- **T10.S01 - Resultar, accidente, vehiculo, conductor** (18 pal, 94 aristas, densidad 0.61): resultar, accidente, vehiculo, conductor, via, urgente, escapar, altura, tragedia, conducir, motocicleta, asaltar
-- **T10.S02 - Defender, voz, dignidad, agente** (11 pal, 32 aristas, densidad 0.58): defender, voz, dignidad, agente, pretender, alzar, injusticia, valentia, secuestrado, maquina, conversacion
-- **T10.S03 - Permitir, lograr, garcia, oficina** (11 pal, 36 aristas, densidad 0.66): permitir, lograr, garcia, oficina, confianza, conflicto, captura, pacifico, torre, maya, panteon
-- **T10.S04 - Deber, animal, reaccionar, tiro** (8 pal, 17 aristas, densidad 0.61): deber, animal, reaccionar, tiro, maltrato, arco, tipejo, caballo
-- **T10.S05 - Ley, derecho, aplicar, medida** (4 pal, 6 aristas, densidad 1.00): ley, derecho, aplicar, medida
-- **T10.S06 - Politico, investigar, preso, marino** (9 pal, 16 aristas, densidad 0.44): politico, investigar, preso, marino, cliente, inservible, corrompido, jugada, cuidamos
-- **T10.S07 - Justicia, exigir, detenido, prision** (6 pal, 12 aristas, densidad 0.80): justicia, exigir, detenido, prision, pongansar, contundente
-- **T10.S08 - Moral, companero, esposo, esposa** (11 pal, 35 aristas, densidad 0.64): moral, companero, esposo, esposa, acusar, abogado, muchacho, persecucion, instante, asesor, morbo
-- **T10.S09 - Defensa, derechos, humanos, conciencia** (7 pal, 13 aristas, densidad 0.62): defensa, derechos, humanos, conciencia, distrito, licenciado, golpeado
-- **T10.S10 - Bastar, golpe, sol, guardar** (11 pal, 30 aristas, densidad 0.55): bastar, golpe, sol, guardar, calor, romero, inmobiliario, comunicador, durango, prestamo, impresion
-- **T10.S11 - Parar, mando, imponer, contrario** (10 pal, 23 aristas, densidad 0.51): parar, mando, imponer, contrario, opositor, original, tecnologico, complejo, monitoreo, refuerza
-- **T10.S12 - Ciudadano, funcionario, resolver, exterior** (6 pal, 11 aristas, densidad 0.73): ciudadano, funcionario, resolver, exterior, cartera, circuito
-- **T10.S13 - Atras, dejen, echar, particular** (7 pal, 17 aristas, densidad 0.81): atras, dejen, echar, particular, renunciar, grosero, financiar
-- **T10.S14 - Respeto, respetar, bravo** (3 pal, 3 aristas, densidad 1.00): respeto, respetar, bravo
-- **T10.S15 - Abuso, utilizar, maldad, temer** (5 pal, 8 aristas, densidad 0.80): abuso, utilizar, maldad, temer, capacitado
-- **T10.S16 - Gobernadora, desastre, violacion, potencia** (4 pal, 5 aristas, densidad 0.83): gobernadora, desastre, violacion, potencia
-- **T10.S17 - Dano, demonio, escoria, invocar** (5 pal, 7 aristas, densidad 0.70): dano, demonio, escoria, invocar, iluminacion
-- **T10.S18 - Permiso, pendeja, preparacion, calma** (4 pal, 4 aristas, densidad 0.67): permiso, pendeja, preparacion, calma
+### T10 (160 palabras, 14 sub-clusters)
+- **T10.S00 - Gonzalez, alcalde, robledo, erasmo** (11 pal, 40 aristas, densidad 0.73): gonzalez, alcalde, robledo, erasmo, armando, manriquez, segura, deportista, participe, cuerda, grandeza
+- **T10.S01 - Policia, robo, armado, agente** (14 pal, 60 aristas, densidad 0.66): policia, robo, armado, agente, culpar, desastre, peligroso, patrulla, policias, enfrentamiento, policiaco, llanta
+- **T10.S02 - Presidente, president, bla, donald** (14 pal, 52 aristas, densidad 0.57): presidente, president, bla, donald, dictador, hipocresia, cuanta, pruebas, habla, gobiernos, decidido, deportar
+- **T10.S03 - Periodista, morenista, ahorita, miserable** (21 pal, 89 aristas, densidad 0.42): periodista, morenista, ahorita, miserable, nieto, noticiero, york, burro, despedir, critica, torre, comunicador
+- **T10.S04 - Llamado, moral, peligro, salinas** (19 pal, 72 aristas, densidad 0.42): llamado, moral, peligro, salinas, mandir, corriente, reiterar, roja, fauna, respetuoso, debate, vigente
+- **T10.S05 - Correr, repetir, hambre, invasion** (12 pal, 42 aristas, densidad 0.64): correr, repetir, hambre, invasion, lamentablemente, coraje, culo, delo, echo, guardias, ultimamente, meza
+- **T10.S06 - Imaginar, obvio, metar, supuestamente** (13 pal, 41 aristas, densidad 0.53): imaginar, obvio, metar, supuestamente, encarcelar, loret, morenarcos, debeer, chavo, hdspm, guatemala, mugrena
+- **T10.S07 - Facil, minuto, levantar, celular** (6 pal, 13 aristas, densidad 0.87): facil, minuto, levantar, celular, clasico, tovar
+- **T10.S08 - Atacar, basta, contratar, extorsionador** (12 pal, 30 aristas, densidad 0.46): atacar, basta, contratar, extorsionador, secuestrador, indignante, humillar, patrias, tirania, demandar, apoir, afrontar
+- **T10.S09 - Seguro, tranquilidad, capacitado, universitario** (5 pal, 5 aristas, densidad 0.50): seguro, tranquilidad, capacitado, universitario, ininterrumpido
+- **T10.S10 - Siquiera, seguramente, terror, reportera** (9 pal, 25 aristas, densidad 0.69): siquiera, seguramente, terror, reportera, bruja, volante, lenguaje, citar, art
+- **T10.S11 - Conferencia, emitir, impartir, centeno** (9 pal, 12 aristas, densidad 0.33): conferencia, emitir, impartir, centeno, aprehension, fernanda, acudar, rectora, profesionista
+- **T10.S12 - Jajajajaja, monton, aplaudir, bendito** (7 pal, 15 aristas, densidad 0.71): jajajajaja, monton, aplaudir, bendito, absoluto, malvado, consigna
+- **T10.S13 - Asesino, criticar, gordo, andir** (6 pal, 11 aristas, densidad 0.73): asesino, criticar, gordo, andir, impune, erradicar
 
-### T11 (108 palabras, 18 sub-clusters)
-- **T11.S00 - Gobierno, pais, pueblo, pardo** (6 pal, 13 aristas, densidad 0.87): gobierno, pais, pueblo, pardo, jefa, desecho
-- **T11.S01 - Pagar, dinero, comprar, impuesto** (9 pal, 31 aristas, densidad 0.86): pagar, dinero, comprar, impuesto, caro, pension, deuda, demanda, garantia
-- **T11.S02 - Eeuu, recurso, interes, vivienda** (11 pal, 44 aristas, densidad 0.80): eeuu, recurso, interes, vivienda, invadir, grave, infonavit, recuperar, terreno, abandonado, automovil
-- **T11.S03 - Robar, corrupcion, rata, robado** (5 pal, 10 aristas, densidad 1.00): robar, corrupcion, rata, robado, escandalo
-- **T11.S04 - Mentira, enganar, porqueria, puras** (8 pal, 23 aristas, densidad 0.82): mentira, enganar, porqueria, puras, narcogobierno, mentiras, macuspano, inscripcion
-- **T11.S05 - Minimo, mayoria, salario, yar** (6 pal, 14 aristas, densidad 0.93): minimo, mayoria, salario, yar, sat, politicos
-- **T11.S06 - Amlo, etc, pemex, petroleo** (4 pal, 6 aristas, densidad 1.00): amlo, etc, pemex, petroleo
-- **T11.S07 - Vender, patria, traidor** (3 pal, 3 aristas, densidad 1.00): vender, patria, traidor
-- **T11.S08 - Jajajaja, aparte, hambre, deir** (7 pal, 17 aristas, densidad 0.81): jajajaja, aparte, hambre, deir, andir, desgraciado, medir
-- **T11.S09 - Realidad, triste, cuarto, simple** (7 pal, 16 aristas, densidad 0.76): realidad, triste, cuarto, simple, electrico, dulce, pinos
-- **T11.S10 - Prian, lastima, sheimbaum, tercero** (6 pal, 14 aristas, densidad 0.93): prian, lastima, sheimbaum, tercero, pagado, tapadera
-- **T11.S11 - Pobre, verguenza, estupidez** (3 pal, 3 aristas, densidad 1.00): pobre, verguenza, estupidez
-- **T11.S12 - Negocio, mencionar, estilo, principio** (6 pal, 15 aristas, densidad 1.00): negocio, mencionar, estilo, principio, dolares, vendar
-- **T11.S13 - Cuba, derecha, dictadura, enemigo** (5 pal, 9 aristas, densidad 0.90): cuba, derecha, dictadura, enemigo, vear
-- **T11.S14 - Dueno, empleado, culpable, vean** (6 pal, 13 aristas, densidad 0.87): dueno, empleado, culpable, vean, socio, issste
-- **T11.S15 - Mala, sabio, senador, privilegio** (6 pal, 12 aristas, densidad 0.80): mala, sabio, senador, privilegio, disfrazado, admirable
-- **T11.S16 - Pie, bla, odio, zapato** (4 pal, 6 aristas, densidad 1.00): pie, bla, odio, zapato
-- **T11.S17 - Servir, extranjero, urgir** (3 pal, 3 aristas, densidad 1.00): servir, extranjero, urgir
+### T11 (77 palabras, 9 sub-clusters)
+- **T11.S00 - Feliz, lleno, alegria, desear** (11 pal, 48 aristas, densidad 0.87): feliz, lleno, alegria, desear, cumpleanos, esperanza, navidad, inolvidable, sonrisa, rodeado, navidena
+- **T11.S01 - Hermoso, bendicion, saludo, saludos** (10 pal, 40 aristas, densidad 0.89): hermoso, bendicion, saludo, saludos, abrazo, bendigar, bendiciones, bendecido, animo, laborar
+- **T11.S02 - Columna, respetar, conversacion, resumen** (5 pal, 7 aristas, densidad 0.70): columna, respetar, conversacion, resumen, enteratir
+- **T11.S03 - Esfuerzo, orgullo, agradecer, dedicacion** (19 pal, 92 aristas, densidad 0.54): esfuerzo, orgullo, agradecer, dedicacion, logro, unido, liderazgo, felicitar, entusiasmo, convencido, gabriela, alejandra
+- **T11.S04 - Gracias, apoyar, gracia, acercar** (10 pal, 26 aristas, densidad 0.58): gracias, apoyar, gracia, acercar, doctor, solucionar, enojar, coladera, recalcar, atlantico
+- **T11.S05 - Felicidad, felicidades, lic** (3 pal, 3 aristas, densidad 1.00): felicidad, felicidades, lic
+- **T11.S06 - Muchisimo, ambiental, chayote, curioso** (11 pal, 17 aristas, densidad 0.31): muchisimo, ambiental, chayote, curioso, asamblea, quiza, militante, jacinto, aires, contaminacion, ciudadvictoria
+- **T11.S07 - Querido, joel, abundante, villegas** (4 pal, 4 aristas, densidad 0.67): querido, joel, abundante, villegas
+- **T11.S08 - Exito, profesion, enamorar** (3 pal, 2 aristas, densidad 0.67): exito, profesion, enamorar
 
-### T12 (159 palabras, 12 sub-clusters)
-- **T12.S00 - President, like, youtube, thank** (53 pal, 636 aristas, densidad 0.46): president, like, youtube, thank, get, see, know, much, day, even, going, new
-- **T12.S01 - Lopez, obrador, prueba, fiscal** (16 pal, 65 aristas, densidad 0.54): lopez, obrador, prueba, fiscal, andres, ilegal, andy, presunto, termino, victor, vuelo, irma
-- **T12.S02 - Claudia, sheinbaum, transformacion, dra** (6 pal, 10 aristas, densidad 0.67): claudia, sheinbaum, transformacion, dra, oreja, empate
-- **T12.S03 - Trump, unidos, gringo, frontera** (11 pal, 37 aristas, densidad 0.67): trump, unidos, gringo, frontera, donald, narcotrafico, migrant, dron, imperio, cocaina, dejes
-- **T12.S04 - Morena, pri, sexenio, norona** (10 pal, 26 aristas, densidad 0.58): morena, pri, sexenio, norona, kks, ebrard, manda, ayotzinapa, mediocres, bronce
-- **T12.S05 - Mexicano, ejercito, soberano, york** (8 pal, 19 aristas, densidad 0.68): mexicano, ejercito, soberano, york, cubano, tipico, presionar, psicologia
-- **T12.S06 - Presidente, mananera, actual, mandato** (15 pal, 40 aristas, densidad 0.38): presidente, mananera, actual, mandato, declarar, daniel, atte, tlatelolco, olvidado, herida, autoritarismo, decreto
-- **T12.S07 - Crimen, combatir, pertenecer, humanidad** (15 pal, 46 aristas, densidad 0.44): crimen, combatir, pertenecer, humanidad, tardar, tortilla, chingada, sindicato, genio, represion, mananero, cabecilla
-- **T12.S08 - Playa, puerto, prianistas, gobernante** (8 pal, 18 aristas, densidad 0.64): playa, puerto, prianistas, gobernante, fuero, balazo, miramar, gabriel
-- **T12.S09 - Narco, soltar, amenazar, mamada** (6 pal, 10 aristas, densidad 0.67): narco, soltar, amenazar, mamada, criminales, nexo
-- **T12.S10 - Dama, marchar, hierro** (3 pal, 3 aristas, densidad 1.00): dama, marchar, hierro
-- **T12.S12 - Eliminar, erario, barbaro, porra** (5 pal, 9 aristas, densidad 0.90): eliminar, erario, barbaro, porra, recaudacion
+### T12 (132 palabras, 12 sub-clusters)
+- **T12.S00 - Maria, corina, machado, venezuela** (8 pal, 27 aristas, densidad 0.96): maria, corina, machado, venezuela, maduro, regimen, terremoto, democratico
+- **T12.S01 - Pedir, volver, orden, negar** (8 pal, 18 aristas, densidad 0.64): pedir, volver, orden, negar, llama, referencia, restriccion, facundo
+- **T12.S02 - Trump, eeuu, petroleo, rubio** (16 pal, 56 aristas, densidad 0.47): trump, eeuu, petroleo, rubio, israel, extrano, pelo, florida, recien, miami, telemundo, negociacion
+- **T12.S03 - Imagen, foto, show, estilo** (20 pal, 81 aristas, densidad 0.43): imagen, foto, show, estilo, vestido, milagro, visto, obviamente, cabello, chavez, lucir, pintar
+- **T12.S04 - Fuerza, alla, valiente, gasolina** (11 pal, 33 aristas, densidad 0.60): fuerza, alla, valiente, gasolina, heroe, brazo, danar, caido, beso, microfono, tweet
+- **T12.S05 - Mundo, mil, par, masivo** (11 pal, 26 aristas, densidad 0.47): mundo, mil, par, masivo, exactamente, entrevistar, milei, morder, fanatico, fino, negligencia
+- **T12.S06 - Leer, decidir, escribir, entrevista** (12 pal, 38 aristas, densidad 0.58): leer, decidir, escribir, entrevista, recomendar, barrio, leyenda, nicaragua, fijar, tesoro, tepito, portugal
+- **T12.S07 - Vivo, misericordia, interno, senal** (13 pal, 41 aristas, densidad 0.53): vivo, misericordia, interno, senal, presumir, regla, soler, maldad, quiero, patetico, paralelo, arduo
+- **T12.S08 - Resto, sorprender, tenia, romero** (18 pal, 55 aristas, densidad 0.36): resto, sorprender, tenia, romero, narrativa, conciencia, santiago, captura, testimonio, transportar, popularidad, terrestre
+- **T12.S09 - Necesario, preso, bloquear, marchar** (8 pal, 15 aristas, densidad 0.54): necesario, preso, bloquear, marchar, liberacion, ministerial, nocturno, atropellamiento
+- **T12.S10 - Lucha, resistencia, depresion, desperdicio** (4 pal, 3 aristas, densidad 0.50): lucha, resistencia, depresion, desperdicio
+- **T12.S11 - Dictadura, represion, edificios** (3 pal, 2 aristas, densidad 0.67): dictadura, represion, edificios
 
-### T13 (146 palabras, 20 sub-clusters)
-- **T13.S00 - Madre, hijo, padre, dolor** (7 pal, 18 aristas, densidad 0.86): madre, hijo, padre, dolor, cielo, jesucristo, novio
-- **T13.S01 - Dejar, pedir, par, porfavor** (5 pal, 8 aristas, densidad 0.80): dejar, pedir, par, porfavor, hagan
-- **T13.S02 - Alla, oposicion, amado, vivar** (16 pal, 65 aristas, densidad 0.54): alla, oposicion, amado, vivar, presidencia, resto, negar, rendir, coraje, xochitl, paisano, narrativa
-- **T13.S03 - Vida, nacer, suerte, energia** (7 pal, 14 aristas, densidad 0.67): vida, nacer, suerte, energia, rosario, mision, presidento
-- **T13.S04 - Morir, olvidar, minuto, mente** (10 pal, 25 aristas, densidad 0.56): morir, olvidar, minuto, mente, peligro, ola, prohibido, frank, lucas, reptil
-- **T13.S05 - Hombre, jamas, imaginar, doler** (8 pal, 17 aristas, densidad 0.61): hombre, jamas, imaginar, doler, indigena, arrastrar, extremo, mogolico
-- **T13.S06 - Gobernar, republica, soberania, doctora** (9 pal, 25 aristas, densidad 0.69): gobernar, republica, soberania, doctora, traicionar, diaz, actitud, fallar, querida
-- **T13.S07 - Vivo, cabeza, asesinar, decada** (6 pal, 12 aristas, densidad 0.80): vivo, cabeza, asesinar, decada, peru, peruano
-- **T13.S08 - Tio, obligar, basta, paro** (12 pal, 39 aristas, densidad 0.59): tio, obligar, basta, paro, manos, vacio, naci, animar, moda, huevon, extorsionador, progresar
-- **T13.S09 - Tocar, herido, cubrir, encarcelar** (11 pal, 28 aristas, densidad 0.51): tocar, herido, cubrir, encarcelar, parejo, senoro, shembaum, elegante, borracho, ventana, bordo
-- **T13.S10 - Merecer, alma, luna, combustible** (8 pal, 22 aristas, densidad 0.79): merecer, alma, luna, combustible, preparado, desaparicion, amigos, callado
-- **T13.S11 - Mama, papa, asustar, habilidad** (5 pal, 8 aristas, densidad 0.80): mama, papa, asustar, habilidad, revivir
-- **T13.S12 - Dema, edad, gloria, caber** (7 pal, 17 aristas, densidad 0.81): dema, edad, gloria, caber, volar, caido, amante
-- **T13.S13 - Voto, amo, granhermano, perfil** (5 pal, 9 aristas, densidad 0.90): voto, amo, granhermano, perfil, mona
-- **T13.S14 - Pendiente, profundo, preocupar, muchisimo** (7 pal, 17 aristas, densidad 0.81): pendiente, profundo, preocupar, muchisimo, taco, cargar, pintar
-- **T13.S15 - Llorar, ensenar, misericordia, hermosa** (6 pal, 10 aristas, densidad 0.67): llorar, ensenar, misericordia, hermosa, lagrima, exactamente
-- **T13.S16 - Hermano, viajar, regreso, ustedes** (6 pal, 9 aristas, densidad 0.60): hermano, viajar, regreso, ustedes, estar, agosto
-- **T13.S17 - Nombre, silencio, borrar** (3 pal, 3 aristas, densidad 1.00): nombre, silencio, borrar
-- **T13.S18 - Mano, destino, corregir, recomendacion** (4 pal, 4 aristas, densidad 0.67): mano, destino, corregir, recomendacion
-- **T13.S19 - Vuelta, estudiar, maestra, enterar** (4 pal, 5 aristas, densidad 0.83): vuelta, estudiar, maestra, enterar
+### T13 (57 palabras, 7 sub-clusters)
+- **T13.S00 - Tampico, ciudad, madero, bache** (5 pal, 9 aristas, densidad 0.90): tampico, ciudad, madero, bache, inclusivo
+- **T13.S01 - Altamira, matamoros, reynosa, cdvictoria** (7 pal, 21 aristas, densidad 1.00): altamira, matamoros, reynosa, cdvictoria, nuevolaredo, cdmadero, ciudadmadero
+- **T13.S02 - Tamaulipas, sur, region, intenso** (6 pal, 14 aristas, densidad 0.93): tamaulipas, sur, region, intenso, prever, energetico
+- **T13.S03 - Manana, sabado, cdmx, concierto** (17 pal, 61 aristas, densidad 0.45): manana, sabado, cdmx, concierto, anunciar, definir, madrugada, explicacion, top, miss, universo, clandestino
+- **T13.S04 - Puente, auto, previo, gas** (12 pal, 23 aristas, densidad 0.35): puente, auto, previo, gas, raul, cruce, moto, coleccion, agresor, camisa, decomisar, indignacion
+- **T13.S05 - Paseo, embarcacion, cortadura, nautico** (5 pal, 10 aristas, densidad 1.00): paseo, embarcacion, cortadura, nautico, procesion
+- **T13.S06 - Vazquez, ramos, adrian** (3 pal, 2 aristas, densidad 0.67): vazquez, ramos, adrian
 
-### T14 (124 palabras, 17 sub-clusters)
-- **T14.S00 - Querer, gente, ojala, irapuato** (4 pal, 6 aristas, densidad 1.00): querer, gente, ojala, irapuato
-- **T14.S01 - Gracia, super, lindo, detalle** (14 pal, 49 aristas, densidad 0.54): gracia, super, lindo, detalle, sencillo, cocina, monico, maravilla, mms, linda, nena, decoracion
-- **T14.S02 - Gustar, amar, hola, encantar** (7 pal, 19 aristas, densidad 0.91): gustar, amar, hola, encantar, bomba, dela, mia
-- **T14.S03 - Sentir, manana, peso, quejar** (8 pal, 20 aristas, densidad 0.71): sentir, manana, peso, quejar, animo, saquen, guatemala, simon
-- **T14.S04 - Delincuencia, nomas, opinion, morenista** (10 pal, 33 aristas, densidad 0.73): delincuencia, nomas, opinion, morenista, porque, jajajaj, asalto, sucio, enfocar, traigar
-- **T14.S05 - Donde, aser, pinch, chiste** (10 pal, 25 aristas, densidad 0.56): donde, aser, pinch, chiste, precidenta, sacrificio, finanza, pasen, lodo, descripcion
-- **T14.S06 - Entender, comer, costar, nooo** (5 pal, 10 aristas, densidad 1.00): entender, comer, costar, nooo, dormido
-- **T14.S07 - Amen, romper, frase, enfermo** (8 pal, 20 aristas, densidad 0.71): amen, romper, frase, enfermo, votado, callar, bendecir, bolsillo
-- **T14.S08 - Sonar, despertar, dormir, ami** (8 pal, 19 aristas, densidad 0.68): sonar, despertar, dormir, ami, patio, bro, cama, consciente
-- **T14.S09 - Real, aumentar, salvador, mitad** (9 pal, 20 aristas, densidad 0.56): real, aumentar, salvador, mitad, incremento, isla, sos, golpista, podrar
-- **T14.S10 - Volver, abajo, humilde, version** (7 pal, 16 aristas, densidad 0.76): volver, abajo, humilde, version, brutal, medellin, estrenar
-- **T14.S11 - Cambiar, regla, sobrar, abrazar** (8 pal, 18 aristas, densidad 0.64): cambiar, regla, sobrar, abrazar, piel, gobernacion, projimo, gesto
-- **T14.S12 - Rico, cual, gastronomia** (3 pal, 3 aristas, densidad 1.00): rico, cual, gastronomia
-- **T14.S13 - Vacacion, seguidor, definitivamente, quiero** (9 pal, 16 aristas, densidad 0.44): vacacion, seguidor, definitivamente, quiero, siii, antecedente, espero, paisaje, saca
-- **T14.S14 - Perro, vato, ladrar, disco** (5 pal, 7 aristas, densidad 0.70): perro, vato, ladrar, disco, ayudenme
-- **T14.S15 - Comentario, temprano, entrevistar, colaborar** (4 pal, 5 aristas, densidad 0.83): comentario, temprano, entrevistar, colaborar
-- **T14.S16 - Grito, desesperado, brillante** (3 pal, 3 aristas, densidad 1.00): grito, desesperado, brillante
+### T14 (122 palabras, 12 sub-clusters)
+- **T14.S00 - Vivir, bonito, lindo, bello** (21 pal, 113 aristas, densidad 0.54): vivir, bonito, lindo, bello, cantar, enhorabuena, vivar, belleza, perfecto, lujo, famoso, gastronomia
+- **T14.S01 - Padre, educacion, escuela, alumno** (10 pal, 36 aristas, densidad 0.80): padre, educacion, escuela, alumno, escolar, formacion, preescolar, investigador, movil, retomar
+- **T14.S02 - Nino, joven, nina, adulto** (9 pal, 32 aristas, densidad 0.89): nino, joven, nina, adulto, infantil, adolescente, diversion, ninos, juegos
+- **T14.S03 - Espacio, convivencia, parque, sano** (14 pal, 49 aristas, densidad 0.54): espacio, convivencia, parque, sano, jardin, gob, artes, alvarez, donacion, secretariadecultura, rehabilitar, vecina
+- **T14.S04 - Historia, recordar, libro, memoria** (8 pal, 26 aristas, densidad 0.93): historia, recordar, libro, memoria, legado, escenario, emblematico, honrar
+- **T14.S05 - Honor, ceremonia, bandera, rendir** (11 pal, 41 aristas, densidad 0.74): honor, ceremonia, bandera, rendir, homenaje, incansable, emotivo, himno, patriota, honores, escamilla
+- **T14.S06 - Comenzar, juego, recorrer, muestra** (15 pal, 45 aristas, densidad 0.43): comenzar, juego, recorrer, muestra, colectivo, ecuador, monumento, camiseta, sombra, marquez, encender, artesanal
+- **T14.S07 - Celebrar, artista, convivir, noviembre** (8 pal, 18 aristas, densidad 0.64): celebrar, artista, convivir, noviembre, espectaculo, pierdar, solis, acompananos
+- **T14.S08 - Futuro, presente, crecer, puerta** (7 pal, 19 aristas, densidad 0.91): futuro, presente, crecer, puerta, ampliacion, fabrica, inversionista
+- **T14.S09 - Crear, naturaleza, enorme, operador** (7 pal, 12 aristas, densidad 0.57): crear, naturaleza, enorme, operador, energy, woodside, trion
+- **T14.S10 - Sueno, atleta, album, personalidad** (7 pal, 10 aristas, densidad 0.48): sueno, atleta, album, personalidad, entrenar, estampa, single
+- **T14.S11 - Rosa, modelo, terapia, aurora** (5 pal, 6 aristas, densidad 0.60): rosa, modelo, terapia, aurora, tepic
 
-### T15 (129 palabras, 11 sub-clusters)
-- **T15.S00 - Persona, casa, ayudar, duda** (11 pal, 39 aristas, densidad 0.71): persona, casa, ayudar, duda, alos, bendito, naranja, fruto, jalar, seriedad, acuerdense
-- **T15.S01 - Salud, atencion, medico, hospital** (9 pal, 26 aristas, densidad 0.72): salud, atencion, medico, hospital, inmediato, prioridad, medica, avalar, lee
-- **T15.S02 - Programa, cuidado, universidad, sonrisas** (22 pal, 71 aristas, densidad 0.31): programa, cuidado, universidad, sonrisas, anunciar, facultad, modulo, opcion, bucal, uat, colosio, donaldo
-- **T15.S03 - Gratuito, consulta, costo, corte** (11 pal, 45 aristas, densidad 0.82): gratuito, consulta, costo, corte, dental, imss, verdura, movil, electrodomestico, fruta, abarrot
-- **T15.S04 - Carretera, rapido, placa, recomendar** (23 pal, 84 aristas, densidad 0.33): carretera, rapido, placa, recomendar, precaucion, sujeto, carril, motociclista, circulacion, ministerio, ave, sinverguenzas
-- **T15.S05 - Agua, solucion, directamente, potable** (9 pal, 23 aristas, densidad 0.64): agua, solucion, directamente, potable, fuga, agresion, chocolate, inmediatamente, iclei
-- **T15.S06 - Servicio, ofrecer, exploracion, explorar** (8 pal, 12 aristas, densidad 0.43): servicio, ofrecer, exploracion, explorar, indispensable, alfonso, promocionar, team
-- **T15.S07 - Lunes, avisar, marzo, barrio** (14 pal, 33 aristas, densidad 0.36): lunes, avisar, marzo, barrio, provincia, difusion, exclusivo, tratado, vestir, caracter, bulevar, residencia
-- **T15.S08 - Totalmente, servidor, tecnologia, crisis** (12 pal, 29 aristas, densidad 0.44): totalmente, servidor, tecnologia, crisis, rumbo, articulo, est, priorizar, rodilla, previamente, adquirido, delta
-- **T15.S09 - Registro, registrar, habitante, acceder** (6 pal, 9 aristas, densidad 0.60): registro, registrar, habitante, acceder, madrugada, armamento
-- **T15.S10 - Recorrido, vulnerable, fundacion, reitero** (4 pal, 4 aristas, densidad 0.67): recorrido, vulnerable, fundacion, reitero
+### T15 (114 palabras, 14 sub-clusters)
+- **T15.S00 - General, justicia, delito, fiscalia** (13 pal, 47 aristas, densidad 0.60): general, justicia, delito, fiscalia, arma, desaparicion, contreras, vinculado, condena, electo, desplegado, contratista
+- **T15.S01 - Presencia, luis, carlos, organizacion** (16 pal, 78 aristas, densidad 0.65): presencia, luis, carlos, organizacion, ramirez, potosi, laura, directivo, david, integrado, comite, arturo
+- **T15.S02 - Director, titular, instituto, directora** (12 pal, 41 aristas, densidad 0.62): director, titular, instituto, directora, alvarado, mora, estrada, adame, rector, libby, implementacion, emprender
+- **T15.S03 - Sector, afectar, afectado, crecimiento** (7 pal, 19 aristas, densidad 0.91): sector, afectar, afectado, crecimiento, afectacion, problematica, deterioro
+- **T15.S04 - Registrar, entidad, periodo, caida** (7 pal, 19 aristas, densidad 0.91): registrar, entidad, periodo, caida, reduccion, unicamente, estancia
+- **T15.S05 - Asegurar, indicar, diverso, detectar** (5 pal, 10 aristas, densidad 1.00): asegurar, indicar, diverso, detectar, factor
+- **T15.S06 - Secretaria, marina, publica, subsecretario** (4 pal, 5 aristas, densidad 0.83): secretaria, marina, publica, subsecretario
+- **T15.S07 - Detallar, guerrero, acapulco, miembro** (6 pal, 15 aristas, densidad 1.00): detallar, guerrero, acapulco, miembro, huracan, john
+- **T15.S08 - Caso, informe, incidencia, aplicacion** (6 pal, 11 aristas, densidad 0.73): caso, informe, incidencia, aplicacion, dengue, posterior
+- **T15.S09 - Informar, kilometro, identificar, tonelada** (11 pal, 30 aristas, densidad 0.55): informar, kilometro, identificar, tonelada, particularmente, adelantar, puntualizar, oficio, mandataria, calendario, reactivacion
+- **T15.S10 - Continuar, busqueda, relacion, rescate** (9 pal, 28 aristas, densidad 0.78): continuar, busqueda, relacion, rescate, desaparecido, personas, encargar, migracion, adentro
+- **T15.S11 - Causa, golpe, extorsion, amenaza** (9 pal, 27 aristas, densidad 0.75): causa, golpe, extorsion, amenaza, combatir, manifestacion, quemar, abuelito, cuchillo
+- **T15.S12 - Nacional, agencia, oferta, conquistar** (4 pal, 4 aristas, densidad 0.67): nacional, agencia, oferta, conquistar
+- **T15.S13 - Senalar, relacionado, recuperacion** (3 pal, 3 aristas, densidad 1.00): senalar, relacionado, recuperacion
 
-### T16 (129 palabras, 12 sub-clusters)
-- **T16.S00 - San, miguel, pedro, privado** (16 pal, 46 aristas, densidad 0.38): san, miguel, pedro, privado, rocio, fractura, hombro, poblano, ortega, seguido, gigante, amenazado
-- **T16.S01 - Directora, campo, lara, asociacion** (11 pal, 27 aristas, densidad 0.49): directora, campo, lara, asociacion, jardines, parques, elvira, trayectoria, chain, discutir, detienen
-- **T16.S02 - Rodriguez, hernandez, manuel, rueda** (11 pal, 25 aristas, densidad 0.46): rodriguez, hernandez, manuel, rueda, prensa, isabel, espinosa, gobernanza, zuniga, inigualable, formulanoticia
-- **T16.S03 - Mes, fila, perseguir, cansado** (19 pal, 48 aristas, densidad 0.28): mes, fila, perseguir, cansado, agenda, ejercer, liderar, fascista, privacidad, imparable, hermanito, eficiencia
-- **T16.S04 - Luz, heroe, confiar, elizabeth** (11 pal, 27 aristas, densidad 0.49): luz, heroe, confiar, elizabeth, patricia, irreparable, heroina, humberto, llego, comprometer, adrian
-- **T16.S05 - Lomas, rosales, loma, bonita** (5 pal, 9 aristas, densidad 0.90): lomas, rosales, loma, bonita, barandal
-- **T16.S06 - Ricardo, monreal, cinismo, explicacion** (12 pal, 29 aristas, densidad 0.44): ricardo, monreal, cinismo, explicacion, narcos, mora, compadre, falsedad, paquete, joya, pertenencia, meteorologico
-- **T16.S07 - Clase, oro, mario, gimnasia** (11 pal, 25 aristas, densidad 0.46): clase, oro, mario, gimnasia, alemania, info, panamericano, seleccionado, modalidad, nava, volumen
-- **T16.S08 - Cargo, digno, popular, comerciante** (10 pal, 20 aristas, densidad 0.44): cargo, digno, popular, comerciante, tratamiento, arreglir, cabe, ratificar, ayudano, italiano
-- **T16.S09 - Reyes, carrera, enrique, pilar** (8 pal, 14 aristas, densidad 0.50): reyes, carrera, enrique, pilar, novia, basurero, distinguido, magos
-- **T16.S10 - Madres, ofender, cifra, arena** (7 pal, 11 aristas, densidad 0.52): madres, ofender, cifra, arena, polo, evidenciar, granito
-- **T16.S11 - Movimiento, organizacion, quintero, cooperacion** (6 pal, 8 aristas, densidad 0.53): movimiento, organizacion, quintero, cooperacion, sostuve, recordatorio
+### T16 (131 palabras, 18 sub-clusters)
+- **T16.S00 - Millon, pesos, impuesto, costo** (12 pal, 51 aristas, densidad 0.77): millon, pesos, impuesto, costo, superior, basico, ingreso, presupuesto, monto, finanzas, hacienda, destinar
+- **T16.S01 - Economico, empresa, inversion, empresario** (11 pal, 51 aristas, densidad 0.93): economico, empresa, inversion, empresario, privado, comercial, demanda, industria, marca, cadena, productor
+- **T16.S02 - Acuerdo, oficial, ciento, cifra** (10 pal, 35 aristas, densidad 0.78): acuerdo, oficial, ciento, cifra, derivado, fuente, presuntamente, debajo, exterior, despliegue
+- **T16.S03 - Publico, recurso, transporte, utilizar** (8 pal, 21 aristas, densidad 0.75): publico, recurso, transporte, utilizar, autobus, aeropuerto, rezago, renovacion
+- **T16.S04 - Social, red, construccion, exponer** (8 pal, 20 aristas, densidad 0.71): social, red, construccion, exponer, prensa, mencionado, publicacion, captar
+- **T16.S05 - Buscar, mayo, mostrar, marcha** (9 pal, 28 aristas, densidad 0.78): buscar, mayo, mostrar, marcha, propuesta, cita, completamente, choque, plantear
+- **T16.S06 - Forma, proceso, establecer, conforme** (11 pal, 40 aristas, densidad 0.73): forma, proceso, establecer, conforme, facilitar, requisito, formal, ambito, cesar, colaborar, militancia
+- **T16.S07 - Registro, base, legal, oficina** (10 pal, 36 aristas, densidad 0.80): registro, base, legal, oficina, documento, ilicito, acceder, impedir, acta, castillo
+- **T16.S08 - Generar, situacion, juridico, fenomeno** (8 pal, 19 aristas, densidad 0.68): generar, situacion, juridico, fenomeno, experto, finalmente, legisladora, ordenamiento
+- **T16.S09 - Extranjero, aprobar, congreso, firmar** (6 pal, 12 aristas, densidad 0.80): extranjero, aprobar, congreso, firmar, senado, criterio
+- **T16.S10 - Contar, cantidad, cubrir, tamaulipecos** (6 pal, 12 aristas, densidad 0.80): contar, cantidad, cubrir, tamaulipecos, tamaulipeca, concurso
+- **T16.S11 - Permitir, estrategia, natural, impulsado** (4 pal, 6 aristas, densidad 1.00): permitir, estrategia, natural, impulsado
+- **T16.S12 - Sistema, materia, ejecutivo, conflicto** (5 pal, 9 aristas, densidad 0.90): sistema, materia, ejecutivo, conflicto, favorecer
+- **T16.S13 - Funcionario, actual, crisis, tercero** (7 pal, 19 aristas, densidad 0.91): funcionario, actual, crisis, tercero, humo, cortina, nacido
+- **T16.S14 - Mayoria, puesto, aplicar, comunista** (6 pal, 15 aristas, densidad 1.00): mayoria, puesto, aplicar, comunista, escapar, beltran
+- **T16.S15 - Plan, interes, declarar, credito** (4 pal, 5 aristas, densidad 0.83): plan, interes, declarar, credito
+- **T16.S16 - Explicar, desarrollar, analisis** (3 pal, 3 aristas, densidad 1.00): explicar, desarrollar, analisis
+- **T16.S17 - Aprovechar, requerir, diariamente** (3 pal, 3 aristas, densidad 1.00): aprovechar, requerir, diariamente
 
-### T17 (173 palabras, 19 sub-clusters)
-- **T17.S00 - Matar, pura, controlar, chingar** (13 pal, 59 aristas, densidad 0.76): matar, pura, controlar, chingar, dedo, inventar, jente, poderoso, salio, corto, jajar, ves
-- **T17.S01 - Jaja, comentar, chingon, contenido** (20 pal, 73 aristas, densidad 0.38): jaja, comentar, chingon, contenido, alv, carnal, demas, onda, vas, pelar, corrido, tamps
-- **T17.S02 - Precio, tienda, barato, osea** (12 pal, 45 aristas, densidad 0.68): precio, tienda, barato, osea, depender, probar, dolar, frijol, litro, ganancia, audio, leche
-- **T17.S03 - Pensar, wow, texas, mover** (10 pal, 29 aristas, densidad 0.64): pensar, wow, texas, mover, perfecto, compra, gracios, ahorrar, comparar, daniela
-- **T17.S04 - Realmente, aprender, espanol, vista** (8 pal, 26 aristas, densidad 0.93): realmente, aprender, espanol, vista, reir, ingles, neto, soler
-- **T17.S05 - Justo, papel, ignorancia, bano** (13 pal, 33 aristas, densidad 0.42): justo, papel, ignorancia, bano, titulo, protegido, confundir, pasaje, religion, joder, traser, cedillo
-- **T17.S06 - Tijuana, coahuila, planeta, tia** (10 pal, 23 aristas, densidad 0.51): tijuana, coahuila, planeta, tia, queretaro, ciencia, cientifico, ciudadanos, descubrir, records
-- **T17.S07 - Salir, preguntar, periodistico, jajajar** (6 pal, 12 aristas, densidad 0.80): salir, preguntar, periodistico, jajajar, fortuna, noboa
-- **T17.S08 - Noticia, aparecer, metar, caray** (8 pal, 18 aristas, densidad 0.64): noticia, aparecer, metar, caray, agusto, credibilidad, duena, izquierdo
-- **T17.S09 - Culpa, carpeta, tapar, pasajero** (9 pal, 29 aristas, densidad 0.81): culpa, carpeta, tapar, pasajero, metido, patrulla, tono, cortina, pecado
-- **T17.S10 - Pequeno, cuento, todavia, miren** (10 pal, 25 aristas, densidad 0.56): pequeno, cuento, todavia, miren, ejemplar, pesado, prender, tamano, latino, tubo
-- **T17.S11 - Pelicula, rene, compa, perra** (8 pal, 18 aristas, densidad 0.64): pelicula, rene, compa, perra, extrano, porfa, chulado, yucatan
-- **T17.S12 - Criminal, tonto, vendido, terror** (5 pal, 7 aristas, densidad 0.70): criminal, tonto, vendido, terror, fracc
-- **T17.S13 - Supuesto, reportero, neta, raza** (7 pal, 15 aristas, densidad 0.71): supuesto, reportero, neta, raza, bailar, jajaj, comprado
-- **T17.S14 - Cabron, tristeza, verga, armar** (8 pal, 18 aristas, densidad 0.64): cabron, tristeza, verga, armar, mata, perdonar, puto, gozar
-- **T17.S16 - Senor, rato, oir, equivocar** (5 pal, 9 aristas, densidad 0.90): senor, rato, oir, equivocar, mire
-- **T17.S17 - Asta, ahorita, fondo, primo** (7 pal, 15 aristas, densidad 0.71): asta, ahorita, fondo, primo, presupuesto, gue, barrer
-- **T17.S18 - Obvio, pesimo, pendejada, evidencia** (7 pal, 15 aristas, densidad 0.71): obvio, pesimo, pendejada, evidencia, obviamente, presion, tumbar
-- **T17.S20 - Forma, nadamas, creacion** (3 pal, 3 aristas, densidad 1.00): forma, nadamas, creacion
+### T17 (145 palabras, 13 sub-clusters)
+- **T17.S00 - Perder, manuel, ladron, narcotrafico** (18 pal, 94 aristas, densidad 0.61): perder, manuel, ladron, narcotrafico, coahuila, dudar, aliado, perjudicar, soberano, atrevir, deje, vieja
+- **T17.S01 - Vehiculo, accidente, camioneta, impactar** (10 pal, 39 aristas, densidad 0.87): vehiculo, accidente, camioneta, impactar, motocicleta, automovil, conducir, coche, ejecutar, bicicleta
+- **T17.S02 - Carretera, via, viajar, altura** (9 pal, 30 aristas, densidad 0.83): carretera, via, viajar, altura, trafico, tramo, sindicato, maniobra, polvo
+- **T17.S03 - Hospital, victima, herido, causar** (12 pal, 40 aristas, densidad 0.61): hospital, victima, herido, causar, auxilio, lesion, arribar, canseco, destrozo, colapsar, relevancia, tapia
+- **T17.S04 - Impacto, reflejar, positivo, revelar** (21 pal, 88 aristas, densidad 0.42): impacto, reflejar, positivo, revelar, abogado, frenar, alcaldia, manejo, analizar, auditoria, irregularidad, contencion
+- **T17.S05 - Enfrentar, cierre, popular, rey** (19 pal, 59 aristas, densidad 0.34): enfrentar, cierre, popular, rey, practica, carnaval, alfredo, posesion, padrino, anda, edmundo, gallardo
+- **T17.S06 - Control, actuar, acto, ataque** (12 pal, 37 aristas, densidad 0.56): control, actuar, acto, ataque, protesta, similar, sabor, disculpa, trampa, rival, contundente, designacion
+- **T17.S07 - Terminar, conocido, asunto, lamentable** (9 pal, 26 aristas, densidad 0.72): terminar, conocido, asunto, lamentable, tragedia, prometer, funcion, ecosistema, firmeza
+- **T17.S08 - Ocurrir, antiguo, escombro, fachada** (9 pal, 21 aristas, densidad 0.58): ocurrir, antiguo, escombro, fachada, muro, afortunadamente, tumba, desplomar, pinos
+- **T17.S09 - Muerte, malandro, catolico, sacrificio** (10 pal, 25 aristas, densidad 0.56): muerte, malandro, catolico, sacrificio, dispuesto, sopa, guiar, aventura, beber, divorcio
+- **T17.S10 - Sufrir, urgente, severo, ladrona** (8 pal, 11 aristas, densidad 0.39): sufrir, urgente, severo, ladrona, people, help, mercedes, still
+- **T17.S11 - Fuego, siniestro, asegurado** (3 pal, 2 aristas, densidad 0.67): fuego, siniestro, asegurado
+- **T17.S12 - Sentar, vien, llenir, conmemoramos** (5 pal, 5 aristas, densidad 0.50): sentar, vien, llenir, conmemoramos, nicole
 
-### T18 (86 palabras, 10 sub-clusters)
-- **T18.S00 - Felicidad, felicidades, exito, presidentar** (15 pal, 81 aristas, densidad 0.77): felicidad, felicidades, exito, presidentar, dedicacion, logro, deporte, enhorabuena, felicitar, premio, cancha, felicitaciones
-- **T18.S01 - Lleno, celebrar, especial, fecha** (13 pal, 52 aristas, densidad 0.67): lleno, celebrar, especial, fecha, inolvidable, magico, ven, sorpresa, pensado, invitado, copia, oficio
-- **T18.S02 - Historia, orgullo, honor, pasion** (17 pal, 86 aristas, densidad 0.63): historia, orgullo, honor, pasion, recuerdo, legado, junio, muestra, huella, siglo, batalla, honrar
-- **T18.S03 - Hermoso, bonito, bello, bienvenido** (8 pal, 23 aristas, densidad 0.82): hermoso, bonito, bello, bienvenido, posada, alfredo, sigan, juana
-- **T18.S04 - Bendicion, saludo, saludos, cordial** (4 pal, 6 aristas, densidad 1.00): bendicion, saludo, saludos, cordial
-- **T18.S05 - Feliz, cumpleanos, cumplir, sabiduria** (5 pal, 10 aristas, densidad 1.00): feliz, cumpleanos, cumplir, sabiduria, prosperidad
-- **T18.S06 - Abrazo, fuerte, bendiga, bendecido** (7 pal, 16 aristas, densidad 0.76): abrazo, fuerte, bendiga, bendecido, ernesto, alegre, desempenar
-- **T18.S07 - Grande, viva, chairo, adan** (9 pal, 29 aristas, densidad 0.81): grande, viva, chairo, adan, miseria, claramente, pensamiento, creado, estres
-- **T18.S08 - Gusto, acompanar, angel** (3 pal, 3 aristas, densidad 1.00): gusto, acompanar, angel
-- **T18.S09 - Querido, admiracion, preservar** (3 pal, 2 aristas, densidad 0.67): querido, admiracion, preservar
+### T18 (111 palabras, 12 sub-clusters)
+- **T18.S00 - Fuerte, lluvia, condicion, temperatura** (12 pal, 66 aristas, densidad 1.00): fuerte, lluvia, condicion, temperatura, minimo, cual, viento, pronostico, golfo, frio, precaucion, atento
+- **T18.S01 - Dia, amor, corazon, camino** (18 pal, 81 aristas, densidad 0.53): dia, amor, corazon, camino, profundo, felicitacion, admiracion, gratitud, espiritual, guia, iluminar, vos
+- **T18.S02 - Mujer, hombre, luchar, mujeres** (7 pal, 19 aristas, densidad 0.91): mujer, hombre, luchar, mujeres, inspirar, valentia, trabajadora
+- **T18.S03 - Encontrar, cuerpo, permanecer, posteriormente** (12 pal, 41 aristas, densidad 0.62): encontrar, cuerpo, permanecer, posteriormente, trasladar, combustible, interior, percance, valles, escolta, libramiento, hospitalizado
+- **T18.S04 - Llegar, martes, luna, ven** (13 pal, 25 aristas, densidad 0.32): llegar, martes, luna, ven, caliente, muchisimos, barrera, lanzamiento, panico, debut, piloto, mantente
+- **T18.S05 - Refugio, temporal, vicente, solidaridad** (7 pal, 16 aristas, densidad 0.76): refugio, temporal, vicente, solidaridad, ubicacion, habilitar, carranza
+- **T18.S06 - Mantener, alcanzar, meta, mision** (6 pal, 11 aristas, densidad 0.73): mantener, alcanzar, meta, mision, perfil, aportacion
+- **T18.S07 - Humano, sentido, carga, pesado** (7 pal, 17 aristas, densidad 0.81): humano, sentido, carga, pesado, solidario, fallecido, cochinero
+- **T18.S08 - Ortiz, maestra, juana, roberto** (11 pal, 27 aristas, densidad 0.49): ortiz, maestra, juana, roberto, dominguez, catedral, rojas, ines, tripulacion, intelectual, tuit
+- **T18.S09 - Ruiz, adolfo, moda, financiar** (4 pal, 5 aristas, densidad 0.83): ruiz, adolfo, moda, financiar
+- **T18.S10 - Iniciar, agosto, temprano, raiz** (7 pal, 14 aristas, densidad 0.67): iniciar, agosto, temprano, raiz, tratamiento, ernesto, toque
+- **T18.S11 - Caminar, bendecir, protegido, fruto** (7 pal, 13 aristas, densidad 0.62): caminar, bendecir, protegido, fruto, religion, avanzado, percibir
 
-### T19 (135 palabras, 12 sub-clusters)
-- **T19.S00 - Dato, eleccion, toma, protesta** (13 pal, 42 aristas, densidad 0.54): dato, eleccion, toma, protesta, tabasco, fuente, ine, minoria, gerardo, advertir, benavides, tuit
-- **T19.S01 - Descuento, aprovechar, predial, corriente** (7 pal, 17 aristas, densidad 0.81): descuento, aprovechar, predial, corriente, recargo, ponte, victimizar
-- **T19.S02 - Parque, jugar, sumar, infantil** (10 pal, 30 aristas, densidad 0.67): parque, jugar, sumar, infantil, joaquin, lucir, juegos, manita, pato, recuperado
-- **T19.S03 - Famoso, museo, cfe, concepcion** (19 pal, 41 aristas, densidad 0.24): famoso, museo, cfe, concepcion, mono, lectura, hermandad, rogar, vino, lealtad, doloroso, inmaculada
-- **T19.S04 - Cobarde, pleno, agredir, creador** (16 pal, 42 aristas, densidad 0.35): cobarde, pleno, agredir, creador, agresor, dominicana, indignante, gentuza, humildad, caracterizar, moralmente, minerva
-- **T19.S05 - America, terrible, latina, colegio** (14 pal, 36 aristas, densidad 0.40): america, terrible, latina, colegio, valentina, ejecucion, latinoamericano, atrocidad, marcos, guardado, despreciar, stop
-- **T19.S06 - Mercado, locatario, interior, designacion** (7 pal, 10 aristas, densidad 0.48): mercado, locatario, interior, designacion, impresionante, puntilla, edil
-- **T19.S07 - Diciembre, venta, manifestacion, tour** (9 pal, 18 aristas, densidad 0.50): diciembre, venta, manifestacion, tour, definitivo, uruguay, magica, montevideo, nazi
-- **T19.S08 - Victoria, sandra, jimenez, mariana** (14 pal, 33 aristas, densidad 0.36): victoria, sandra, jimenez, mariana, castillo, dorado, mari, felicita, josefina, emilio, lourdes, ecuatoriano
-- **T19.S09 - Javier, alvarez, categoria, premiar** (9 pal, 20 aristas, densidad 0.56): javier, alvarez, categoria, premiar, gira, prever, lugo, ayala, dlb
-- **T19.S10 - Responsabilidad, elegir, moto, obligacion** (10 pal, 21 aristas, densidad 0.47): responsabilidad, elegir, moto, obligacion, casco, estadistica, hero, oiga, documentado, juancho
-- **T19.S11 - Firma, prospero, pase, hello** (7 pal, 8 aristas, densidad 0.38): firma, prospero, pase, hello, parroquia, acosar, hermanamiento
+### T19 (148 palabras, 13 sub-clusters)
+- **T19.S00 - Lopez, huachicol, fiscal, aduana** (18 pal, 85 aristas, densidad 0.56): lopez, huachicol, fiscal, aduana, huachicolero, escandalo, barco, hidrocarburo, paraiso, periodistico, involucrar, admirable
+- **T19.S01 - Junio, metro, exposicion, viaje** (20 pal, 87 aristas, densidad 0.46): junio, metro, exposicion, viaje, entrada, teatro, metropolitano, museo, conexion, galeria, combinar, atraco
+- **T19.S02 - Tonto, poderoso, cinismo, festejar** (17 pal, 55 aristas, densidad 0.40): tonto, poderoso, cinismo, festejar, agusto, jefa, agredir, kilo, ahorro, alemania, bendice, fascista
+- **T19.S03 - Clase, espanol, ingles, payaso** (8 pal, 16 aristas, densidad 0.57): clase, espanol, ingles, payaso, bye, cecilia, tributo, pactar
+- **T19.S04 - Banda, xochitl, galvez, martha** (7 pal, 14 aristas, densidad 0.67): banda, xochitl, galvez, martha, blues, ultimahora, pausa
+- **T19.S05 - Ramon, pina, norma, leal** (9 pal, 19 aristas, densidad 0.53): ramon, pina, norma, leal, padecer, comienzo, procesado, sindrome, maki
+- **T19.S06 - Generacion, afirmar, figura, comunicado** (8 pal, 18 aristas, densidad 0.64): generacion, afirmar, figura, comunicado, surgir, rock, influyente, negra
+- **T19.S07 - Profesional, jorge, boleto, objeto** (13 pal, 32 aristas, densidad 0.41): profesional, jorge, boleto, objeto, cano, chillar, incomodo, ortega, pierna, defecto, morado, montoya
+- **T19.S08 - Campana, eliminar, sucio, exacto** (10 pal, 23 aristas, densidad 0.51): campana, eliminar, sucio, exacto, bolsillo, mugre, nomina, pongar, esterilizacion, fumigar
+- **T19.S09 - Compania, poquito, credibilidad, evidente** (15 pal, 40 aristas, densidad 0.38): compania, poquito, credibilidad, evidente, magnitud, falsedad, amp, ascenso, contado, post, encuesta, granito
+- **T19.S10 - Sinaloa, rocha, moya, impresionante** (6 pal, 11 aristas, densidad 0.73): sinaloa, rocha, moya, impresionante, gue, culiacan
+- **T19.S11 - Personaje, texas, drenaje, tamaulipa** (7 pal, 14 aristas, densidad 0.67): personaje, texas, drenaje, tamaulipa, apoderar, coreano, dibujo
+- **T19.S12 - Doler, ausencia, fortuna, pecho** (10 pal, 16 aristas, densidad 0.36): doler, ausencia, fortuna, pecho, afin, miserabl, vibrar, nervio, inspector, embarazado
 
-### T20 (166 palabras, 14 sub-clusters)
-- **T20.S00 - Love, time, one, american** (20 pal, 67 aristas, densidad 0.35): love, time, one, american, videos, record, bless, florida, god, baby, keep, forever
-- **T20.S01 - Maestro, california, profesional, baja** (19 pal, 82 aristas, densidad 0.48): maestro, california, profesional, baja, interesar, uds, momia, ignorar, pantalon, television, promesa, habiar
-- **T20.S02 - Doctor, cancer, centeno, maryfer** (15 pal, 36 aristas, densidad 0.34): doctor, cancer, centeno, maryfer, paciente, imaginate, espera, anabel, zambada, octavio, altos, abogada
-- **T20.S03 - Estudio, orale, latinus, pista** (7 pal, 18 aristas, densidad 0.86): estudio, orale, latinus, pista, informacionparati, tenebrozo, chamaco
-- **T20.S04 - Inteligencia, inteligente, mentalidad, costumbre** (15 pal, 41 aristas, densidad 0.39): inteligencia, inteligente, mentalidad, costumbre, inmigrante, profugo, chin, jaime, molesto, chiqui, expulsar, violin
-- **T20.S05 - Criticar, seguramente, mental, rafael** (13 pal, 33 aristas, densidad 0.42): criticar, seguramente, mental, rafael, depresion, profesion, fumar, etica, pndejo, puesta, compasion, arrepientir
-- **T20.S06 - Ela, queria, muito, voces** (13 pal, 34 aristas, densidad 0.44): ela, queria, muito, voces, quinto, paralelo, protagonista, equilibrio, essa, turma, genocido, sendo
-- **T20.S07 - Chino, ingreso, asqueroso, corresponder** (10 pal, 26 aristas, densidad 0.58): chino, ingreso, asqueroso, corresponder, bloquear, arancel, esperer, fentanilo, comunicado, grata
-- **T20.S08 - Visto, desaparecido, bolsa, fallecido** (16 pal, 35 aristas, densidad 0.29): visto, desaparecido, bolsa, fallecido, colectivo, sabia, defensor, monarca, cultivar, insecto, empresarios, homero
-- **T20.S09 - Estrella, origen, guapo, blanca** (12 pal, 24 aristas, densidad 0.36): estrella, origen, guapo, blanca, mercenario, lorena, grabado, guapisima, unidas, movilizar, gonzalo, aprobado
-- **T20.S10 - Vestido, cine, contratar, separar** (12 pal, 21 aristas, densidad 0.32): vestido, cine, contratar, separar, portada, cer, unicamente, nocturno, disenador, ayuder, lezama, anfitriona
-- **T20.S11 - Entrevista, zamora, milenio, multimedios** (5 pal, 8 aristas, densidad 0.80): entrevista, zamora, milenio, multimedios, inbox
-- **T20.S12 - Dejate, internet, pantalla, narrar** (4 pal, 5 aristas, densidad 0.83): dejate, internet, pantalla, narrar
-- **T20.S13 - Extraterrestr, guia, episodio, loque** (5 pal, 9 aristas, densidad 0.90): extraterrestr, guia, episodio, loque, crack
+### T20 (131 palabras, 14 sub-clusters)
+- **T20.S00 - Nombre, llamar, senora, recuerden** (12 pal, 32 aristas, densidad 0.48): nombre, llamar, senora, recuerden, mamen, mole, influir, carisimo, filtro, pelota, alentar, impresentable
+- **T20.S01 - Luz, granhermano, sandra, jimenez** (14 pal, 36 aristas, densidad 0.40): luz, granhermano, sandra, jimenez, consuelo, mariana, martin, mari, regidora, vargas, partida, totalidad
+- **T20.S02 - Ganar, diferencia, vuelta, pagina** (15 pal, 41 aristas, densidad 0.39): ganar, diferencia, vuelta, pagina, engano, semejante, enteer, consecutivo, confrontacion, paloma, balance, inflado
+- **T20.S03 - Muerto, dedicar, secuestro, avisar** (10 pal, 23 aristas, densidad 0.51): muerto, dedicar, secuestro, avisar, sear, fingir, grandioso, max, colega, mazon
+- **T20.S04 - Consecuencia, mover, claramente, asaltar** (11 pal, 33 aristas, densidad 0.60): consecuencia, mover, claramente, asaltar, probable, confundir, extorsionar, estariar, arroyo, cuidad, bionica
+- **T20.S05 - Enero, madrid, planta, colegio** (13 pal, 25 aristas, densidad 0.32): enero, madrid, planta, colegio, planear, mejia, emilio, alicia, alonso, enlace, paola, premios
+- **T20.S06 - Detenido, litro, fuero, vas** (14 pal, 29 aristas, densidad 0.32): detenido, litro, fuero, vas, cagar, mono, espantar, alcohol, polanco, interceptar, maritimo, cosita
+- **T20.S07 - Noticia, chairo, tabasqueno, merida** (8 pal, 15 aristas, densidad 0.54): noticia, chairo, tabasqueno, merida, extorcionar, felicita, inservible, chidir
+- **T20.S08 - Animal, prohibir, maltrato, sentado** (4 pal, 4 aristas, densidad 0.67): animal, prohibir, maltrato, sentado
+- **T20.S09 - Enviar, deseo, felicitaciones, aprecio** (8 pal, 15 aristas, densidad 0.54): enviar, deseo, felicitaciones, aprecio, vicepresidenta, consejera, jessica, diste
+- **T20.S11 - Listo, facebook, vendedor, azucena** (7 pal, 10 aristas, densidad 0.48): listo, facebook, vendedor, azucena, artesania, cocaina, cup
+- **T20.S12 - Honesto, contestar, narrar, sinceramente** (5 pal, 7 aristas, densidad 0.70): honesto, contestar, narrar, sinceramente, cloaca
+- **T20.S13 - Motivo, paciencia, beca, limpia** (4 pal, 5 aristas, densidad 0.83): motivo, paciencia, beca, limpia
+- **T20.S14 - Rene, novio, twitter, tulipan** (4 pal, 4 aristas, densidad 0.67): rene, novio, twitter, tulipan
 
-### T21 (79 palabras, 10 sub-clusters)
-- **T21.S00 - Seguir, unidad, cambio, responsable** (10 pal, 27 aristas, densidad 0.60): seguir, unidad, cambio, responsable, carmen, distinguir, campesino, asesina, honores, claudiasheinbaum
-- **T21.S01 - Secretaria, servicios, publicos, comapa** (8 pal, 20 aristas, densidad 0.71): secretaria, servicios, publicos, comapa, gestion, delegacion, funcion, gerente
-- **T21.S02 - Bienestar, jornada, tampiquenas, descacharrizacion** (8 pal, 20 aristas, densidad 0.71): bienestar, jornada, tampiquenas, descacharrizacion, vacunacion, vacuna, consultorio, encontraras
-- **T21.S03 - Mejorar, brindar, calidad, importancia** (10 pal, 40 aristas, densidad 0.89): mejorar, brindar, calidad, importancia, saludable, diabetes, prioritario, alimentacion, platica, diagnostico
-- **T21.S04 - Basura, limpieza, mantener, recoleccion** (9 pal, 24 aristas, densidad 0.67): basura, limpieza, mantener, recoleccion, retirar, contenedor, cuadrilla, cementerio, tijerina
-- **T21.S05 - Ciudadania, atender, necesidad, peticion** (7 pal, 16 aristas, densidad 0.76): ciudadania, atender, necesidad, peticion, solicitud, inquietud, desplegar
-- **T21.S07 - Colonia, pina, elias, chapoleo** (5 pal, 8 aristas, densidad 0.80): colonia, pina, elias, chapoleo, jessica
-- **T21.S08 - Sector, continuar, diverso, horario** (5 pal, 9 aristas, densidad 0.90): sector, continuar, diverso, horario, pavimento
-- **T21.S09 - Comunidad, beneficio, transparencia, platicar** (7 pal, 14 aristas, densidad 0.67): comunidad, beneficio, transparencia, platicar, reflexionar, firmar, trans
-- **T21.S10 - Entorno, mantenimiento, conservar, emblematico** (6 pal, 12 aristas, densidad 0.80): entorno, mantenimiento, conservar, emblematico, habitar, ciudadvictoria
+### T21 (126 palabras, 14 sub-clusters)
+- **T21.S00 - Mario, alberto, chapo, hotel** (18 pal, 71 aristas, densidad 0.46): mario, alberto, chapo, hotel, guzman, departamento, aguilar, enrique, mendez, elena, rosario, teresa
+- **T21.S01 - Politica, diputado, aparecer, decision** (9 pal, 27 aristas, densidad 0.75): politica, diputado, aparecer, decision, lista, titere, sombrero, rodrigo, reeleccion
+- **T21.S02 - Presidencia, orgulloso, candidato, ordenar** (13 pal, 46 aristas, densidad 0.59): presidencia, orgulloso, candidato, ordenar, origen, precioso, fue, candidata, erar, juzgado, acero, adn
+- **T21.S03 - Miguel, angel, rocio, mendoza** (11 pal, 19 aristas, densidad 0.34): miguel, angel, rocio, mendoza, tortura, defensora, tachira, camila, campeones, mosco, normalidad
+- **T21.S04 - Abuso, permiso, soberania, discurso** (14 pal, 38 aristas, densidad 0.42): abuso, permiso, soberania, discurso, tardar, agresion, persecucion, guero, feminista, isidro, variedad, tamal
+- **T21.S05 - Calderon, hermana, pasajero, cansar** (12 pal, 30 aristas, densidad 0.46): calderon, hermana, pasajero, cansar, margarita, esclavo, mega, describir, macho, mosca, clinico, mochila
+- **T21.S06 - Vista, pelicula, cuento, velocidad** (9 pal, 21 aristas, densidad 0.58): vista, pelicula, cuento, velocidad, mafioso, ficcion, agradable, drama, carton
+- **T21.S07 - Bad, way, believe, better** (7 pal, 20 aristas, densidad 0.95): bad, way, believe, better, poor, take, name
+- **T21.S08 - Completo, orale, pista, latinus** (6 pal, 13 aristas, densidad 0.87): completo, orale, pista, latinus, informacionparati, chamaco
+- **T21.S09 - Derechos, humanos, asumir** (3 pal, 3 aristas, densidad 1.00): derechos, humanos, asumir
+- **T21.S10 - Javier, barda, torta, santillan** (5 pal, 5 aristas, densidad 0.50): javier, barda, torta, santillan, exfuncionario
+- **T21.S11 - Voz, alzar, reconocido, portal** (5 pal, 8 aristas, densidad 0.80): voz, alzar, reconocido, portal, web
+- **T21.S12 - Prueba, acusar, periodismo, metido** (7 pal, 20 aristas, densidad 0.95): prueba, acusar, periodismo, metido, producir, arancel, nombrar
+- **T21.S13 - Echar, atras, demas, joaquin** (7 pal, 13 aristas, densidad 0.62): echar, atras, demas, joaquin, caracterizar, mago, sociales
 
-### T22 (144 palabras, 14 sub-clusters)
-- **T22.S00 - Mujer, violencia, mujeres, menor** (16 pal, 72 aristas, densidad 0.60): mujer, violencia, mujeres, menor, genero, igualdad, fisico, laboral, inspirar, meta, erradicar, adolescente
-- **T22.S01 - Militar, marina, informar, armado** (15 pal, 51 aristas, densidad 0.49): militar, marina, informar, armado, infanteria, comandante, golfo, batallon, naval, reino, similar, escamilla
-- **T22.S02 - Destacar, titular, senalar, proceso** (17 pal, 80 aristas, densidad 0.59): destacar, titular, senalar, proceso, expresar, proposito, miembro, disminuir, ampliar, implementar, usuario, medina
-- **T22.S03 - Guerrero, estrategia, ramirez, laura** (21 pal, 99 aristas, densidad 0.47): guerrero, estrategia, ramirez, laura, acapulco, tecnico, entidad, integrar, david, velazquez, ambito, coordinadora
-- **T22.S04 - Alto, deportivo, obtener, deportiva** (14 pal, 49 aristas, densidad 0.54): alto, deportivo, obtener, deportiva, medalla, rehabilitacion, pintura, cantante, espectaculo, gimnasio, campeonato, secretariadecultura
-- **T22.S05 - Nacional, sede, competencia, participante** (7 pal, 14 aristas, densidad 0.67): nacional, sede, competencia, participante, simulacro, auditorio, web
-- **T22.S06 - Estatal, director, presencia, acto** (9 pal, 23 aristas, densidad 0.64): estatal, director, presencia, acto, memoria, lozano, estarer, marcado, anfitrion
-- **T22.S07 - Ana, profundamente, alberto, cancun** (8 pal, 16 aristas, densidad 0.57): ana, profundamente, alberto, cancun, peralta, paty, alcaldes, mary
-- **T22.S08 - Institucion, basico, ordenar, grado** (9 pal, 17 aristas, densidad 0.47): institucion, basico, ordenar, grado, atraer, tambo, plastico, despensa, mantente
-- **T22.S09 - Julio, conocido, septiembre, diego** (8 pal, 14 aristas, densidad 0.50): julio, conocido, septiembre, diego, multiple, alvaro, acusado, orozco
-- **T22.S10 - Crear, honestidad, harto, barrera** (7 pal, 12 aristas, densidad 0.57): crear, honestidad, harto, barrera, carteles, juzgado, enfoque
-- **T22.S11 - Ruiz, senadora, olga** (3 pal, 3 aristas, densidad 1.00): ruiz, senadora, olga
-- **T22.S12 - Integrante, ejecutivo, cuyo, busqueda** (5 pal, 7 aristas, densidad 0.70): integrante, ejecutivo, cuyo, busqueda, inclusion
-- **T22.S13 - Oaxaca, repartir, patrimonio, rehabilitado** (5 pal, 7 aristas, densidad 0.70): oaxaca, repartir, patrimonio, rehabilitado, sucursal
+### T22 (117 palabras, 10 sub-clusters)
+- **T22.S00 - Seguridad, estatal, operativo, elemento** (19 pal, 128 aristas, densidad 0.75): seguridad, estatal, operativo, elemento, guardia, dependencia, vigilancia, reforzar, permanente, correspondiente, corporacion, disposicion
+- **T22.S01 - Zona, municipio, centro, norte** (8 pal, 25 aristas, densidad 0.89): zona, municipio, centro, norte, cercano, delegacion, espera, auditorio
+- **T22.S02 - Area, labor, limpieza, servicios** (19 pal, 132 aristas, densidad 0.77): area, labor, limpieza, servicios, limpio, publicos, mantenimiento, constante, camion, retirar, material, eficiente
+- **T22.S03 - Colonia, calle, avenida, hidalgo** (13 pal, 43 aristas, densidad 0.55): colonia, calle, avenida, hidalgo, comapa, reparacion, elias, cuadra, obrera, cementerio, bosque, nayarit
+- **T22.S04 - Proteccion, civil, bomberos, preventivo** (8 pal, 22 aristas, densidad 0.79): proteccion, civil, bomberos, preventivo, supervision, bombero, inspeccion, procuraduria
+- **T22.S05 - Direccion, transito, vialidad, instalacion** (9 pal, 32 aristas, densidad 0.89): direccion, transito, vialidad, instalacion, vial, obras, publicas, reglamento, continuo
+- **T22.S06 - Personal, atender, emergencia, sitio** (13 pal, 65 aristas, densidad 0.83): personal, atender, emergencia, sitio, inmediato, intervencion, incidente, protocolo, oportuno, activar, elementos, vital
+- **T22.S07 - Riesgo, poblacion, evitar, prevenir** (12 pal, 52 aristas, densidad 0.79): riesgo, poblacion, evitar, prevenir, revisar, inmueble, automovilista, integridad, peaton, exhortar, establecido, salvaguardar
+- **T22.S08 - Unidad, reportar, circulacion, registrado** (5 pal, 10 aristas, densidad 1.00): unidad, reportar, circulacion, registrado, lesionado
+- **T22.S09 - Solicitar, reciente, corresponder, conocimiento** (11 pal, 38 aristas, densidad 0.69): solicitar, reciente, corresponder, conocimiento, ubicar, disponible, estadistica, complejo, esquema, publicado, formato
 
-### T23 (119 palabras, 15 sub-clusters)
-- **T23.S00 - Disfrutar, tradicion, celebracion, union** (12 pal, 51 aristas, densidad 0.77): disfrutar, tradicion, celebracion, union, tradicional, recinto, magia, monumental, muertos, altar, nautico, platillo
-- **T23.S01 - Espacio, cultural, metropolitano, teatro** (9 pal, 19 aristas, densidad 0.53): espacio, cultural, metropolitano, teatro, riqueza, extraordinario, alberca, mobiliario, enteratir
-- **T23.S02 - Cultura, arte, artista, exposicion** (7 pal, 16 aristas, densidad 0.76): cultura, arte, artista, exposicion, artes, reflexion, conformado
-- **T23.S03 - Experiencia, turistico, visitar, visitante** (11 pal, 37 aristas, densidad 0.67): experiencia, turistico, visitar, visitante, visita, promocion, amistad, atractivo, amplio, bombero, recibimiento
-- **T23.S04 - Evento, zacil, asistir, acompanado** (9 pal, 27 aristas, densidad 0.75): evento, zacil, asistir, acompanado, aniversario, invitacion, resaltar, eduardo, hito
-- **T23.S05 - Plaza, domingo, huasteco, jueves** (10 pal, 35 aristas, densidad 0.78): plaza, domingo, huasteco, jueves, miercoles, hijas, pierdar, exhibicion, salon, acordeon
-- **T23.S06 - Actividad, encuentro, promover, referente** (13 pal, 38 aristas, densidad 0.49): actividad, encuentro, promover, referente, propuesta, bienvenida, enriquecer, informativo, arturo, resumen, planear, docente
-- **T23.S07 - Musica, fiesta, presente, baile** (9 pal, 18 aristas, densidad 0.50): musica, fiesta, presente, baile, comparsa, consumo, proximamente, periodistas, mamon
-- **T23.S08 - Talento, llenar, homenaje, creatividad** (7 pal, 15 aristas, densidad 0.71): talento, llenar, homenaje, creatividad, merito, durar, invaluable
-- **T23.S09 - Invitar, participar, valorar, respetuoso** (7 pal, 12 aristas, densidad 0.57): invitar, participar, valorar, respetuoso, fauna, silvestre, park
-- **T23.S10 - Abril, fiestas, asistente, significativo** (4 pal, 5 aristas, densidad 0.83): abril, fiestas, asistente, significativo
-- **T23.S11 - Identidad, unir, raiz, huasteca** (6 pal, 11 aristas, densidad 0.73): identidad, unir, raiz, huasteca, huastecas, vigente
-- **T23.S12 - Presentacion, artistico, expresion, musical** (6 pal, 12 aristas, densidad 0.80): presentacion, artistico, expresion, musical, agrupacion, fomento
-- **T23.S13 - Festival, costa, espectacular, tigre** (4 pal, 6 aristas, densidad 1.00): festival, costa, espectacular, tigre
-- **T23.S14 - Reunir, danza, congreso, diputados** (5 pal, 5 aristas, densidad 0.50): reunir, danza, congreso, diputados, discusion
+### T23 (131 palabras, 14 sub-clusters)
+- **T23.S00 - Clave, guadalupe, virgen, santo** (13 pal, 48 aristas, densidad 0.61): clave, guadalupe, virgen, santo, diego, fiel, cuidir, pastor, insistir, aguila, texcoco, guevara
+- **T23.S01 - San, juan, pedro, activo** (7 pal, 16 aristas, densidad 0.76): san, juan, pedro, activo, pablo, instante, provincia
+- **T23.S02 - Proyecto, sostener, regional, conurbado** (11 pal, 30 aristas, densidad 0.55): proyecto, sostener, regional, conurbado, tercer, localidad, planeacion, taller, alineado, orientacion, normatividad
+- **T23.S03 - Puerto, operacion, mencionar, presion** (10 pal, 31 aristas, densidad 0.69): puerto, operacion, mencionar, presion, portuario, afluencia, corporativo, conformar, ejercer, romo
+- **T23.S04 - Ubicado, etapa, fase, gol** (12 pal, 38 aristas, densidad 0.58): ubicado, etapa, fase, gol, carril, fifa, inicial, deteccion, corea, albergar, sudafrica, sacudir
+- **T23.S05 - Acceso, usuario, instalar, adecuado** (11 pal, 31 aristas, densidad 0.56): acceso, usuario, instalar, adecuado, conectar, distancia, finalidad, compartido, verificar, previamente, frank
+- **T23.S06 - Principal, concentrar, significar, elevar** (13 pal, 39 aristas, densidad 0.50): principal, concentrar, significar, elevar, relevante, liderar, trimestre, fama, big, geografia, indebido, city
+- **T23.S07 - Abrir, alianza, proponer, andy** (16 pal, 44 aristas, densidad 0.37): abrir, alianza, proponer, andy, caracter, abusivo, naranja, ejecucion, roto, parecido, medellin, novela
+- **T23.S08 - Estudio, gomez, campo, posibilidad** (8 pal, 22 aristas, densidad 0.79): estudio, gomez, campo, posibilidad, titulo, europa, apto, cursar
+- **T23.S09 - Conjunto, tecnico, encabezado, consejo** (7 pal, 16 aristas, densidad 0.76): conjunto, tecnico, encabezado, consejo, foro, ritmo, resguardar
+- **T23.S10 - Antonio, julio, octubre, rivera** (7 pal, 16 aristas, densidad 0.76): antonio, julio, octubre, rivera, celebrado, premiar, girl
+- **T23.S11 - Cuyo, ocasion, solicitud, funcionamiento** (9 pal, 24 aristas, densidad 0.67): cuyo, ocasion, solicitud, funcionamiento, peatonal, croc, pego, bacheo, atendido
+- **T23.S12 - Tamaulipeco, meteorologico, competitivo, maderense** (4 pal, 3 aristas, densidad 0.50): tamaulipeco, meteorologico, competitivo, maderense
+- **T23.S13 - Nacer, vestir, ponte** (3 pal, 3 aristas, densidad 1.00): nacer, vestir, ponte
 
-### T24 (139 palabras, 21 sub-clusters)
-- **T24.S00 - Pasar, peor, pedo, doble** (5 pal, 8 aristas, densidad 0.80): pasar, peor, pedo, doble, totalidad
-- **T24.S01 - Caso, correr, agarrar, impunidad** (10 pal, 37 aristas, densidad 0.82): caso, correr, agarrar, impunidad, gasolina, gordo, chihuahua, danar, ilicito, pruebas
-- **T24.S02 - Claro, pregunta, serio, actuar** (6 pal, 14 aristas, densidad 0.93): claro, pregunta, serio, actuar, detras, critica
-- **T24.S04 - Buscar, demostrar, empatia, maravilloso** (8 pal, 18 aristas, densidad 0.64): buscar, demostrar, empatia, maravilloso, abuela, presumir, practicamente, brillar
-- **T24.S05 - Importar, organizado, calderon, fox** (5 pal, 8 aristas, densidad 0.80): importar, organizado, calderon, fox, felipe
-- **T24.S06 - Problema, afectar, arreglar, lamentablemente** (8 pal, 16 aristas, densidad 0.57): problema, afectar, arreglar, lamentablemente, controlado, pongar, fraccionamiento, estandar
-- **T24.S07 - Viejo, deberiar, feo, perdon** (8 pal, 20 aristas, densidad 0.71): viejo, deberiar, feo, perdon, desmadre, falla, techo, multa
-- **T24.S08 - Meter, facil, propiedad, suponer** (7 pal, 19 aristas, densidad 0.91): meter, facil, propiedad, suponer, acer, curp, biometrico
-- **T24.S09 - Pan, circo, juzgar, suelo** (8 pal, 14 aristas, densidad 0.50): pan, circo, juzgar, suelo, clasico, barco, choque, viene
-- **T24.S10 - Andar, traer, invasion, burro** (5 pal, 9 aristas, densidad 0.90): andar, traer, invasion, burro, pancho
-- **T24.S11 - Terminar, cantar, ocurrir, despues** (7 pal, 19 aristas, densidad 0.91): terminar, cantar, ocurrir, despues, limite, pegar, abandonar
-- **T24.S12 - Malo, maldito, culpar, nieto** (6 pal, 12 aristas, densidad 0.80): malo, maldito, culpar, nieto, coche, absoluto
-- **T24.S13 - Levantar, repetir, convenir, noticiero** (10 pal, 24 aristas, densidad 0.53): levantar, repetir, convenir, noticiero, interno, temblar, pisar, clima, corona, drama
-- **T24.S14 - Cuanto, suceder, patron, mana** (7 pal, 18 aristas, densidad 0.86): cuanto, suceder, patron, mana, chayotero, cuota, incrementar
-- **T24.S15 - Unico, idea, horrible, posibilidad** (7 pal, 13 aristas, densidad 0.62): unico, idea, horrible, posibilidad, soto, aprendizaje, acompanamiento
-- **T24.S16 - Puro, desaparecer, comunista, roma** (4 pal, 6 aristas, densidad 1.00): puro, desaparecer, comunista, roma
-- **T24.S17 - Pinche, raro, sear, fue** (8 pal, 21 aristas, densidad 0.75): pinche, raro, sear, fue, tranza, prohibir, reportaje, locura
-- **T24.S18 - Parecer, siquiera, grabar** (3 pal, 3 aristas, densidad 1.00): parecer, siquiera, grabar
-- **T24.S19 - Alo, segun, molestar, algun** (5 pal, 8 aristas, densidad 0.80): alo, segun, molestar, algun, tragar
-- **T24.S20 - Wey, jajajajaja, error, infierno** (5 pal, 8 aristas, densidad 0.80): wey, jajajajaja, error, infierno, semejante
-- **T24.S21 - Creer, casualidad, culo** (3 pal, 2 aristas, densidad 0.67): creer, casualidad, culo
+### T24 (150 palabras, 14 sub-clusters)
+- **T24.S00 - Judicial, reforma, electoral, juez** (15 pal, 66 aristas, densidad 0.63): judicial, reforma, electoral, juez, imponer, tribunal, distrito, magistrado, supremo, nepotismo, magistrada, universal
+- **T24.S01 - Cambio, frente, medida, totalmente** (17 pal, 66 aristas, densidad 0.48): cambio, frente, medida, totalmente, fondo, estructura, federacion, motociclista, transparente, ordenado, olor, ordinaria
+- **T24.S02 - Defender, proteger, dignidad, odio** (13 pal, 57 aristas, densidad 0.73): defender, proteger, dignidad, odio, estadounidense, destruccion, mentirosa, narcos, comunismo, bala, corrupta, incapaz
+- **T24.S03 - Ley, derecho, impunidad, constitucion** (7 pal, 16 aristas, densidad 0.76): ley, derecho, impunidad, constitucion, desvio, frances, magdalena
+- **T24.S04 - Violencia, libre, genero, grito** (11 pal, 23 aristas, densidad 0.42): violencia, libre, genero, grito, gobernacion, dialogar, malla, mancha, poblado, nucleo, music
+- **T24.S05 - Lider, investigar, mafia, asesinato** (12 pal, 47 aristas, densidad 0.71): lider, investigar, mafia, asesinato, culpable, secuestrar, oler, narcotraficante, cjng, estres, tristemente, nexo
+- **T24.S06 - Colombia, liberar, infancia, rusia** (9 pal, 18 aristas, densidad 0.50): colombia, liberar, infancia, rusia, adolescencia, poza, plaga, lancha, black
+- **T24.S07 - Ciudadano, capturar, cercania, merito** (13 pal, 29 aristas, densidad 0.37): ciudadano, capturar, cercania, merito, caca, ciudadanos, consciente, modernizacion, duran, constituir, alexander, sonado
+- **T24.S08 - Menor, edad, recoger, identificado** (6 pal, 9 aristas, densidad 0.60): menor, edad, recoger, identificado, sonido, afiliacion
+- **T24.S09 - Institucion, medicina, cuestion, preparacion** (10 pal, 23 aristas, densidad 0.51): institucion, medicina, cuestion, preparacion, directiva, aficion, donar, lapso, media, arranca
+- **T24.S10 - Operar, pretender, observar, suelo** (13 pal, 42 aristas, densidad 0.54): operar, pretender, observar, suelo, entero, milenio, condenar, comprado, encubrir, autor, procesar, paredes
+- **T24.S11 - Nacion, defensa, corte, ministra** (8 pal, 14 aristas, densidad 0.50): nacion, defensa, corte, ministra, dividir, semilla, poniente, rehabilitado
+- **T24.S12 - Epoca, independiente, regreso, gutierrez** (9 pal, 19 aristas, densidad 0.53): epoca, independiente, regreso, gutierrez, trayectoria, cantu, acumular, nombramiento, sellar
+- **T24.S13 - Testigo, carajo, pecado, calma** (7 pal, 12 aristas, densidad 0.57): testigo, carajo, pecado, calma, toluca, ecatepec, votante
 
-### T25 (146 palabras, 16 sub-clusters)
-- **T25.S00 - Jesus, jose, sentido, gomez** (12 pal, 41 aristas, densidad 0.62): jesus, jose, sentido, gomez, descanse, gutierrez, oracion, roberto, ramos, paula, lent, oferent
-- **T25.S01 - Desear, deseo, compania, felicitacion** (16 pal, 59 aristas, densidad 0.49): desear, deseo, compania, felicitacion, precioso, maltratar, cumplido, salazar, rodeado, abundante, profesionalismo, satisfaccion
-- **T25.S02 - Acabar, cancion, mugroso, ciego** (11 pal, 29 aristas, densidad 0.53): acabar, cancion, mugroso, ciego, cristo, credito, fuerzas, tristemente, fino, telefonico, jacinto
-- **T25.S03 - Guerra, rusia, urge, recuerden** (10 pal, 31 aristas, densidad 0.69): guerra, rusia, urge, recuerden, cobardes, canon, reserva, hdspm, oficialmente, atlantico
-- **T25.S04 - Tomar, decision, barda, santillan** (7 pal, 12 aristas, densidad 0.57): tomar, decision, barda, santillan, influyente, besar, suero
-- **T25.S05 - Perrito, adoptar, rescatar, viral** (11 pal, 31 aristas, densidad 0.56): perrito, adoptar, rescatar, viral, rescate, titere, clinica, morder, peluche, tierno, equidad
-- **T25.S06 - Mandar, medicamento, tremendo, noma** (8 pal, 19 aristas, densidad 0.68): mandar, medicamento, tremendo, noma, tenia, cristina, vale, reconocido
-- **T25.S07 - Dona, perez, azteca, carolina** (6 pal, 11 aristas, densidad 0.73): dona, perez, azteca, carolina, oxxo, ferial
-- **T25.S08 - Hermana, noviembre, luisa, chavez** (12 pal, 22 aristas, densidad 0.33): hermana, noviembre, luisa, chavez, leyenda, dibujo, liberacion, galeria, farol, traduccion, hincha, ter
-- **T25.S09 - Aceptar, boca, opinar, poquito** (11 pal, 22 aristas, densidad 0.40): aceptar, boca, opinar, poquito, europeo, administrar, costilla, estacionamiento, portuario, continental, prepotencia
-- **T25.S10 - Come, family, may, country** (9 pal, 15 aristas, densidad 0.42): come, family, may, country, martina, ticket, noriega, black, violeta
-- **T25.S11 - Mensaje, enviar, central, rector** (5 pal, 8 aristas, densidad 0.80): mensaje, enviar, central, rector, damaso
-- **T25.S12 - Gana, porq, delante, del** (8 pal, 13 aristas, densidad 0.46): gana, porq, delante, del, sergio, eternamente, enfermar, prometido
-- **T25.S13 - Departamento, mercancia, escrito, referencia** (8 pal, 16 aristas, densidad 0.57): departamento, mercancia, escrito, referencia, factura, sepa, vencido, importacion
-- **T25.S14 - Parasito, inepto, saquear, infeliz** (6 pal, 7 aristas, densidad 0.47): parasito, inepto, saquear, infeliz, esclavo, mete
-- **T25.S15 - Etapa, olviden, filtro, palacios** (6 pal, 9 aristas, densidad 0.60): etapa, olviden, filtro, palacios, alentar, juliana
+### T25 (130 palabras, 10 sub-clusters)
+- **T25.S00 - Com, nao, uma, ela** (17 pal, 101 aristas, densidad 0.74): com, nao, uma, ela, pra, tem, mais, isso, muito, meu, turma, quem
+- **T25.S01 - Semana, santa, turista, temporada** (9 pal, 22 aristas, densidad 0.61): semana, santa, turista, temporada, lunes, llegada, tri, aroma, invierno
+- **T25.S02 - Costa, terreno, lastima, tremendo** (25 pal, 106 aristas, densidad 0.35): costa, terreno, lastima, tremendo, pareja, rica, acumulado, asqueroso, corrar, sabiar, hallar, imaginate
+- **T25.S03 - Provocar, negro, villa, circular** (17 pal, 58 aristas, densidad 0.43): provocar, negro, villa, circular, fallecer, colapso, aguas, lento, entro, drenaj, plato, equilibrio
+- **T25.S04 - Jesus, cristo, dedicado, reino** (15 pal, 43 aristas, densidad 0.41): jesus, cristo, dedicado, reino, sacerdote, sagrado, diocesis, delante, amante, lorena, projimo, beatriz
+- **T25.S05 - Sanitario, jardines, parques, champayan** (10 pal, 22 aristas, densidad 0.49): sanitario, jardines, parques, champayan, colosio, donaldo, elvira, ratificar, quinto, implicado
+- **T25.S06 - Dona, porfa, emocional, marta** (10 pal, 16 aristas, densidad 0.36): dona, porfa, emocional, marta, reflexionar, mafin, leo, sonreir, recibimiento, encierro
+- **T25.S07 - Col, heroes, lampara, pared** (8 pal, 10 aristas, densidad 0.36): col, heroes, lampara, pared, desecho, pedazos, gonzalo, aprobado
+- **T25.S08 - Toma, agregar, pleno, esquina** (9 pal, 19 aristas, densidad 0.53): toma, agregar, pleno, esquina, sorpresa, exploracion, cancelar, parada, ayuso
+- **T25.S09 - Triunfo, protagonista, cena, concesion** (10 pal, 12 aristas, densidad 0.27): triunfo, protagonista, cena, concesion, tapatio, estandar, estrellas, tranquilamente, almomento, encanto
 
-### T26 (100 palabras, 13 sub-clusters)
-- **T26.S00 - Cartel, grupo, terrorista, jefe** (10 pal, 40 aristas, densidad 0.89): cartel, grupo, terrorista, jefe, sicario, regional, noreste, zetas, tropa, cdn
-- **T26.S01 - Ganar, partido, mundial, futbol** (7 pal, 20 aristas, densidad 0.95): ganar, partido, mundial, futbol, copa, animalito, fifa
-- **T26.S02 - Mexico, cdmx, guadalajara, zocalo** (8 pal, 15 aristas, densidad 0.54): mexico, cdmx, guadalajara, zocalo, convocar, tula, traidora, metodo
-- **T26.S03 - Video, subir, show, favorito** (13 pal, 31 aristas, densidad 0.40): video, subir, show, favorito, acabo, tesoro, autor, top, combinar, nomina, bogota, implicar
-- **T26.S04 - Mundo, china, canada, europa** (6 pal, 15 aristas, densidad 1.00): mundo, china, canada, europa, panama, corea
-- **T26.S05 - Perder, capital, auto, enfrente** (8 pal, 14 aristas, densidad 0.50): perder, capital, auto, enfrente, bella, lesionado, influencer, tapatio
-- **T26.S06 - Emocion, transmitir, televisa, escena** (11 pal, 26 aristas, densidad 0.47): emocion, transmitir, televisa, escena, serie, televisora, rock, beisbol, telemundo, gatito, adopcion
-- **T26.S07 - Espana, destruccion, reflejo, tlaxcala** (7 pal, 11 aristas, densidad 0.52): espana, destruccion, reflejo, tlaxcala, ancho, fest, ecosistema
-- **T26.S08 - Apoyar, andrea, mueble, marta** (6 pal, 9 aristas, densidad 0.60): apoyar, andrea, mueble, marta, mafin, genocidio
-- **T26.S09 - Serar, significar, preparar, tamal** (8 pal, 15 aristas, densidad 0.54): serar, significar, preparar, tamal, fase, utilidad, albergar, oral
-- **T26.S10 - Final, enfrentar, desafio** (3 pal, 3 aristas, densidad 1.00): final, enfrentar, desafio
-- **T26.S11 - Operacion, suficiente, caida, gas** (8 pal, 11 aristas, densidad 0.39): operacion, suficiente, caida, gas, resistir, toro, escala, tumaco
-- **T26.S13 - Visual, accesible, autonomia** (3 pal, 3 aristas, densidad 1.00): visual, accesible, autonomia
+### T26 (85 palabras, 8 sub-clusters)
+- **T26.S00 - Mercado, pago, alias, banco** (9 pal, 25 aristas, densidad 0.69): mercado, pago, alias, banco, paypal, santander, muchisimas, chicos, administrador
+- **T26.S01 - Francisco, responder, gloria, carmen** (28 pal, 109 aristas, densidad 0.29): francisco, responder, gloria, carmen, descanso, gerente, legislador, promesa, declaracion, plano, tension, panama
+- **T26.S02 - Nuevamente, juntar, morfi, ciego** (11 pal, 29 aristas, densidad 0.53): nuevamente, juntar, morfi, ciego, colecta, locura, link, recaudado, alia, historias, selectivo
+- **T26.S03 - Informativo, noticias, preocupado, tapon** (4 pal, 5 aristas, densidad 0.83): informativo, noticias, preocupado, tapon
+- **T26.S04 - Aumento, comerciante, incrementar, platillo** (5 pal, 8 aristas, densidad 0.80): aumento, comerciante, incrementar, platillo, evadir
+- **T26.S05 - Comision, firma, convocatoria, lanzar** (11 pal, 21 aristas, densidad 0.38): comision, firma, convocatoria, lanzar, horas, difusion, convocado, abundancia, recepcion, keiko, maxima
+- **T26.S06 - Cerrar, rojo, saldo, soto** (11 pal, 18 aristas, densidad 0.33): cerrar, rojo, saldo, soto, comprometer, genocidio, american, god, bless, microbus, tepjf
+- **T26.S07 - Efecto, pongas, caracteristica, tarado** (6 pal, 7 aristas, densidad 0.47): efecto, pongas, caracteristica, tarado, abundar, tumaco
 
-### T27 (70 palabras, 7 sub-clusters)
-- **T27.S00 - Villarreal, monica, anaya** (3 pal, 3 aristas, densidad 1.00): villarreal, monica, anaya
-- **T27.S01 - Fortalecer, construir, participacion, futuro** (17 pal, 122 aristas, densidad 0.90): fortalecer, construir, participacion, futuro, iniciativa, sociedad, avanzar, fomentar, generacion, avance, dialogo, comprometido
-- **T27.S03 - Compromiso, esfuerzo, reconocer, administracion** (12 pal, 60 aristas, densidad 0.91): compromiso, esfuerzo, reconocer, administracion, reconocimiento, reafirmar, contribuir, respaldo, vocacion, fortalecimiento, productivo, formacion
-- **T27.S04 - Excelente, alcaldesa, lic, villareal** (7 pal, 17 aristas, densidad 0.81): excelente, alcaldesa, lic, villareal, tampiquenos, destacado, agradable
-- **T27.S05 - Educacion, entrega, escuela, entregar** (18 pal, 110 aristas, densidad 0.72): educacion, entrega, escuela, entregar, encabezar, estudiante, ceremonia, alumno, educativo, civico, escolar, plantel
-- **T27.S06 - Dif, adriana, comunitario, inauguracion** (4 pal, 6 aristas, densidad 1.00): dif, adriana, comunitario, inauguracion
-- **T27.S08 - Tampiqueno, juventud, cercania** (3 pal, 2 aristas, densidad 0.67): tampiqueno, juventud, cercania
+### T27 (120 palabras, 16 sub-clusters)
+- **T27.S00 - Morena, politico, pan, pri** (6 pal, 12 aristas, densidad 0.80): morena, politico, pan, pri, panista, vivero
+- **T27.S01 - Crimen, criminal, organizado, humanidad** (11 pal, 33 aristas, densidad 0.60): crimen, criminal, organizado, humanidad, eua, cuello, delictivo, fuser, poseer, lesa, farc
+- **T27.S02 - Dinero, inteligencia, adan, opcion** (10 pal, 30 aristas, densidad 0.67): dinero, inteligencia, adan, opcion, siglo, digital, artificial, conviccion, paga, orozco
+- **T27.S03 - Cargo, dano, ocupar, referir** (15 pal, 50 aristas, densidad 0.48): cargo, dano, ocupar, referir, articulo, combate, jaime, decreto, acreditar, constar, agilizar, retroceso
+- **T27.S04 - Bola, ratero, maldito, mierda** (7 pal, 19 aristas, densidad 0.91): bola, ratero, maldito, mierda, tranquilo, cinico, animalito
+- **T27.S05 - Corrupto, verguenza, vividor, juzgar** (7 pal, 15 aristas, densidad 0.71): corrupto, verguenza, vividor, juzgar, enfrente, paisano, villahermosa
+- **T27.S06 - Servir, aumentar, quejar, senador** (9 pal, 23 aristas, densidad 0.64): servir, aumentar, quejar, senador, norona, rango, perspectiva, daniela, romano
+- **T27.S07 - Gobernar, duda, idea, caber** (9 pal, 23 aristas, densidad 0.64): gobernar, duda, idea, caber, molestar, ministerio, posiblemente, gobernanza, sostuve
+- **T27.S08 - Prian, sexenio, prianista, mandato** (9 pal, 25 aristas, densidad 0.69): prian, sexenio, prianista, mandato, presidencial, contrato, financiamiento, atte, olvidado
+- **T27.S09 - Claro, cabeza, razon, ridiculo** (6 pal, 12 aristas, densidad 0.80): claro, cabeza, razon, ridiculo, fantasma, eficiencia
+- **T27.S10 - Pueblo, cuba, gritar, dias** (5 pal, 7 aristas, densidad 0.70): pueblo, cuba, gritar, dias, aparentemente
+- **T27.S11 - Azteca, urge, opositor, oxxo** (9 pal, 18 aristas, densidad 0.50): azteca, urge, opositor, oxxo, diana, rosales, aprox, avanza, imperdible
+- **T27.S12 - Hermano, jamas, lara, aguantar** (4 pal, 6 aristas, densidad 1.00): hermano, jamas, lara, aguantar
+- **T27.S13 - Acabar, limpiar, convenir, equivocar** (5 pal, 8 aristas, densidad 0.80): acabar, limpiar, convenir, equivocar, lima
+- **T27.S14 - Votar, ministro, sigan** (3 pal, 2 aristas, densidad 0.67): votar, ministro, sigan
+- **T27.S15 - Derecha, cometer, saquear** (3 pal, 3 aristas, densidad 1.00): derecha, cometer, saquear
 
-### T28 (133 palabras, 10 sub-clusters)
-- **T28.S00 - Fortaleza, pronto, condolencia, perdida** (17 pal, 92 aristas, densidad 0.68): fortaleza, pronto, condolencia, perdida, qepd, sincero, resignacion, eterno, fallecimiento, lamentar, consuelo, perdurar
-- **T28.S01 - Responder, sem, fan, saludar** (10 pal, 22 aristas, densidad 0.49): responder, sem, fan, saludar, arriesgar, beto, mayorga, regalado, cronista, sua
-- **T28.S02 - Alcalde, tomas, dias, maipu** (11 pal, 30 aristas, densidad 0.55): alcalde, tomas, dias, maipu, vodanovic, producir, comuna, diputada, pacto, recorrer, municipios
-- **T28.S03 - Viernes, cardenas, periodismo, teresa** (29 pal, 83 aristas, densidad 0.20): viernes, cardenas, periodismo, teresa, sierra, bala, alta, lazaro, ocasionar, ingresar, narcoestado, veronica
-- **T28.S04 - Paz, descansar, senal, pionero** (5 pal, 5 aristas, densidad 0.50): paz, descansar, senal, pionero, apreciar
-- **T28.S05 - Gritar, festejar, masivo, festejo** (17 pal, 54 aristas, densidad 0.40): gritar, festejar, masivo, festejo, escenario, atropellar, condenar, galvez, paraiso, respirar, pongas, calendario
-- **T28.S06 - Carlos, representante, salinas, priista** (12 pal, 31 aristas, densidad 0.47): carlos, representante, salinas, priista, ruben, saldivar, traducir, calladito, karina, medrano, lizeth, tello
-- **T28.S07 - Anos, milagro, fallecer, atrevir** (16 pal, 48 aristas, densidad 0.40): anos, milagro, fallecer, atrevir, erar, ivan, distancia, salvo, tar, regular, hablando, actriz
-- **T28.S08 - Mendoza, bad, ford, better** (7 pal, 17 aristas, densidad 0.81): mendoza, bad, ford, better, rich, take, name
-- **T28.S10 - Difundir, whatsapp, confirmado, prima** (7 pal, 11 aristas, densidad 0.52): difundir, whatsapp, confirmado, prima, doblar, embarazado, bbva
+### T28 (141 palabras, 13 sub-clusters)
+- **T28.S00 - Hora, medio, ambiente, viernes** (5 pal, 10 aristas, densidad 1.00): hora, medio, ambiente, viernes, clima
+- **T28.S01 - Hogar, perrito, rescatar, mascota** (15 pal, 64 aristas, densidad 0.61): hogar, perrito, rescatar, mascota, adoptar, adopcion, mediano, perrita, whatsapp, talla, comprador, info
+- **T28.S02 - Gustar, encantar, sem, saludar** (8 pal, 14 aristas, densidad 0.50): gustar, encantar, sem, saludar, jodido, sofia, administrar, seleccionar
+- **T28.S03 - Venta, compra, consumo, cliente** (17 pal, 57 aristas, densidad 0.42): venta, compra, consumo, cliente, especifico, coincidir, cuadro, conservar, disminucion, indice, higiene, comedor
+- **T28.S04 - Super, detalle, sencillo, cocina** (21 pal, 65 aristas, densidad 0.31): super, detalle, sencillo, cocina, monico, vuelo, maravilla, angeles, adicional, buenisimo, decoracion, traje
+- **T28.S05 - Oportunidad, marcar, clausura, descubrir** (12 pal, 32 aristas, densidad 0.48): oportunidad, marcar, clausura, descubrir, apertura, liguilla, semifinal, excelencia, empate, enfoque, actualizar, orientado
+- **T28.S06 - Ana, emocion, cancun, benito** (10 pal, 25 aristas, densidad 0.56): ana, emocion, cancun, benito, paty, peralta, yucatan, motivar, mazatlan, lezama
+- **T28.S07 - Familiar, tormenta, ropa, tropical** (9 pal, 18 aristas, densidad 0.50): familiar, tormenta, ropa, tropical, brasil, acompanamiento, localizacion, competente, tripulante
+- **T28.S08 - Rio, panuco, bloqueo, pescador** (9 pal, 16 aristas, densidad 0.44): rio, panuco, bloqueo, pescador, orilla, boleta, inconformidad, guemez, pesquero
+- **T28.S09 - Canal, vecino, esposa, version** (9 pal, 17 aristas, densidad 0.47): canal, vecino, esposa, version, solar, cuauhtemoc, maipu, comuna, retener
+- **T28.S10 - Esperar, practicamente, ideal, verano** (7 pal, 13 aristas, densidad 0.62): esperar, practicamente, ideal, verano, cuota, enojo, borracho
+- **T28.S11 - Bendiga, rico, admirar, infinito** (10 pal, 27 aristas, densidad 0.60): bendiga, rico, admirar, infinito, agradecido, rancho, placer, bella, etica, unam
+- **T28.S12 - Realidad, comentar, contenido, arriesgar** (9 pal, 17 aristas, densidad 0.47): realidad, comentar, contenido, arriesgar, acoso, tolerancia, suceso, app, prima
 
-### T29 (122 palabras, 12 sub-clusters)
-- **T29.S00 - Mil, abierto, formar, medicina** (13 pal, 39 aristas, densidad 0.50): mil, abierto, formar, medicina, torneo, muchisimos, desorden, emocionar, conociar, certamen, jugadora, christian
-- **T29.S01 - Completo, nota, antiguo, edificio** (10 pal, 24 aristas, densidad 0.53): completo, nota, antiguo, edificio, revelar, monicavillarreal, derrumbe, calzado, semar, alacran
-- **T29.S02 - Francisco, torres, deportista, plata** (12 pal, 26 aristas, densidad 0.39): francisco, torres, deportista, plata, periodico, munoz, isidro, alonso, claus, gregorio, decencia, comparti
-- **T29.S03 - Comida, listo, restaurante, cuadra** (12 pal, 32 aristas, densidad 0.48): comida, listo, restaurante, cuadra, vendedor, adorar, deliciosa, notario, recibimos, artesania, suspension, celeber
-- **T29.S04 - Puesto, lujo, millonario, leccion** (12 pal, 30 aristas, densidad 0.46): puesto, lujo, millonario, leccion, ridicula, presi, analizar, sancion, impulsado, escrupulo, infraccion, bullying
-- **T29.S05 - Dudar, ataque, enorme, presirvienta** (14 pal, 39 aristas, densidad 0.43): dudar, ataque, enorme, presirvienta, produccion, aclarar, polemica, normalizar, interminable, fundar, instagram, manolo
-- **T29.S06 - Puente, guzman, viento, construido** (10 pal, 21 aristas, densidad 0.47): puente, guzman, viento, construido, supervisar, canton, insistir, mosco, diseno, especificamente
-- **T29.S07 - Moreno, alito, montaje, verdaderamente** (11 pal, 19 aristas, densidad 0.34): moreno, alito, montaje, verdaderamente, toxico, qie, pregonar, escuelas, summer, last, went
-- **T29.S08 - Huir, golpear, manipular, hilo** (10 pal, 21 aristas, densidad 0.47): huir, golpear, manipular, hilo, desgobierno, sombra, destrozar, cargado, sacudir, sorteo
-- **T29.S09 - Testigo, feminista, guillermo, testimonio** (7 pal, 16 aristas, densidad 0.76): testigo, feminista, guillermo, testimonio, sexual, monsalve, sinfiltrostv
-- **T29.S10 - Solicitar, pintado, calles** (3 pal, 3 aristas, densidad 1.00): solicitar, pintado, calles
-- **T29.S11 - Mostrar, ocultar, publicacion, empleada** (5 pal, 8 aristas, densidad 0.80): mostrar, ocultar, publicacion, empleada, concurso
+### T29 (113 palabras, 13 sub-clusters)
+- **T29.S00 - Familia, paz, descansar, fortaleza** (14 pal, 66 aristas, densidad 0.72): familia, paz, descansar, fortaleza, sincero, condolencia, profundamente, eterno, fallecimiento, qepd, lamentar, decirte
+- **T29.S01 - Ano, mes, cumplir, prision** (10 pal, 26 aristas, densidad 0.58): ano, mes, cumplir, prision, financiero, record, fractura, trabajadores, bruto, formalizar
+- **T29.S02 - Vida, mama, dolor, alma** (11 pal, 29 aristas, densidad 0.53): vida, mama, dolor, alma, amen, oracion, madrina, atropellar, amoroso, tiktok, tini
+- **T29.S03 - Tomar, ruta, error, transitar** (19 pal, 75 aristas, densidad 0.44): tomar, ruta, error, transitar, cerrado, indicacion, utilizado, ventana, austeridad, excusa, obedecer, mateos
+- **T29.S04 - Lograr, formar, reto, marino** (10 pal, 31 aristas, densidad 0.69): lograr, formar, reto, marino, expo, ciencia, cirugia, revivir, ciencias, navegar
+- **T29.S05 - Amigo, dificil, companero, amiga** (5 pal, 9 aristas, densidad 0.90): amigo, dificil, companero, amiga, companera
+- **T29.S06 - Acompanar, alimento, noble, nicolas** (7 pal, 14 aristas, densidad 0.67): acompanar, alimento, noble, nicolas, gesto, coepris, riesgos
+- **T29.S07 - Pequeno, chico, escena, sobrevivir** (8 pal, 16 aristas, densidad 0.57): pequeno, chico, escena, sobrevivir, ave, habilidad, nena, puesta
+- **T29.S08 - Categoria, tiro, juvenil, ninas** (6 pal, 12 aristas, densidad 0.80): categoria, tiro, juvenil, ninas, talentoso, villanueva
+- **T29.S09 - Olvidar, arrastrar, pase, termino** (9 pal, 19 aristas, densidad 0.53): olvidar, arrastrar, pase, termino, hilo, gobernado, rifa, regalado, amarrado
+- **T29.S10 - Grande, carino, regalo** (3 pal, 3 aristas, densidad 1.00): grande, carino, regalo
+- **T29.S11 - Daniel, noboa, influencia, oceano** (4 pal, 4 aristas, densidad 0.67): daniel, noboa, influencia, oceano
+- **T29.S13 - Recibo, desconocer, datos** (3 pal, 2 aristas, densidad 0.67): recibo, desconocer, datos
 
-### T30 (173 palabras, 16 sub-clusters)
-- **T30.S00 - Pago, alias, nacion, banco** (8 pal, 20 aristas, densidad 0.71): pago, alias, nacion, banco, paypal, santander, muchisimas, chicos
-- **T30.S01 - Equipo, brava, estadio, liga** (17 pal, 53 aristas, densidad 0.39): equipo, brava, estadio, liga, seleccion, club, camiseta, tercer, mundialista, estacion, cuauhtemoc, derrota
-- **T30.S02 - Pesos, sueldo, aumento, juntar** (12 pal, 45 aristas, densidad 0.68): pesos, sueldo, aumento, juntar, cantidad, canasta, patita, lanzar, kilo, chillar, flaco, obrero
-- **T30.S03 - Faltar, pata, vividor, desgracia** (18 pal, 78 aristas, densidad 0.51): faltar, pata, vividor, desgracia, perjudicar, quieren, mediocre, cagar, rancho, cirugia, ubeir, chinguir
-- **T30.S04 - Favor, marcha, organizar, traslado** (11 pal, 24 aristas, densidad 0.44): favor, marcha, organizar, traslado, var, concesion, gallina, indicar, mediano, num, camellon
-- **T30.S05 - Jalisco, alejandro, delgado, informe** (18 pal, 48 aristas, densidad 0.31): jalisco, alejandro, delgado, informe, fernandez, deje, trasladar, reunido, jabon, mayores, cenar, muneco
-- **T30.S06 - Nivel, documento, incansable, nacimiento** (12 pal, 23 aristas, densidad 0.35): nivel, documento, incansable, nacimiento, panuco, villegas, joel, aportacion, ecologico, ninas, vacacional, eventual
-- **T30.S07 - Ladron, asunto, involucrado, contrato** (14 pal, 43 aristas, densidad 0.47): ladron, asunto, involucrado, contrato, tonteria, tellez, loca, rostro, panico, enojo, compliz, sentencia
-- **T30.S08 - Reparacion, profeco, croc, antirrabico** (10 pal, 25 aristas, densidad 0.56): reparacion, profeco, croc, antirrabico, itea, recibido, bacheo, atendido, pese, aseo
-- **T30.S09 - Federal, comunicacion, gabinete, audiencia** (9 pal, 19 aristas, densidad 0.53): federal, comunicacion, gabinete, audiencia, pecho, publicamente, desmentir, fernanda, bonilla
-- **T30.S10 - Fernando, potosi, chavo, tanta** (10 pal, 21 aristas, densidad 0.47): fernando, potosi, chavo, tanta, valles, tamayo, latinoamerica, policiaco, enteer, tardes
-- **T30.S11 - Cerrar, profesor, jubilado, cholula** (5 pal, 7 aristas, densidad 0.70): cerrar, profesor, jubilado, cholula, monito
-- **T30.S12 - Cuantos, enserio, halloween, angela** (10 pal, 23 aristas, densidad 0.51): cuantos, enserio, halloween, angela, oye, hagas, tmb, cuan, encender, ahhh
-- **T30.S13 - Aca, piso, nuevamente, link** (6 pal, 8 aristas, densidad 0.53): aca, piso, nuevamente, link, karen, mango
-- **T30.S14 - Alcanzar, material, atleta, tenor** (8 pal, 13 aristas, densidad 0.46): alcanzar, material, atleta, tenor, aguirre, ajedrez, culminar, foi
-- **T30.S15 - Salida, independiente, rocha, moya** (5 pal, 6 aristas, densidad 0.60): salida, independiente, rocha, moya, conformar
+### T30 (125 palabras, 14 sub-clusters)
+- **T30.S00 - Quedar, casa, mandar, opinion** (9 pal, 22 aristas, densidad 0.61): quedar, casa, mandar, opinion, correo, fotografia, rebasar, despedida, motobomba
+- **T30.S01 - Favor, necesitar, ayudar, ayuda** (6 pal, 14 aristas, densidad 0.93): favor, necesitar, ayudar, ayuda, amigos, gracios
+- **T30.S02 - Pagar, tarjeta, clabe, pension** (4 pal, 6 aristas, densidad 1.00): pagar, tarjeta, clabe, pension
+- **T30.S03 - Escuchar, dormir, grabar, bano** (19 pal, 82 aristas, densidad 0.48): escuchar, dormir, grabar, bano, ruido, manos, patio, definitivamente, pasaje, techo, viral, caos
+- **T30.S04 - Venir, sentir, boca, perdon** (11 pal, 29 aristas, densidad 0.53): venir, sentir, boca, perdon, compa, creador, cajero, capa, pluvial, matrimonio, fatal
+- **T30.S05 - Comentario, cancer, enfermedad, bebe** (14 pal, 48 aristas, densidad 0.53): comentario, cancer, enfermedad, bebe, cerebro, ine, plastico, tendencia, tipico, reclamar, recomendacion, lavado
+- **T30.S06 - Amar, hola, comer, extranar** (8 pal, 18 aristas, densidad 0.64): amar, hola, comer, extranar, divertido, broma, mami, aprendizaje
+- **T30.S07 - Color, gana, suerte, carta** (10 pal, 28 aristas, densidad 0.62): color, gana, suerte, carta, envidia, signo, tamano, autopista, vicio, sentimiento
+- **T30.S08 - Estupido, porqueria, feo, todavia** (8 pal, 21 aristas, densidad 0.75): estupido, porqueria, feo, todavia, armar, verga, prender, mariela
+- **T30.S09 - Alguien, dedo, esconder, callar** (7 pal, 13 aristas, densidad 0.62): alguien, dedo, esconder, callar, amparo, injusticia, camargo
+- **T30.S10 - Caro, depender, miseria, checar** (9 pal, 27 aristas, densidad 0.75): caro, depender, miseria, checar, comparar, sancion, comparacion, porcentaje, variar
+- **T30.S11 - Preferir, notar, chica, humilde** (8 pal, 13 aristas, densidad 0.46): preferir, notar, chica, humilde, miente, belico, cotidiano, renacer
+- **T30.S12 - Cambiar, expresidente, despensa, ligado** (6 pal, 10 aristas, densidad 0.67): cambiar, expresidente, despensa, ligado, chedraui, colocado
+- **T30.S13 - Increible, piso, pata, piedra** (4 pal, 6 aristas, densidad 1.00): increible, piso, pata, piedra
 
-### T31 (162 palabras, 15 sub-clusters)
-- **T31.S00 - Com, pelo, nao, uma** (18 pal, 98 aristas, densidad 0.64): com, pelo, nao, uma, eua, israel, brasil, mais, pra, fama, tem, isso
-- **T31.S01 - Millon, huachicol, aduana, idiota** (15 pal, 75 aristas, densidad 0.71): millon, huachicol, aduana, idiota, lagartija, huachicolero, detencion, argumento, codigo, torta, humo, capo
-- **T31.S02 - Social, red, asegurar, sostener** (10 pal, 27 aristas, densidad 0.60): social, red, asegurar, sostener, relacionado, pro, figura, finalmente, beneficiado, cuidados
-- **T31.S03 - Autoridad, policia, honesto, autopista** (12 pal, 28 aristas, densidad 0.42): autoridad, policia, honesto, autopista, trailero, mugre, saldo, edomex, taxi, bus, boulevard, banorte
-- **T31.S04 - Delito, investigacion, fiscalia, denuncia** (9 pal, 24 aristas, densidad 0.67): delito, investigacion, fiscalia, denuncia, cadena, afirmar, dinamica, cordoba, legisladora
-- **T31.S05 - Presentar, linea, lista, detectar** (15 pal, 45 aristas, densidad 0.43): presentar, linea, lista, detectar, arrancar, preciso, magnifico, cortadura, paseo, frenar, tension, destapar
-- **T31.S06 - Diario, iniciar, reportar, juridico** (14 pal, 41 aristas, densidad 0.45): diario, iniciar, reportar, juridico, ejercicio, ordenado, tamaulipa, report, reparar, certeza, lampara, cable
-- **T31.S07 - Arma, droga, americano, efectivo** (10 pal, 22 aristas, densidad 0.49): arma, droga, americano, efectivo, voltear, apoderar, oriente, narcoterrorista, acumular, impulsir
-- **T31.S08 - Jorge, natural, ramon, pelear** (16 pal, 54 aristas, densidad 0.45): jorge, natural, ramon, pelear, valido, reciente, experto, tir, agradecimiento, bendice, lago, amanecer
-- **T31.S09 - Juego, acercar, gratis, mecanico** (10 pal, 24 aristas, densidad 0.53): juego, acercar, gratis, mecanico, impecable, dinamico, esperado, navidena, vital, avalado
-- **T31.S10 - General, juarez, analisis, vinculado** (8 pal, 13 aristas, densidad 0.46): general, juarez, analisis, vinculado, disposicion, administrativo, relevante, preventa
-- **T31.S11 - Celular, telefono, credencial, comunicar** (7 pal, 14 aristas, densidad 0.67): celular, telefono, credencial, comunicar, llamada, conforme, cancelacion
-- **T31.S12 - Informacion, dedicar, probable, util** (7 pal, 11 aristas, densidad 0.52): informacion, dedicar, probable, util, sustento, localizar, xochimilco
-- **T31.S13 - Causa, legal, familias, acuerdir** (6 pal, 10 aristas, densidad 0.67): causa, legal, familias, acuerdir, aborto, cena
-- **T31.S14 - Guanajuato, motivo, sala, incomodo** (5 pal, 9 aristas, densidad 0.90): guanajuato, motivo, sala, incomodo, delicios
+### T31 (113 palabras, 15 sub-clusters)
+- **T31.S00 - Servicio, salud, atencion, brindar** (10 pal, 42 aristas, densidad 0.93): servicio, salud, atencion, brindar, medico, consulta, especializado, paciente, modulo, traslado
+- **T31.S01 - Gobierno, municipal, sociedad, humanista** (5 pal, 9 aristas, densidad 0.90): gobierno, municipal, sociedad, humanista, patrimonio
+- **T31.S02 - Seguir, construir, sumar, avanzar** (9 pal, 34 aristas, densidad 0.94): seguir, construir, sumar, avanzar, transformar, digno, firme, impulso, preparado
+- **T31.S03 - Mejorar, obra, calidad, infraestructura** (11 pal, 49 aristas, densidad 0.89): mejorar, obra, calidad, infraestructura, urbano, movilidad, mejora, concreto, potable, suministro, territorial
+- **T31.S04 - Fortalecer, iniciativa, capacidad, laboral** (16 pal, 95 aristas, densidad 0.79): fortalecer, iniciativa, capacidad, laboral, estrategico, capacitacion, proposito, herramienta, ampliar, convenio, tecnologia, productivo
+- **T31.S05 - Accion, coordinacion, prevencion, contribuir** (9 pal, 36 aristas, densidad 1.00): accion, coordinacion, prevencion, contribuir, entorno, coordinado, implementar, fortalecimiento, destinado
+- **T31.S06 - Bienestar, programa, jornada, tampiquenas** (5 pal, 10 aristas, densidad 1.00): bienestar, programa, jornada, tampiquenas, beneficiar
+- **T31.S07 - Tampicovacontodo, tampicotecuida, cuidar, prioridad** (5 pal, 10 aristas, densidad 1.00): tampicovacontodo, tampicotecuida, cuidar, prioridad, licenciada
+- **T31.S08 - Objetivo, garantizar, organismo, cabildo** (7 pal, 20 aristas, densidad 0.95): objetivo, garantizar, organismo, cabildo, sesion, creacion, sostenible
+- **T31.S09 - Administracion, resultado, avance, gestion** (9 pal, 33 aristas, densidad 0.92): administracion, resultado, avance, gestion, asimismo, disminuir, administrativo, programado, traducir
+- **T31.S10 - Ciudadania, beneficio, necesidad, pendiente** (6 pal, 15 aristas, densidad 1.00): ciudadania, beneficio, necesidad, pendiente, dialogo, comprometido
+- **T31.S11 - Compromiso, vision, reafirmar, respaldo** (4 pal, 6 aristas, densidad 1.00): compromiso, vision, reafirmar, respaldo
+- **T31.S12 - Cuidado, integral, importancia, morelos** (8 pal, 22 aristas, densidad 0.79): cuidado, integral, importancia, morelos, saludable, diabetes, cecodiat, actualizacion
+- **T31.S13 - Importante, reconocer, fundamental** (3 pal, 3 aristas, densidad 1.00): importante, reconocer, fundamental
+- **T31.S14 - Comunidad, universidad, academico, pacifico** (4 pal, 6 aristas, densidad 1.00): comunidad, universidad, academico, pacifico
 
-### T32 (122 palabras, 14 sub-clusters)
-- **T32.S00 - Martinez, armando, robledo, erasmo** (7 pal, 21 aristas, densidad 1.00): martinez, armando, robledo, erasmo, manriquez, representacion, hector
-- **T32.S01 - Direccion, transito, vialidad, vial** (11 pal, 38 aristas, densidad 0.69): direccion, transito, vialidad, vial, ecologia, aeropuerto, instalar, mascota, optimizar, obrera, sanidad
-- **T32.S02 - Municipio, sur, region, conurbado** (11 pal, 33 aristas, densidad 0.60): municipio, sur, region, conurbado, carnaval, cierre, delictivo, tamaulipecos, juntos, celebrado, asamblea
-- **T32.S03 - Seguridad, proteger, construccion, mesa** (6 pal, 13 aristas, densidad 0.87): seguridad, proteger, construccion, mesa, porres, participe
-- **T32.S04 - Ciudad, limpio, constante, banqueta** (14 pal, 41 aristas, densidad 0.45): ciudad, limpio, constante, banqueta, diariamente, tonelada, sabor, inundado, acumulacion, infeccion, galardon, embellecir
-- **T32.S05 - Publico, transporte, mejora, invertir** (13 pal, 41 aristas, densidad 0.53): publico, transporte, mejora, invertir, alumbrado, manejo, reglamento, lavado, correspondiente, modernizacion, orientado, rehabilitar
-- **T32.S06 - Cabo, coordinacion, instalacion, vicente** (10 pal, 29 aristas, densidad 0.64): cabo, coordinacion, instalacion, vicente, supervision, dialogar, funcionamiento, voluntario, peatonal, rosca
-- **T32.S07 - Personal, capacitacion, curso, conocimiento** (10 pal, 29 aristas, densidad 0.64): personal, capacitacion, curso, conocimiento, taller, higiene, impartir, sensibilidad, creativo, mochila
-- **T32.S08 - Seguro, condicion, morelos, tranquilidad** (8 pal, 21 aristas, densidad 0.75): seguro, condicion, morelos, tranquilidad, aire, adecuado, verificar, merida
-- **T32.S09 - Laguna, carpintero, turista** (3 pal, 3 aristas, densidad 1.00): laguna, carpintero, turista
-- **T32.S10 - Avenida, ubicado, prevenir, bache** (8 pal, 20 aristas, densidad 0.71): avenida, ubicado, prevenir, bache, transitar, pluvial, intenso, villahermosa
-- **T32.S11 - Evitar, acudir, tramite, reducir** (7 pal, 13 aristas, densidad 0.62): evitar, acudir, tramite, reducir, efectuar, determinar, montoya
-- **T32.S12 - Objetivo, garantizar, tarea, coordinar** (5 pal, 9 aristas, densidad 0.90): objetivo, garantizar, tarea, coordinar, gestionar
-- **T32.S13 - Requerir, pila, electronico, pongansir** (9 pal, 14 aristas, densidad 0.39): requerir, pila, electronico, pongansir, vieja, lady, cdvictorio, michael, today
+### T32 (153 palabras, 18 sub-clusters)
+- **T32.S00 - Trabajador, numero, leon, fan** (24 pal, 103 aristas, densidad 0.37): trabajador, numero, leon, fan, monterrey, baja, descuento, multa, queretaro, licencia, parejo, predial
+- **T32.S01 - Narco, cartel, gringo, terrorista** (12 pal, 49 aristas, densidad 0.74): narco, cartel, gringo, terrorista, inutil, sicario, inepto, mugroso, kks, cia, vigilar, tropa
+- **T32.S02 - Ejercito, militar, soldado, horario** (10 pal, 27 aristas, densidad 0.60): ejercito, militar, soldado, horario, aver, larga, copia, cartilla, reclutamiento, electronica
+- **T32.S03 - Jajaja, jajajaja, risa, wey** (8 pal, 21 aristas, densidad 0.75): jajaja, jajajaja, risa, wey, segun, circo, bailar, sexo
+- **T32.S04 - Pendejo, pinche, cabron, chingar** (9 pal, 29 aristas, densidad 0.81): pendejo, pinche, cabron, chingar, mamada, pongansir, pinches, chingada, huevon
+- **T32.S05 - Preguntar, invadir, oposicion, normal** (11 pal, 36 aristas, densidad 0.66): preguntar, invadir, oposicion, normal, ajeno, perdido, limite, sal, enferma, prd, votacion
+- **T32.S06 - Video, comida, despues, vean** (7 pal, 14 aristas, densidad 0.67): video, comida, despues, vean, presa, guapo, europeo
+- **T32.S07 - Parecer, faltar, arreglar, primo** (7 pal, 12 aristas, densidad 0.57): parecer, faltar, arreglar, primo, comodo, maquillaje, guillen
+- **T32.S08 - Matar, jefe, nomas, controlar** (8 pal, 19 aristas, densidad 0.68): matar, jefe, nomas, controlar, simple, prestar, muchacho, tramitar
+- **T32.S09 - Turno, disfruten, casas, cardenas** (13 pal, 29 aristas, densidad 0.37): turno, disfruten, casas, cardenas, portar, amable, lazaro, mty, gris, ruben, alegre, diente
+- **T32.S10 - Empezar, inventar, radio, ivan** (8 pal, 13 aristas, densidad 0.46): empezar, inventar, radio, ivan, desafortunadamente, archivo, alex, school
+- **T32.S11 - Morir, despertar, enfermo, porq** (7 pal, 19 aristas, densidad 0.91): morir, despertar, enfermo, porq, cortar, caray, demonio
+- **T32.S12 - Jaja, pedo, reir, pobreza** (7 pal, 19 aristas, densidad 0.91): jaja, pedo, reir, pobreza, jajar, neto, fallido
+- **T32.S13 - Huevo, demasiado, pila, har** (8 pal, 12 aristas, densidad 0.43): huevo, demasiado, pila, har, acelerar, one, mcm, segui
+- **T32.S14 - Regresar, cuando, organizar, carnal** (5 pal, 8 aristas, densidad 0.80): regresar, cuando, organizar, carnal, disfrazado
+- **T32.S15 - Andar, deir, mero** (3 pal, 3 aristas, densidad 1.00): andar, deir, mero
+- **T32.S16 - Cuanto, mana, pavimento** (3 pal, 2 aristas, densidad 0.67): cuanto, mana, pavimento
+- **T32.S17 - Agarrar, ustedes, atrapar** (3 pal, 2 aristas, densidad 0.67): agarrar, ustedes, atrapar
 
-### T33 (90 palabras, 14 sub-clusters)
-- **T33.S00 - Corazon, amor, hogar, esperanza** (9 pal, 28 aristas, densidad 0.78): corazon, amor, hogar, esperanza, carino, dificil, infinito, angeles, morenita
-- **T33.S01 - Contar, clabe, tarjeta, toby** (6 pal, 12 aristas, densidad 0.80): contar, clabe, tarjeta, toby, cuentas, diana
-- **T33.S02 - Noche, tarde, navidad, navideno** (10 pal, 36 aristas, densidad 0.80): noche, tarde, navidad, navideno, espiritu, sabado, pino, encendido, caja, disfruter
-- **T33.S03 - Compartir, alegria, familiar, convivencia** (9 pal, 33 aristas, densidad 0.92): compartir, alegria, familiar, convivencia, sano, febrero, edicion, album, esparcimiento
-- **T33.S04 - Apoyo, necesitar, ayuda, donacion** (8 pal, 19 aristas, densidad 0.68): apoyo, necesitar, ayuda, donacion, mandir, solito, entrenar, little
-- **T33.S05 - Nino, nina, adulto, diversion** (8 pal, 17 aristas, densidad 0.61): nino, nina, adulto, diversion, divertido, jardin, cris, tamara
-- **T33.S06 - Gracias, regalo, contento, bendiciones** (6 pal, 12 aristas, densidad 0.80): gracias, regalo, contento, bendiciones, padrisimo, lanzamiento
-- **T33.S07 - Vivir, esperar, reclamo, queja** (6 pal, 9 aristas, densidad 0.60): vivir, esperar, reclamo, queja, atropello, negligencia
-- **T33.S08 - Encontrar, humano, bebe, universo** (7 pal, 13 aristas, densidad 0.62): encontrar, humano, bebe, universo, piedra, desesperacion, apasionado
-- **T33.S09 - Familia, solidaridad, convivir, santiago** (5 pal, 5 aristas, densidad 0.50): familia, solidaridad, convivir, santiago, ampliacion
-- **T33.S10 - Amigo, amiga, viaje, adios** (4 pal, 5 aristas, densidad 0.83): amigo, amiga, viaje, adios
-- **T33.S11 - Agradecer, especialmente, recuperacion** (3 pal, 2 aristas, densidad 0.67): agradecer, especialmente, recuperacion
-- **T33.S13 - Palabra, sueno, guerrera, tanque** (4 pal, 6 aristas, densidad 1.00): palabra, sueno, guerrera, tanque
-- **T33.S14 - Dia, proponer, cerramos** (3 pal, 2 aristas, densidad 0.67): dia, proponer, cerramos
+### T33 (136 palabras, 20 sub-clusters)
+- **T33.S00 - Querer, dejar, templo** (3 pal, 3 aristas, densidad 1.00): querer, dejar, templo
+- **T33.S01 - Patria, loco, traidor, bastar** (8 pal, 26 aristas, densidad 0.93): patria, loco, traidor, bastar, anos, hipocrita, traicion, vendido
+- **T33.S02 - Realmente, pie, triste, inocente** (13 pal, 47 aristas, densidad 0.60): realmente, pie, triste, inocente, suponer, tristeza, nefasto, peru, enemigo, controlado, sos, peruano
+- **T33.S03 - Palabra, democracia, venezolano, privilegio** (11 pal, 34 aristas, densidad 0.62): palabra, democracia, venezolano, privilegio, principio, frase, sabio, estudiar, mirada, exceso, resistir
+- **T33.S04 - Mal, peor, mala, devolver** (6 pal, 14 aristas, densidad 0.93): mal, peor, mala, devolver, chiste, sinverguenza
+- **T33.S05 - Pasar, exigir, sat, tragar** (6 pal, 11 aristas, densidad 0.73): pasar, exigir, sat, tragar, modificar, modificacion
+- **T33.S06 - Problema, falta, resolver, capaz** (5 pal, 10 aristas, densidad 1.00): problema, falta, resolver, capaz, preocupacion
+- **T33.S07 - Tocar, romper, tio, salvar** (12 pal, 43 aristas, densidad 0.65): tocar, romper, tio, salvar, voluntad, mental, abandonar, justificar, pendeja, marido, perdonar, gabriel
+- **T33.S08 - Voto, eleccion, elegir, contrario** (5 pal, 10 aristas, densidad 1.00): voto, eleccion, elegir, contrario, intencion
+- **T33.S09 - Deber, suficiente, juicio, imposible** (5 pal, 7 aristas, densidad 0.70): deber, suficiente, juicio, imposible, asesor
+- **T33.S10 - Falso, enganar, destruir, fraude** (6 pal, 14 aristas, densidad 0.93): falso, enganar, destruir, fraude, ocultar, sentencia
+- **T33.S11 - Sacar, dejen, parar, publicar** (5 pal, 10 aristas, densidad 1.00): sacar, dejen, parar, publicar, paro
+- **T33.S12 - Basura, asco, tapar, recolector** (4 pal, 5 aristas, densidad 0.83): basura, asco, tapar, recolector
+- **T33.S13 - Tratar, cobro, cruzar, migrant** (7 pal, 15 aristas, densidad 0.71): tratar, cobro, cruzar, migrant, espalda, queja, admitir
+- **T33.S14 - Llorar, confiar, silencio, cargar** (8 pal, 16 aristas, densidad 0.57): llorar, confiar, silencio, cargar, guardar, lagrima, agustin, desgaste
+- **T33.S15 - Existir, senor, detras, sustancia** (4 pal, 5 aristas, densidad 0.83): existir, senor, detras, sustancia
+- **T33.S16 - Mentira, ojo, mentir, lengua** (5 pal, 8 aristas, densidad 0.80): mentira, ojo, mentir, lengua, amarte
+- **T33.S18 - Quitar, cobrar, salario** (3 pal, 3 aristas, densidad 1.00): quitar, cobrar, salario
+- **T33.S19 - Caer, peso, dolar** (3 pal, 3 aristas, densidad 1.00): caer, peso, dolar
+- **T33.S20 - Justo, papel, mente, sangre** (5 pal, 10 aristas, densidad 1.00): justo, papel, mente, sangre, presi
 
-### T34 (112 palabras, 11 sub-clusters)
-- **T34.S00 - Empezar, cobrar, mafia, morenarcos** (19 pal, 57 aristas, densidad 0.33): empezar, cobrar, mafia, morenarcos, honduras, priistas, abandono, denlir, mamen, fanatico, radical, cloaca
-- **T34.S01 - Increible, territorio, plano, camioneta** (13 pal, 39 aristas, densidad 0.50): increible, territorio, plano, camioneta, cruzar, primaria, independencia, disparar, curioso, migaja, tlatoani, ipocrita
-- **T34.S02 - Luis, concierto, confirmar, cancelar** (7 pal, 12 aristas, densidad 0.57): luis, concierto, confirmar, cancelar, delegado, programado, alternativa
-- **T34.S03 - Principal, establecer, critico, inmueble** (12 pal, 38 aristas, densidad 0.58): principal, establecer, critico, inmueble, activar, automovilista, peaton, contingencia, estructural, reabrir, adorno, cerco
-- **T34.S04 - Villavicencio, amanda, tamia, encubrir** (7 pal, 14 aristas, densidad 0.67): villavicencio, amanda, tamia, encubrir, ecuador, postumo, entranable
-- **T34.S05 - Contreras, tania, ecatepec, electo** (12 pal, 23 aristas, densidad 0.35): contreras, tania, ecatepec, electo, afin, nombramiento, edith, compuesto, encomienda, azucena, contagiar, romina
-- **T34.S06 - Omar, cantu, ofelia, rodolfo** (11 pal, 22 aristas, densidad 0.40): omar, cantu, ofelia, rodolfo, solidario, inspiracion, fabbri, margarita, app, alineado, mochis
-- **T34.S07 - Leon, mayo, boleto, campeon** (11 pal, 20 aristas, densidad 0.36): leon, mayo, boleto, campeon, pinto, agustin, panistas, rivas, ccp, recolectar, lienzo
-- **T34.S08 - Libre, entrada, penal, embajadora** (6 pal, 8 aristas, densidad 0.53): libre, entrada, penal, embajadora, apagon, semifinal
-- **T34.S09 - Rey, aplaudir, argentino, anda** (9 pal, 18 aristas, densidad 0.50): rey, aplaudir, argentino, anda, mijo, desagradable, machista, burdo, autobuses
-- **T34.S10 - Puebla, pumas, enterate, zaragoza** (5 pal, 4 aristas, densidad 0.40): puebla, pumas, enterate, zaragoza, cristobal
+### T34 (104 palabras, 12 sub-clusters)
+- **T34.S00 - Secretario, jose, garcia, ayuntamiento** (13 pal, 57 aristas, densidad 0.73): secretario, jose, garcia, ayuntamiento, rodriguez, hernandez, representacion, hector, marin, fernandez, porres, consejero
+- **T34.S01 - Domingo, jueves, miercoles, huasteco** (11 pal, 39 aristas, densidad 0.71): domingo, jueves, miercoles, huasteco, pasion, extraordinario, salon, exhibicion, arena, comparsa, gobernadores
+- **T34.S02 - Reunion, martinez, mesa, representante** (11 pal, 31 aristas, densidad 0.56): reunion, martinez, mesa, representante, asistir, abordar, semanal, karina, tequila, times, war
+- **T34.S03 - Fecha, marzo, diciembre, sede** (10 pal, 29 aristas, densidad 0.64): fecha, marzo, diciembre, sede, serie, tour, culminar, finalizar, semestre, callejero
+- **T34.S04 - Presentar, distinto, incluir, pese** (12 pal, 31 aristas, densidad 0.47): presentar, distinto, incluir, pese, oficialmente, conducta, barra, levantamiento, silvestre, aburrido, palacios, aguacate
+- **T34.S05 - Dato, palacio, sala, integrar** (11 pal, 30 aristas, densidad 0.55): dato, palacio, sala, integrar, determinar, convocar, multiple, respectivo, cafe, fregado, palestino
+- **T34.S06 - Reyes, tradicional, rosca, festividad** (5 pal, 8 aristas, densidad 0.80): reyes, tradicional, rosca, festividad, muneca
+- **T34.S07 - Sanchez, perez, dinamica, per** (10 pal, 16 aristas, densidad 0.36): sanchez, perez, dinamica, per, tommavi, finalista, lei, sempre, que, moncho
+- **T34.S08 - Acompanado, muertos, diversidad, altar** (8 pal, 18 aristas, densidad 0.64): acompanado, muertos, diversidad, altar, incluido, enriquecer, programacion, bolivia
+- **T34.S09 - Cabo, instruccion, semaforo, bullying** (5 pal, 7 aristas, densidad 0.70): cabo, instruccion, semaforo, bullying, conteo
+- **T34.S10 - Visitar, atractivo, cabe, disenar** (4 pal, 6 aristas, densidad 1.00): visitar, atractivo, cabe, disenar
+- **T34.S11 - Juarez, biblioteca, dividido, infeliz** (4 pal, 4 aristas, densidad 0.67): juarez, biblioteca, dividido, infeliz

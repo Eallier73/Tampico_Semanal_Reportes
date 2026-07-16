@@ -1,7 +1,9 @@
 # SNA historico de Tampico
 
 El corpus de entrada es `SNA/Datos/tampico_datos_tabulares_consolidados.csv`.
-Incluye Twitter, Facebook y YouTube; `Medios` queda excluido.
+Incluye Twitter, Facebook, YouTube y Medios. En las notas periodisticas, el
+campo `fuente` se conserva como cuenta bajo la identidad
+`Medios::<nombre del medio>` (por ejemplo, `Medios::Milenio`).
 
 El consolidador integra las descargas del repo y, cuando existe, el historico
 social de `/home/emilio/Documentos/RAdAR/Datos_RAdAR/Juntos`. Los formatos sin

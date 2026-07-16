@@ -3,54 +3,54 @@
   "clusters_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico/clusters",
   "capas": {
     "intra_cluster": {
-      "n_aristas": 76220,
+      "n_aristas": 87210,
       "min": 1.0,
-      "media": 3.4753214379427972,
-      "max": 487.0,
+      "media": 4.322153422772618,
+      "max": 2347.0,
       "p50": 2.0,
-      "p75": 3.0,
-      "p90": 7.0,
-      "p95": 11.0,
-      "p99": 32.0
+      "p75": 4.0,
+      "p90": 9.0,
+      "p95": 14.0,
+      "p99": 39.0
     },
     "intra_sub": {
-      "n_aristas": 12449,
+      "n_aristas": 13208,
       "min": 1.0,
-      "media": 5.404771467587758,
-      "max": 1770.0,
-      "p50": 2.0,
-      "p75": 5.0,
-      "p90": 10.0,
-      "p95": 16.0,
-      "p99": 47.0
+      "media": 7.741141732283465,
+      "max": 1990.0,
+      "p50": 3.0,
+      "p75": 6.0,
+      "p90": 14.0,
+      "p95": 25.0,
+      "p99": 81.93000000000029
     },
     "sin_subcluster": {
-      "n_aristas": 2309,
+      "n_aristas": 2179,
       "min": 1.0,
-      "media": 11.773495019488957,
-      "max": 912.0,
+      "media": 6.837081229921982,
+      "max": 222.0,
       "p50": 3.0,
-      "p75": 9.0,
-      "p90": 21.0,
-      "p95": 40.0,
-      "p99": 125.28000000000065
+      "p75": 7.0,
+      "p90": 15.0,
+      "p95": 27.0,
+      "p99": 60.2199999999998
     },
     "extra": {
       "n_aristas": 7000,
-      "min": 7.0,
-      "media": 44.74,
-      "max": 1160.0,
-      "p50": 31.0,
-      "p75": 51.0,
-      "p90": 85.0,
-      "p95": 120.04999999999927,
-      "p99": 229.0
+      "min": 13.0,
+      "media": 57.30842857142857,
+      "max": 1227.0,
+      "p50": 40.0,
+      "p75": 65.0,
+      "p90": 108.0,
+      "p95": 148.0,
+      "p99": 287.0400000000009
     }
   },
   "umbrales_sugeridos": {
-    "umbral_intra_sub": 5.0,
-    "umbral_intra_cluster": 3.0,
-    "umbral_extra": 51.0,
+    "umbral_intra_sub": 6.0,
+    "umbral_intra_cluster": 4.0,
+    "umbral_extra": 65.0,
     "criterio": "percentil 75 de cada capa"
   }
 }

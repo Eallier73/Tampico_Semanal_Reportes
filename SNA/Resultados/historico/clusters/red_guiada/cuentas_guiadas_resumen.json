@@ -1,24 +1,31 @@
 {
-  "n_nodos": 4539,
-  "n_nodos_con_categoria": 711,
-  "n_nodos_con_polaridad": 1451,
+  "n_nodos": 4336,
+  "n_nodos_con_categoria": 716,
+  "n_nodos_con_polaridad": 1424,
+  "n_nodos_con_postura": 1424,
   "categorias": {
-    "Obras": 319,
-    "Delitos": 299,
-    "Corrupcion": 277,
-    "Morena": 269,
-    "Prevencion": 266,
-    "Vialidad": 208,
-    "Basura": 153,
-    "Americo": 126,
-    "Alumbrado": 104,
-    "Agua": 82
+    "Obras": 327,
+    "Delitos": 296,
+    "Corrupcion": 276,
+    "Prevencion": 274,
+    "Morena": 273,
+    "Vialidad": 218,
+    "Basura": 152,
+    "Americo": 139,
+    "Alumbrado": 97,
+    "Agua": 83
   },
   "polaridades": {
-    "neutral": 3088,
-    "negativa": 521,
-    "positiva": 506,
-    "mixta": 424
+    "neutral": 2912,
+    "negativa": 512,
+    "positiva": 499,
+    "mixta": 413
+  },
+  "posturas": {
+    "sin_postura": 2912,
+    "apoyo_defensa": 666,
+    "critica_oposicion": 618,
+    "mixta_disputa": 140
   },
   "fuentes": {
     "temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",

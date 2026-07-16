@@ -34,8 +34,21 @@ Youtube/**
 Claude/**
 !Claude/.gitkeep
 
+Influencia_Temas/**
+!Influencia_Temas/.gitkeep
+
+Temas_Guiados/**
+!Temas_Guiados/.gitkeep
+
+Reportes/**
+!Reportes/.gitkeep
+
 state/x_state.json
 state/x_state.local.json
 
 .idea/
 .vscode/
+
+# Archivos grandes de SNA (>100 MB)
+SNA/Datos/tampico_datos_tabulares_consolidados.csv
+SNA/Resultados/historico/cuentas_clusters/cuentas_x_subcluster.csv
