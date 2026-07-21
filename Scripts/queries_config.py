@@ -12,6 +12,8 @@ Estructura:
 - TWITTER: queries de búsqueda
 - MEDIOS: sitios y términos de búsqueda
 - FACEBOOK: páginas target
+- INSTAGRAM: perfiles, hashtags y términos de descubrimiento
+- TIKTOK: perfiles, hashtags y búsquedas de videos
 
 ================================================================================
 """
@@ -120,6 +122,64 @@ FACEBOOK_POSTS_DEFAULT_BATCH_SIZE = 10
 
 
 # ============================================================================
+# INSTAGRAM (Apify: apify/instagram-scraper)
+# ============================================================================
+
+INSTAGRAM_PROFILE_URLS: list[str] = []
+"""Perfiles oficiales confirmados. Acepta handles o URLs; vacío evita atribuciones falsas."""
+
+INSTAGRAM_SEARCH_QUERIES = [
+    "Mónica Villarreal Tampico",
+    "Monica Villarreal Tampico",
+    "Mónica Villarreal Anaya",
+    "Gobierno de Tampico",
+    "Ayuntamiento de Tampico",
+    "presidenta municipal de Tampico",
+]
+"""Términos dirigidos para descubrir cuentas y publicaciones relevantes."""
+
+INSTAGRAM_HASHTAGS = [
+    "monicavillarreal",
+    "monicavtampico",
+    "gobiernodetampico",
+    "ayuntamientodetampico",
+]
+"""Hashtags específicos; se excluye #tampico por su alto nivel de ruido."""
+
+INSTAGRAM_DEFAULT_RESULTS_LIMIT = 50
+INSTAGRAM_DEFAULT_SEARCH_LIMIT = 3
+
+
+# ============================================================================
+# TIKTOK (Apify: clockworks/tiktok-scraper)
+# ============================================================================
+
+TIKTOK_PROFILES: list[str] = []
+"""Handles oficiales confirmados; vacío hasta verificarlos en la plataforma."""
+
+TIKTOK_SEARCH_QUERIES = [
+    "Mónica Villarreal Tampico",
+    "Monica Villarreal Tampico",
+    "Mónica Villarreal Anaya",
+    "Gobierno de Tampico",
+    "Ayuntamiento de Tampico",
+    "presidenta municipal de Tampico",
+]
+"""Búsquedas de videos para monitorear a la presidenta y al gobierno municipal."""
+
+TIKTOK_HASHTAGS = [
+    "monicavillarreal",
+    "monicavtampico",
+    "gobiernodetampico",
+    "ayuntamientodetampico",
+]
+"""Hashtags específicos; se excluye #tampico por su alto nivel de ruido."""
+
+TIKTOK_DEFAULT_RESULTS_LIMIT = 50
+TIKTOK_DEFAULT_COMMENTS_PER_POST = 0
+
+
+# ============================================================================
 # FUNCIONES AUXILIARES
 # ============================================================================
 
@@ -165,6 +225,28 @@ def get_facebook_config() -> dict:
     }
 
 
+def get_instagram_config() -> dict:
+    """Retorna configuración completa de Instagram."""
+    return {
+        "profiles": INSTAGRAM_PROFILE_URLS,
+        "search_queries": INSTAGRAM_SEARCH_QUERIES,
+        "hashtags": INSTAGRAM_HASHTAGS,
+        "results_limit": INSTAGRAM_DEFAULT_RESULTS_LIMIT,
+        "search_limit": INSTAGRAM_DEFAULT_SEARCH_LIMIT,
+    }
+
+
+def get_tiktok_config() -> dict:
+    """Retorna configuración completa de TikTok."""
+    return {
+        "profiles": TIKTOK_PROFILES,
+        "search_queries": TIKTOK_SEARCH_QUERIES,
+        "hashtags": TIKTOK_HASHTAGS,
+        "results_limit": TIKTOK_DEFAULT_RESULTS_LIMIT,
+        "comments_per_post": TIKTOK_DEFAULT_COMMENTS_PER_POST,
+    }
+
+
 def get_all_config() -> dict:
     """Retorna configuración completa de todos los extractores"""
     return {
@@ -172,6 +254,8 @@ def get_all_config() -> dict:
         "twitter": get_twitter_config(),
         "medios": get_medios_config(),
         "facebook": get_facebook_config(),
+        "instagram": get_instagram_config(),
+        "tiktok": get_tiktok_config(),
     }
 
 

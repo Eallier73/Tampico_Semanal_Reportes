@@ -402,6 +402,30 @@ def adapt_radar_recovered(
     )
 
 
+def adapt_apify_social(
+    row: pd.Series, path: Path, plataforma: str
+) -> dict[str, Any]:
+    return base_record(
+        row,
+        path,
+        plataforma,
+        first(row, "tipo_registro") or "mencion",
+        first(row, "usuario"),
+        first(row, "fecha"),
+        first(row, "texto"),
+        first(row, "id", "url"),
+        likes=integer(row.get("likes")),
+        comentarios=integer(row.get("comentarios")),
+        shares=integer(row.get("shares")),
+        vistas=integer(row.get("vistas")),
+        es_reply=first(row, "tipo_registro") == "comentario",
+        url_origen=first(row, "url"),
+        url_contexto=first(row, "url_contexto", "input_url"),
+        query_busqueda=first(row, "query_busqueda"),
+        datos_originales_json=first(row, "datos_originales_json") or raw_json(row),
+    )
+
+
 SOURCES: list[tuple[str, str, Callable[[pd.Series, Path], dict[str, Any]]]] = [
     ("Twitter comentarios", "Twitter/*/*_comentarios.csv", lambda r, p: adapt_twitter(r, p, False)),
     ("Twitter institucionales", "Twitter/*/*_post_institucionales.csv", lambda r, p: adapt_twitter(r, p, True)),
@@ -410,6 +434,16 @@ SOURCES: list[tuple[str, str, Callable[[pd.Series, Path], dict[str, Any]]]] = [
     ("YouTube comentarios", "Youtube/*/*_comentarios.csv", adapt_youtube_comment),
     ("YouTube transcripciones", "Youtube/*/*_scripts.csv", adapt_youtube_script),
     ("Medios", "Medios/*/*_Medios.csv", adapt_medio),
+    (
+        "Instagram",
+        "Instagram/*/*_publicaciones.csv",
+        lambda r, p: adapt_apify_social(r, p, "Instagram"),
+    ),
+    (
+        "TikTok",
+        "TikTok/*/*_publicaciones.csv",
+        lambda r, p: adapt_apify_social(r, p, "TikTok"),
+    ),
 ]
 
 

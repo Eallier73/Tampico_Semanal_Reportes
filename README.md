@@ -8,7 +8,7 @@ Este repo parte de `Datos_Radar`, pero quedó limpiado para uso operativo:
 
 - Sin datos históricos descargados.
 - Sin la carpeta `Datos_Redes_Sets_Enteros_55_Semanas`.
-- Con las carpetas `Facebook`, `Medios`, `Twitter` y `Youtube` vacías, dejando solo la arquitectura.
+- Con carpetas de salida separadas para cada red, dejando solo la arquitectura en Git.
 - Con scripts ajustados para escribir dentro de este mismo repo.
 - Sin secretos embebidos en código.
 
@@ -19,8 +19,10 @@ Tampico_Semanal_Reportes/
 ├── Claude/
 ├── Datos/
 ├── Facebook/
+├── Instagram/
 ├── Medios/
 ├── Scripts/
+├── TikTok/
 ├── Twitter/
 ├── Youtube/
 └── state/
@@ -32,7 +34,7 @@ Donde:
 - `Datos/`: Archivos consolidados y procesados por semana
 - `Influencia_Temas/`: Analisis correlacional de influencia de temas sobre polaridad
 - `Temas_Guiados/`: Clasificacion de documentos por temas guiados por palabras clave
-- `Facebook/`, `Medios/`, `Twitter/`, `Youtube/`: Descargas por red/fuente
+- `Facebook/`, `Instagram/`, `Medios/`, `TikTok/`, `Twitter/`, `Youtube/`: Descargas por red/fuente
 
 ## Scripts incluidos
 
@@ -46,6 +48,8 @@ Donde:
 - `Scripts/7_modelado_temas_claude.py`
 - `Scripts/8_influencia_temas.py`
 - `Scripts/9_temas_guiados.py`
+- `Scripts/5a_extractors_instagram.py`
+- `Scripts/5b_extractors_tiktok.py`
 
 ## Variables de entorno
 
@@ -84,7 +88,10 @@ El detalle script por script de argumentos y prompts quedó en `ORQUESTADOR_ARGU
 ## Notas operativas
 
 - `state/x_state.example.json` es solo una referencia. Debes crear `state/x_state.json` con un `storage_state` válido para correr el extractor de X/Twitter.
-- Las salidas semanales se generan dentro de `Facebook/`, `Medios/`, `Twitter/`, `Youtube/` y `Claude/`, usando carpetas etiquetadas por semana.
+- Las salidas semanales se generan dentro de la carpeta de cada fuente y usan etiquetas por semana.
+- Instagram (pipeline 12) y TikTok (pipeline 13) usan `APIFY_TOKEN`. Sus búsquedas, hashtags y perfiles se centralizan en `Scripts/queries_config.py`.
+- Los perfiles oficiales de Instagram y TikTok permanecen vacíos hasta confirmarlos. Mientras tanto, ambos extractores operan como descubrimiento por consultas y hashtags dirigidos.
+- Ambos extractores admiten `--dry-run`: muestran la entrada prevista sin llamar a Apify, sin requerir token y sin crear archivos.
 - La carpeta `Influencia_Temas/{semana}/` contiene analisis correlacional de temas sobre polaridad con reportes tecnicos (CSVs) y ejecutivos (KPIs, hallazgos, alertas).
 - El pipeline 8 (Analisis de Influencia) requiere que se ejecute primero el pipeline 6 (Consolidador) para generar `material_institucional.txt` e `material_comentarios.txt`.
 - La carpeta `Temas_Guiados/{semana}/` contiene clasificacion por tema, top de palabras y reporte textual del analisis guiado.

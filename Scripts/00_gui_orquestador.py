@@ -310,7 +310,12 @@ class OrquestadorGUI:
             selected = ensure_pipeline_before(selected, "6", dep_code)
 
         selected = ensure_pipeline_after(selected, "10", ["1", "2", "4"])
-        selected = ensure_pipeline_after(selected, "11", ["1", "2", "4", "5"])
+        selected = ensure_pipeline_after(
+            selected, "6", ["1", "2", "4", "5", "12", "13"]
+        )
+        selected = ensure_pipeline_after(
+            selected, "11", ["1", "2", "4", "5", "12", "13"]
+        )
 
         unique_selected = []
         seen = set()

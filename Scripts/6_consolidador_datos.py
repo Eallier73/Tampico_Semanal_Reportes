@@ -2,8 +2,8 @@
 """
 Consolida los .txt de cada extractor en dos archivos de análisis:
 
-  material_institucional.txt  <- posts oficiales (Twitter, Facebook, YouTube scripts)
-  material_comentarios.txt    <- reacciones ciudadanas (Twitter, Facebook, YouTube comentarios, Medios)
+  material_institucional.txt  <- posts oficiales (Twitter, Facebook, YouTube, Instagram, TikTok)
+  material_comentarios.txt    <- conversación pública (Twitter, Facebook, YouTube, Instagram, TikTok, Medios)
 
 Uso:
   python 6_consolidador_datos.py --since 2026-03-30 --before 2026-04-05
@@ -41,11 +41,15 @@ def _sources(since: str, base_dir: Path) -> dict[str, list[Path]]:
     fb  = build_report_tag(since, "Facebook")
     yt  = build_report_tag(since, "Youtube")
     med = build_report_tag(since, "Medios")
+    ig  = build_report_tag(since, "Instagram")
+    tt  = build_report_tag(since, "TikTok")
 
     institucional = [
         base_dir / "Twitter" / tw  / f"{tw}_post_institucionales.txt",
         base_dir / "Facebook" / fb / f"{fb}_posts.txt",
         base_dir / "Youtube"  / yt / f"{yt}_scripts.txt",
+        base_dir / "Instagram" / ig / f"{ig}_posts_institucionales.txt",
+        base_dir / "TikTok" / tt / f"{tt}_posts_institucionales.txt",
     ]
 
     comentarios = [
@@ -53,6 +57,10 @@ def _sources(since: str, base_dir: Path) -> dict[str, list[Path]]:
         base_dir / "Facebook" / fb  / f"{fb}_comentarios.txt",
         base_dir / "Youtube"  / yt  / f"{yt}_comentarios.txt",
         base_dir / "Medios"   / med / f"noticias_tampico_{med}.txt",
+        base_dir / "Instagram" / ig / f"{ig}_menciones.txt",
+        base_dir / "Instagram" / ig / f"{ig}_comentarios.txt",
+        base_dir / "TikTok" / tt / f"{tt}_menciones.txt",
+        base_dir / "TikTok" / tt / f"{tt}_comentarios.txt",
     ]
 
     return {"institucional": institucional, "comentarios": comentarios}

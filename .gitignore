@@ -31,6 +31,12 @@ Twitter/**
 Youtube/**
 !Youtube/.gitkeep
 
+Instagram/**
+!Instagram/.gitkeep
+
+TikTok/**
+!TikTok/.gitkeep
+
 Claude/**
 !Claude/.gitkeep
 
