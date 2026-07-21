@@ -202,6 +202,25 @@ def _topic_key(value: Any) -> str:
     return "".join(char for char in text if not unicodedata.combining(char))
 
 
+def is_monica_or_municipal_topic(words: list[str]) -> bool:
+    """Detecta temas sobre Monica Villarreal o el gobierno municipal local."""
+    keys = {_topic_key(word) for word in words if str(word).strip()}
+    direct_terms = {"monica", "villarreal", "monicavillarreal"}
+    municipal_terms = {
+        "alcalde", "alcaldesa", "alcaldia", "ayuntamiento", "cabildo",
+        "municipal", "municipio",
+    }
+    local_context = {
+        "ciudad", "ciudadania", "colonia", "gestion", "tampico",
+        "tampiqueno", "tampiquena",
+    }
+    return bool(
+        keys & direct_terms
+        or keys & municipal_terms
+        or ({"gobierno", "presidencia"} & keys and local_context & keys)
+    )
+
+
 def build_topic_reading(topic_id: int, words: list[str]) -> dict[str, str]:
     """Produce una lectura semantica prudente a partir de los terminos LDA."""
     clean_words = list(dict.fromkeys(str(word).strip() for word in words if str(word).strip()))
@@ -930,6 +949,10 @@ def build_html(
 ) -> str:
     vis_css, vis_js = extract_vis_assets(base)
     topics = sorted(topic_info)
+    monica_municipal_topic_ids = sorted(
+        tid for tid in topics
+        if is_monica_or_municipal_topic(topic_info[tid].get("words", []))
+    )
 
     position_topics = {
         str(node["id"]): int(node["tema"])
@@ -967,17 +990,21 @@ def build_html(
     topic_cards = []
     for tid in topics:
         info = topic_info[tid]
-        title = re.sub(rf"^T{tid:02d}\s*:\s*", "", str(info.get("title", ""))).strip()
         words = [str(word).strip() for word in info.get("words", []) if str(word).strip()]
-        explanation = str(info.get("summary", "Tema definido por sus conexiones en la red."))
+        ranked_words = "".join(
+            f'<span class="topic-word-row"><b>{rank}.</b> {html.escape(word)}</span>'
+            for rank, word in enumerate(words[:15], start=1)
+        )
         topic_cards.append(
             f'<button class="network-topic-filter" data-network-topic="{tid}" data-topic="{tid}" '
             f'data-volume="{topic_metrics[tid]["volume"]}" '
             f'data-centrality="{topic_metrics[tid]["centrality"]}" '
             f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
             f'<span class="topic-card-title"><i class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></i>'
-            f'Tema {tid:02d} · {html.escape(title)}</span>'
-            f'<small class="topic-description">{html.escape(explanation)}</small>'
+            f'<span class="topic-title-text">Tema {tid:02d}</span>'
+            f'<span class="topic-disclosure" role="button" tabindex="0" aria-expanded="false" '
+            f'aria-label="Mostrar las 15 palabras principales del Tema {tid:02d}">▸</span></span>'
+            f'<span class="topic-words" hidden>{ranked_words}</span>'
             f'<small class="topic-score"></small></button>'
         )
     topic_cards_html = "\n".join(topic_cards)
@@ -1012,8 +1039,14 @@ def build_html(
   .sw {{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }}
   .network-topic-filter {{ display:block; width:100%; margin:5px 0; padding:7px; text-align:left; box-sizing:border-box; }}
   .network-topic-filter.guided-active {{ outline:2px solid #f5f5f5; background:#505050; }}
-  .topic-card-title {{ display:block; font-size:12px; font-weight:bold; line-height:1.25; }}
-  .topic-description {{ display:block; margin:4px 0 0 15px; color:#aaa; font-size:10px; line-height:1.3; font-weight:normal; }}
+  .topic-card-title {{ display:flex; align-items:flex-start; gap:4px; font-size:12px; font-weight:bold; line-height:1.25; }}
+  .topic-title-text {{ flex:1; min-width:0; }}
+  .topic-disclosure {{ flex:none; width:18px; height:18px; display:grid; place-items:center; margin:-2px -2px 0 2px; border-radius:3px; color:#ddd; font-size:14px; }}
+  .topic-disclosure:hover, .topic-disclosure:focus {{ background:#666; color:#fff; outline:none; }}
+  .topic-words {{ display:grid; grid-template-columns:1fr 1fr; gap:2px 8px; margin:5px 0 1px 15px; color:#bbb; font-size:10px; line-height:1.3; font-weight:normal; }}
+  .topic-words[hidden] {{ display:none; }}
+  .topic-word-row {{ display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }}
+  .topic-word-row b {{ color:#888; font-weight:normal; }}
   .topic-score {{ display:block; margin:3px 0 0 15px; color:#75bfff; font-size:10px; }}
   .pill {{ display:inline-block; padding:2px 6px; margin:2px 3px 2px 0; border-radius:10px; background:#26384a; font-size:11px; }}
   .metric {{ display:grid; grid-template-columns:1fr auto; gap:6px; font-size:12px; border-bottom:1px solid #2b2b2b; padding:4px 0; }}
@@ -1022,7 +1055,19 @@ def build_html(
   .level-bajo {{ color:#cfcfcf; }}
   .level-medio {{ color:#ffcc33; }}
   .level-alto {{ color:#ff6b6b; }}
-  #stats {{ position:fixed; left:calc(332px - 1cm); top:10px; z-index:8; background:#111; border:1px solid #444; border-radius:4px; padding:6px 8px; font-size:12px; }}
+  #strategicBar {{ position:fixed; left:calc(320px - 1cm + 10px); right:calc(360px - 1cm + 10px); top:10px; z-index:9;
+    display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:7px 9px; box-sizing:border-box;
+    background:rgba(17,17,17,.96); border:1px solid #555; border-radius:5px; box-shadow:0 3px 12px #0008; font-size:11px; }}
+  #strategicBar .strategic-title {{ color:#fff; font-weight:bold; white-space:nowrap; }}
+  #strategicBar .strategic-actions {{ display:flex; gap:5px; }}
+  #strategicBar .strategy-button {{ padding:5px 10px; }}
+  #strategicBar .strategy-button.strategy-active {{ outline:2px solid #fff; }}
+  #strategicBar [data-strategy="risk"].strategy-active {{ background:#8d1717; }}
+  #strategicBar [data-strategy="opportunity"].strategy-active {{ background:#8a6410; }}
+  #strategicBar [data-strategy="consolidation"].strategy-active {{ background:#176b42; }}
+  #strategyHelp {{ flex:1 1 250px; color:#aaa; line-height:1.3; }}
+  #stats {{ margin-left:auto; color:#ddd; white-space:nowrap; }}
+  .network-topic-filter.strategy-anchor {{ outline:2px solid #e31a1c; }}
 </style>
 </head>
 <body>
@@ -1078,11 +1123,21 @@ def build_html(
   <h1>Lectura</h1>
   <div id="detail" class="muted">Haz clic en cualquier elemento de la red. Aquí aparecerá una explicación de qué representa, sus cifras y las palabras o ejemplos que ayudan a interpretarlo.</div>
 </aside>
-<div id="stats"></div>
+<div id="strategicBar">
+  <span class="strategic-title">Lectura estratégica</span>
+  <div class="strategic-actions">
+    <button class="strategy-button" data-strategy="risk">Riesgo</button>
+    <button class="strategy-button" data-strategy="opportunity">Oportunidad</button>
+    <button class="strategy-button" data-strategy="consolidation">Consolidación</button>
+  </div>
+  <span id="strategyHelp">Elige un ámbito para filtrar la red; los temas sobre Mónica Villarreal y el gobierno municipal se resaltarán en rojo.</span>
+  <span id="stats"></span>
+</div>
 <script>
 const RAW_NODES = {json.dumps(nodes, ensure_ascii=False)};
 const RAW_EDGES = {json.dumps(edges, ensure_ascii=False)};
 const META = {json.dumps(meta, ensure_ascii=False)};
+const MONICA_MUNICIPAL_TOPIC_IDS = {json.dumps(monica_municipal_topic_ids)};
 const nodes = new vis.DataSet(RAW_NODES);
 const edges = new vis.DataSet(RAW_EDGES);
 const network = new vis.Network(document.getElementById('network'), {{nodes, edges}}, {{
@@ -1097,6 +1152,33 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
   interaction: {{ hover:true, tooltipDelay:100, navigationButtons:true, keyboard:true }}
 }});
 window.network = network;
+
+const STRATEGIC_PRESETS = {{
+  risk: {{label:'Riesgo', polarity:['negativa'], stance:['critica_oposicion'], help:'Lenguaje negativo y postura crítica/opositora.'}},
+  opportunity: {{label:'Oportunidad', polarity:['mixta'], stance:['mixta_disputa'], help:'Lenguaje mixto y posturas en disputa que pueden cambiar de dirección.'}},
+  consolidation: {{label:'Consolidación', polarity:['positiva'], stance:['apoyo_defensa'], help:'Lenguaje positivo y posturas de apoyo o defensa.'}}
+}};
+function clearStrategicBar() {{
+  document.querySelectorAll('.strategy-button').forEach(button => button.classList.remove('strategy-active'));
+  document.querySelectorAll('.network-topic-filter').forEach(card => card.classList.remove('strategy-anchor'));
+  document.getElementById('strategyHelp').textContent = 'Elige un ámbito para filtrar la red; los temas sobre Mónica Villarreal y el gobierno municipal se resaltarán en rojo.';
+}}
+document.querySelectorAll('.strategy-button').forEach(button => {{
+  button.addEventListener('click', () => {{
+    clearStrategicBar();
+    button.classList.add('strategy-active');
+    MONICA_MUNICIPAL_TOPIC_IDS.forEach(topicId => {{
+      const card = document.querySelector('[data-network-topic="' + topicId + '"]');
+      if (card) card.classList.add('strategy-anchor');
+    }});
+    const preset = STRATEGIC_PRESETS[button.dataset.strategy];
+    document.getElementById('strategyHelp').textContent = preset.help + ' En rojo: ' + MONICA_MUNICIPAL_TOPIC_IDS.map(id => 'Tema ' + String(id).padStart(2, '0')).join(', ') + '.';
+    if (typeof window.guidedApplyStrategicPreset === 'function') {{
+      window.guidedApplyStrategicPreset({{...preset, anchorTopics:MONICA_MUNICIPAL_TOPIC_IDS}});
+    }}
+  }});
+}});
+window.addEventListener('guided-strategy-cleared', clearStrategicBar);
 
 function sortTopicMenu() {{
   const mode = document.getElementById('topicOrder').value;
@@ -1117,6 +1199,21 @@ function sortTopicMenu() {{
 }}
 document.getElementById('topicOrder').addEventListener('change', sortTopicMenu);
 sortTopicMenu();
+document.querySelectorAll('.topic-disclosure').forEach(disclosure => {{
+  function toggleExplanation(event) {{
+    event.preventDefault();
+    event.stopPropagation();
+    const words = disclosure.closest('.network-topic-filter').querySelector('.topic-words');
+    const expanding = words.hidden;
+    words.hidden = !expanding;
+    disclosure.textContent = expanding ? '▾' : '▸';
+    disclosure.setAttribute('aria-expanded', String(expanding));
+  }}
+  disclosure.addEventListener('click', toggleExplanation);
+  disclosure.addEventListener('keydown', event => {{
+    if (event.key === 'Enter' || event.key === ' ') toggleExplanation(event);
+  }});
+}});
 
 function activeLevels() {{
   const s = {{}};

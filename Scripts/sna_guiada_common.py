@@ -460,6 +460,7 @@ def inject_guided_layer(
   const originals = {{}};
   const LAYERED_FILTERS = {str(layered_filters).lower()};
   const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set()}};
+  let strategicAnchorTopics = new Set();
   let guidedFocus = null;
   let guidedNodes = null;
   let guidedNetwork = null;
@@ -530,6 +531,10 @@ def inject_guided_layer(
     return true;
   }}
   function toggleFilter(kind, value, button) {{
+    if (strategicAnchorTopics.size) {{
+      strategicAnchorTopics.clear();
+      window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
+    }}
     const values = activeFilters[kind];
     if (values.has(value)) values.delete(value); else values.add(value);
     button.classList.toggle('guided-active', values.has(value));
@@ -537,7 +542,9 @@ def inject_guided_layer(
     applyLayerFilters();
   }}
   function applyLayerFilters() {{
-    window.guidedNodeAllowed = node => matchesLayerFilters(GUIDED_META[String(node.id)]);
+    window.guidedNodeAllowed = node =>
+      (node.kind === 'tema' && strategicAnchorTopics.has(String(node.tema))) ||
+      matchesLayerFilters(GUIDED_META[String(node.id)]);
     if (typeof rebuild === 'function') rebuild();
     else guidedNodes.update(guidedNodes.get().map(node => ({{id:node.id, hidden:!window.guidedNodeAllowed(node)}})));
     recolor();
@@ -592,7 +599,12 @@ def inject_guided_layer(
       let size = original.size;
       let font = original.font;
       const isFocus = matchesFocus(meta, guidedFocus);
-      if (guidedFocus) {{
+      const isStrategicAnchor = node.kind === 'tema' && strategicAnchorTopics.has(String(node.tema));
+      if (isStrategicAnchor) {{
+        color = {{background:'#e31a1c', border:'#ffffff'}};
+        borderWidth = 7;
+        if (typeof size === 'number') size = Math.max(size + 8, Math.round(size * 1.45));
+      }} else if (guidedFocus) {{
         if (isFocus) {{
           color = focusColor(meta, guidedFocus);
           borderWidth = 5;
@@ -615,7 +627,9 @@ def inject_guided_layer(
   function resetGuided() {{
     guidedFocus = null;
     Object.values(activeFilters).forEach(values => values.clear());
+    strategicAnchorTopics.clear();
     window.guidedNodeAllowed = null;
+    window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
     document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
     document.getElementById('guidedColorMode').value = 'original';
     document.getElementById('guidedConfidence').value = '0';
@@ -623,6 +637,26 @@ def inject_guided_layer(
     if (typeof rebuild === 'function') rebuild();
     guidedNetwork.unselectAll(); recolor(); guidedNetwork.fit({{animation:true}});
   }}
+  window.guidedApplyStrategicPreset = function(preset) {{
+    if (!resolveNetwork()) return;
+    guidedFocus = null;
+    Object.values(activeFilters).forEach(values => values.clear());
+    (preset.polarity || []).forEach(value => activeFilters.polarity.add(value));
+    (preset.stance || []).forEach(value => activeFilters.stance.add(value));
+    strategicAnchorTopics = new Set((preset.anchorTopics || []).map(value => String(value)));
+    document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(button => button.classList.remove('guided-active'));
+    activeFilters.polarity.forEach(value => {{
+      const button = document.querySelector('#guidedPanel [data-polarity="' + value + '"]');
+      if (button) button.classList.add('guided-active');
+    }});
+    activeFilters.stance.forEach(value => {{
+      const button = document.querySelector('#guidedPanel [data-stance="' + value + '"]');
+      if (button) button.classList.add('guided-active');
+    }});
+    applyLayerFilters();
+    const anchorLabel = Array.from(strategicAnchorTopics).map(value => 'T' + value.padStart(2, '0')).join(', ');
+    document.getElementById('guidedStats').innerHTML += anchorLabel ? ' · <b>' + anchorLabel + '</b> en rojo' : '';
+  }};
   setTimeout(initGuided, 0);
 }})();
 </script>
