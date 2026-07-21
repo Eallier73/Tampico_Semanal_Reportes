@@ -202,25 +202,6 @@ def _topic_key(value: Any) -> str:
     return "".join(char for char in text if not unicodedata.combining(char))
 
 
-def is_monica_or_municipal_topic(words: list[str]) -> bool:
-    """Detecta temas sobre Monica Villarreal o el gobierno municipal local."""
-    keys = {_topic_key(word) for word in words if str(word).strip()}
-    direct_terms = {"monica", "villarreal", "monicavillarreal"}
-    municipal_terms = {
-        "alcalde", "alcaldesa", "alcaldia", "ayuntamiento", "cabildo",
-        "municipal", "municipio",
-    }
-    local_context = {
-        "ciudad", "ciudadania", "colonia", "gestion", "tampico",
-        "tampiqueno", "tampiquena",
-    }
-    return bool(
-        keys & direct_terms
-        or keys & municipal_terms
-        or ({"gobierno", "presidencia"} & keys and local_context & keys)
-    )
-
-
 def build_topic_reading(topic_id: int, words: list[str]) -> dict[str, str]:
     """Produce una lectura semantica prudente a partir de los terminos LDA."""
     clean_words = list(dict.fromkeys(str(word).strip() for word in words if str(word).strip()))
@@ -949,11 +930,6 @@ def build_html(
 ) -> str:
     vis_css, vis_js = extract_vis_assets(base)
     topics = sorted(topic_info)
-    monica_municipal_topic_ids = sorted(
-        tid for tid in topics
-        if is_monica_or_municipal_topic(topic_info[tid].get("words", []))
-    )
-
     position_topics = {
         str(node["id"]): int(node["tema"])
         for node in nodes if node.get("kind") == "posicion"
@@ -1067,7 +1043,6 @@ def build_html(
   #strategicBar [data-strategy="consolidation"].strategy-active {{ background:#176b42; }}
   #strategyHelp {{ flex:1 1 250px; color:#aaa; line-height:1.3; }}
   #stats {{ margin-left:auto; color:#ddd; white-space:nowrap; }}
-  .network-topic-filter.strategy-anchor {{ outline:2px solid #e31a1c; }}
 </style>
 </head>
 <body>
@@ -1130,14 +1105,13 @@ def build_html(
     <button class="strategy-button" data-strategy="opportunity">Oportunidad</button>
     <button class="strategy-button" data-strategy="consolidation">Consolidación</button>
   </div>
-  <span id="strategyHelp">Elige un ámbito para filtrar la red; los temas sobre Mónica Villarreal y el gobierno municipal se resaltarán en rojo.</span>
+  <span id="strategyHelp">Elige un ámbito. Los nodos con color cumplen el criterio; los grises muestran sus conexiones inmediatas como contexto.</span>
   <span id="stats"></span>
 </div>
 <script>
 const RAW_NODES = {json.dumps(nodes, ensure_ascii=False)};
 const RAW_EDGES = {json.dumps(edges, ensure_ascii=False)};
 const META = {json.dumps(meta, ensure_ascii=False)};
-const MONICA_MUNICIPAL_TOPIC_IDS = {json.dumps(monica_municipal_topic_ids)};
 const nodes = new vis.DataSet(RAW_NODES);
 const edges = new vis.DataSet(RAW_EDGES);
 const network = new vis.Network(document.getElementById('network'), {{nodes, edges}}, {{
@@ -1154,27 +1128,22 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
 window.network = network;
 
 const STRATEGIC_PRESETS = {{
-  risk: {{label:'Riesgo', polarity:['negativa'], stance:['critica_oposicion'], help:'Lenguaje negativo y postura crítica/opositora.'}},
-  opportunity: {{label:'Oportunidad', polarity:['mixta'], stance:['mixta_disputa'], help:'Lenguaje mixto y posturas en disputa que pueden cambiar de dirección.'}},
-  consolidation: {{label:'Consolidación', polarity:['positiva'], stance:['apoyo_defensa'], help:'Lenguaje positivo y posturas de apoyo o defensa.'}}
+  risk: {{label:'Riesgo', polarity:['negativa'], stance:['critica_oposicion'], combine:'any', help:'Incluye lenguaje negativo o postura crítica/opositora.'}},
+  opportunity: {{label:'Oportunidad', polarity:['mixta'], stance:['mixta_disputa'], combine:'any', help:'Incluye conversaciones con balance léxico entre −0.20 y +0.20: posturas realmente mixtas o en disputa.'}},
+  consolidation: {{label:'Consolidación', polarity:['positiva'], stance:['apoyo_defensa'], combine:'any', help:'Incluye lenguaje positivo o posturas de apoyo/defensa.'}}
 }};
 function clearStrategicBar() {{
   document.querySelectorAll('.strategy-button').forEach(button => button.classList.remove('strategy-active'));
-  document.querySelectorAll('.network-topic-filter').forEach(card => card.classList.remove('strategy-anchor'));
-  document.getElementById('strategyHelp').textContent = 'Elige un ámbito para filtrar la red; los temas sobre Mónica Villarreal y el gobierno municipal se resaltarán en rojo.';
+  document.getElementById('strategyHelp').textContent = 'Elige un ámbito. Los nodos con color cumplen el criterio; los grises muestran sus conexiones inmediatas como contexto.';
 }}
 document.querySelectorAll('.strategy-button').forEach(button => {{
   button.addEventListener('click', () => {{
     clearStrategicBar();
     button.classList.add('strategy-active');
-    MONICA_MUNICIPAL_TOPIC_IDS.forEach(topicId => {{
-      const card = document.querySelector('[data-network-topic="' + topicId + '"]');
-      if (card) card.classList.add('strategy-anchor');
-    }});
     const preset = STRATEGIC_PRESETS[button.dataset.strategy];
-    document.getElementById('strategyHelp').textContent = preset.help + ' En rojo: ' + MONICA_MUNICIPAL_TOPIC_IDS.map(id => 'Tema ' + String(id).padStart(2, '0')).join(', ') + '.';
+    document.getElementById('strategyHelp').textContent = preset.help + ' Color: coincidencia; gris: conexión inmediata de contexto.';
     if (typeof window.guidedApplyStrategicPreset === 'function') {{
-      window.guidedApplyStrategicPreset({{...preset, anchorTopics:MONICA_MUNICIPAL_TOPIC_IDS}});
+      window.guidedApplyStrategicPreset(preset);
     }}
   }});
 }});

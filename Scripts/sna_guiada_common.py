@@ -226,18 +226,18 @@ def aggregate_words(
         }
         for name, score in category_scores.most_common()
     ]
-    if positive_hits and negative_hits:
-        polarity = "mixta"
-    elif positive_hits:
-        polarity = "positiva"
-    elif negative_hits:
-        polarity = "negativa"
-    else:
-        polarity = "neutral"
     polarity_total = positive_hits + negative_hits
     polarity_score = (
         (positive_hits - negative_hits) / polarity_total if polarity_total else 0.0
     )
+    if not polarity_total:
+        polarity = "neutral"
+    elif polarity_score >= 0.20:
+        polarity = "positiva"
+    elif polarity_score <= -0.20:
+        polarity = "negativa"
+    else:
+        polarity = "mixta"
     stance = stance_from_score(polarity_score, polarity_total)
     primary = categories[0] if categories else None
     return {
@@ -460,18 +460,32 @@ def inject_guided_layer(
   const originals = {{}};
   const LAYERED_FILTERS = {str(layered_filters).lower()};
   const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set()}};
-  let strategicAnchorTopics = new Set();
+  let strategicCombine = null;
+  let strategicSeedIds = new Set();
+  let strategicContextIds = new Set();
   let guidedFocus = null;
   let guidedNodes = null;
+  let guidedEdges = null;
   let guidedNetwork = null;
+  window.guidedStrategicState = {{seedIds:[], contextIds:[]}};
+  function publishStrategicState() {{
+    window.guidedStrategicState = {{
+      seedIds: Array.from(strategicSeedIds),
+      contextIds: Array.from(strategicContextIds),
+    }};
+  }}
   function confidence() {{
     return parseInt(document.getElementById('guidedConfidence').value || '0', 10) / 100;
   }}
   function resolveNetwork() {{
     guidedNetwork = (typeof network !== 'undefined') ? network : window.network;
     guidedNodes = (typeof nodes !== 'undefined') ? nodes : window.nodes;
+    guidedEdges = (typeof edges !== 'undefined') ? edges : window.edges;
     if (!guidedNodes && guidedNetwork && guidedNetwork.body && guidedNetwork.body.data) {{
       guidedNodes = guidedNetwork.body.data.nodes;
+    }}
+    if (!guidedEdges && guidedNetwork && guidedNetwork.body && guidedNetwork.body.data) {{
+      guidedEdges = guidedNetwork.body.data.edges;
     }}
     return !!(guidedNodes && guidedNetwork);
   }}
@@ -526,13 +540,22 @@ def inject_guided_layer(
     if (!meta) return false;
     if (activeFilters.topic.size && !(meta.network_topics || []).some(value => activeFilters.topic.has(String(value)))) return false;
     if (activeFilters.category.size && !Array.from(activeFilters.category).some(value => categoryMatch(meta, value))) return false;
-    if (activeFilters.polarity.size && !activeFilters.polarity.has(meta.polarity)) return false;
-    if (activeFilters.stance.size && !activeFilters.stance.has(meta.stance)) return false;
+    if (strategicCombine === 'any') {{
+      const polarityMatch = activeFilters.polarity.size && activeFilters.polarity.has(meta.polarity);
+      const stanceMatch = activeFilters.stance.size && activeFilters.stance.has(meta.stance);
+      if (!polarityMatch && !stanceMatch) return false;
+    }} else {{
+      if (activeFilters.polarity.size && !activeFilters.polarity.has(meta.polarity)) return false;
+      if (activeFilters.stance.size && !activeFilters.stance.has(meta.stance)) return false;
+    }}
     return true;
   }}
   function toggleFilter(kind, value, button) {{
-    if (strategicAnchorTopics.size) {{
-      strategicAnchorTopics.clear();
+    if (strategicCombine) {{
+      strategicCombine = null;
+      strategicSeedIds.clear();
+      strategicContextIds.clear();
+      publishStrategicState();
       window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
     }}
     const values = activeFilters[kind];
@@ -541,19 +564,52 @@ def inject_guided_layer(
     if (kind !== 'topic') document.getElementById('guidedColorMode').value = kind;
     applyLayerFilters();
   }}
+  function buildStrategicNeighborhood() {{
+    strategicSeedIds = new Set(
+      Object.keys(GUIDED_META).filter(id => guidedNodes.get(id) && matchesLayerFilters(GUIDED_META[id]))
+    );
+    strategicContextIds = new Set(strategicSeedIds);
+    const networkEdges = guidedEdges ? guidedEdges.get() : [];
+    networkEdges.forEach(edge => {{
+      const from = String(edge.from);
+      const to = String(edge.to);
+      if (strategicSeedIds.has(from) || strategicSeedIds.has(to)) {{
+        strategicContextIds.add(from);
+        strategicContextIds.add(to);
+      }}
+    }});
+    networkEdges.forEach(edge => {{
+      if (edge.kind !== 'tema_posicion') return;
+      const from = String(edge.from);
+      const to = String(edge.to);
+      if (strategicContextIds.has(from) || strategicContextIds.has(to)) {{
+        strategicContextIds.add(from);
+        strategicContextIds.add(to);
+      }}
+    }});
+    publishStrategicState();
+  }}
   function applyLayerFilters() {{
-    window.guidedNodeAllowed = node =>
-      (node.kind === 'tema' && strategicAnchorTopics.has(String(node.tema))) ||
-      matchesLayerFilters(GUIDED_META[String(node.id)]);
+    if (strategicCombine) buildStrategicNeighborhood();
+    window.guidedNodeAllowed = node => strategicCombine
+      ? strategicContextIds.has(String(node.id))
+      : matchesLayerFilters(GUIDED_META[String(node.id)]);
     if (typeof rebuild === 'function') rebuild();
     else guidedNodes.update(guidedNodes.get().map(node => ({{id:node.id, hidden:!window.guidedNodeAllowed(node)}})));
     recolor();
     const matching = Object.keys(GUIDED_META).filter(id => matchesLayerFilters(GUIDED_META[id]) && guidedNodes.get(id) && !guidedNodes.get(id).hidden);
+    const visible = guidedNodes.get().filter(node => !node.hidden);
     guidedNetwork.unselectAll();
     guidedNetwork.selectNodes(matching.slice(0, 1000));
-    document.getElementById('guidedStats').innerHTML = hasActiveFilters()
-      ? '<b>' + matching.length + '</b> nodos en el subconjunto activo'
-      : 'Sin filtros de capa activos';
+    if (strategicCombine) {{
+      document.getElementById('guidedStats').innerHTML = '<b>' + matching.length +
+        '</b> coincidencias · <b>' + Math.max(0, visible.length - matching.length) +
+        '</b> nodos de contexto · <b>' + visible.length + '</b> visibles';
+    }} else {{
+      document.getElementById('guidedStats').innerHTML = hasActiveFilters()
+        ? '<b>' + matching.length + '</b> nodos en el subconjunto activo'
+        : 'Sin filtros de capa activos';
+    }}
   }}
   function setActiveButton(kind, value) {{
     document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
@@ -599,11 +655,12 @@ def inject_guided_layer(
       let size = original.size;
       let font = original.font;
       const isFocus = matchesFocus(meta, guidedFocus);
-      const isStrategicAnchor = node.kind === 'tema' && strategicAnchorTopics.has(String(node.tema));
-      if (isStrategicAnchor) {{
-        color = {{background:'#e31a1c', border:'#ffffff'}};
-        borderWidth = 7;
-        if (typeof size === 'number') size = Math.max(size + 8, Math.round(size * 1.45));
+      const isStrategicSeed = strategicCombine && strategicSeedIds.has(String(node.id));
+      const isStrategicContext = strategicCombine && strategicContextIds.has(String(node.id)) && !isStrategicSeed;
+      if (isStrategicSeed) {{
+        borderWidth = Math.max(Number(borderWidth || 1), 4);
+      }} else if (isStrategicContext) {{
+        color = mutedColor();
       }} else if (guidedFocus) {{
         if (isFocus) {{
           color = focusColor(meta, guidedFocus);
@@ -627,7 +684,10 @@ def inject_guided_layer(
   function resetGuided() {{
     guidedFocus = null;
     Object.values(activeFilters).forEach(values => values.clear());
-    strategicAnchorTopics.clear();
+    strategicCombine = null;
+    strategicSeedIds.clear();
+    strategicContextIds.clear();
+    publishStrategicState();
     window.guidedNodeAllowed = null;
     window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
     document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
@@ -643,8 +703,9 @@ def inject_guided_layer(
     Object.values(activeFilters).forEach(values => values.clear());
     (preset.polarity || []).forEach(value => activeFilters.polarity.add(value));
     (preset.stance || []).forEach(value => activeFilters.stance.add(value));
-    strategicAnchorTopics = new Set((preset.anchorTopics || []).map(value => String(value)));
+    strategicCombine = preset.combine || 'all';
     document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(button => button.classList.remove('guided-active'));
+    document.getElementById('guidedColorMode').value = 'original';
     activeFilters.polarity.forEach(value => {{
       const button = document.querySelector('#guidedPanel [data-polarity="' + value + '"]');
       if (button) button.classList.add('guided-active');
@@ -654,8 +715,6 @@ def inject_guided_layer(
       if (button) button.classList.add('guided-active');
     }});
     applyLayerFilters();
-    const anchorLabel = Array.from(strategicAnchorTopics).map(value => 'T' + value.padStart(2, '0')).join(', ');
-    document.getElementById('guidedStats').innerHTML += anchorLabel ? ' · <b>' + anchorLabel + '</b> en rojo' : '';
   }};
   setTimeout(initGuided, 0);
 }})();

@@ -16,10 +16,10 @@
     "Agua": 102
   },
   "polaridades": {
-    "mixta": 1373,
+    "positiva": 956,
     "neutral": 809,
-    "positiva": 391,
-    "negativa": 262
+    "negativa": 722,
+    "mixta": 348
   },
   "posturas": {
     "apoyo_defensa": 956,
