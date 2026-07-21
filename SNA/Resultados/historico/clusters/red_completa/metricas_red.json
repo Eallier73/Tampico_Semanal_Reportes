@@ -1,16 +1,16 @@
 {
-  "n_nodos": 3836,
-  "n_aristas_total": 31245,
+  "n_nodos": 4084,
+  "n_aristas_total": 26550,
   "aristas_por_tipo": {
-    "intra_cluster": 26551,
-    "intra_sub": 3650,
-    "extra": 1044
+    "intra_cluster": 21568,
+    "intra_sub": 3386,
+    "extra": 1596
   },
-  "n_componentes_conexas": 14,
+  "n_componentes_conexas": 36,
   "tamano_componentes_top10": [
-    3709,
-    97,
-    4,
+    4008,
+    3,
+    3,
     3,
     3,
     3,
@@ -19,11 +19,11 @@
     2,
     2
   ],
-  "modularidad": 0.1678,
-  "clustering_global": 0.5971,
-  "diametro_gigante": 11,
-  "camino_promedio_gigante": 4.0387,
-  "asortatividad_peso": 0.0312,
-  "n_comunidades_sub": 470,
-  "n_temas": 35
+  "modularidad": 0.1629,
+  "clustering_global": 0.5683,
+  "diametro_gigante": 12,
+  "camino_promedio_gigante": 4.1059,
+  "asortatividad_peso": 0.0257,
+  "n_comunidades_sub": 584,
+  "n_temas": 50
 }

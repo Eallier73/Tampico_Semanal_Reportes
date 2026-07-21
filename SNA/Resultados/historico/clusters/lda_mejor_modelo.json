@@ -1,12 +1,12 @@
 {
-  "k": 35,
-  "coherencia_c_v": 0.4244284111199033,
-  "perplexity": -11.22341839775742,
+  "k": 50,
+  "coherencia_c_v": 0.4006993282098063,
+  "perplexity": -12.573352169436927,
   "alpha": "auto",
   "eta": "auto",
   "passes": 10,
   "iterations": 100,
-  "criterio_seleccion": "mayor K con coherencia >= 90% del maximo (0.4048)",
-  "coherencia_maxima_barrido": 0.44974325954803807,
-  "k_maxima_coherencia": 26
+  "criterio_seleccion": "mayor K con coherencia >= 90% del maximo (0.3606)",
+  "coherencia_maxima_barrido": 0.4006993282098063,
+  "k_maxima_coherencia": 50
 }

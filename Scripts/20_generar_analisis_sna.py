@@ -27,8 +27,8 @@ def build_steps(*, sin_radar: bool = False) -> list[tuple[str, list[str]]]:
             [
                 python,
                 str(SCRIPTS_DIR / "12_lda_sna.py"),
-                "--k-min", "25",
-                "--k-max", "35",
+                "--k-min", "50",
+                "--k-max", "50",
                 "--selection-mode", "informative",
             ],
         ),

@@ -2,9 +2,9 @@
   "corpus": "historico consolidado de Tampico",
   "n_mensajes": 67292,
   "n_usuarios_unicos": 47887,
-  "n_usuarios_sin_palabras": 3988,
-  "n_temas": 35,
-  "n_subs": 460,
-  "vocab_lda": 4375,
-  "vocab_subs": 4344
+  "n_usuarios_sin_palabras": 3819,
+  "n_temas": 50,
+  "n_subs": 563,
+  "vocab_lda": 4940,
+  "vocab_subs": 4883
 }

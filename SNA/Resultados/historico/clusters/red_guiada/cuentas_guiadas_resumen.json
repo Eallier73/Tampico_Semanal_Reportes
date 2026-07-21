@@ -1,30 +1,30 @@
 {
-  "n_nodos": 4336,
-  "n_nodos_con_categoria": 716,
-  "n_nodos_con_polaridad": 1424,
-  "n_nodos_con_postura": 1424,
+  "n_nodos": 4584,
+  "n_nodos_con_categoria": 735,
+  "n_nodos_con_polaridad": 1478,
+  "n_nodos_con_postura": 1478,
   "categorias": {
-    "Obras": 327,
-    "Delitos": 296,
-    "Corrupcion": 276,
-    "Prevencion": 274,
-    "Morena": 273,
+    "Obras": 343,
+    "Delitos": 294,
+    "Corrupcion": 278,
+    "Prevencion": 273,
+    "Morena": 266,
     "Vialidad": 218,
-    "Basura": 152,
-    "Americo": 139,
-    "Alumbrado": 97,
-    "Agua": 83
+    "Basura": 155,
+    "Americo": 142,
+    "Alumbrado": 104,
+    "Agua": 90
   },
   "polaridades": {
-    "neutral": 2912,
-    "negativa": 512,
-    "positiva": 499,
-    "mixta": 413
+    "neutral": 3106,
+    "positiva": 535,
+    "negativa": 528,
+    "mixta": 415
   },
   "posturas": {
-    "sin_postura": 2912,
-    "apoyo_defensa": 666,
-    "critica_oposicion": 618,
+    "sin_postura": 3106,
+    "apoyo_defensa": 701,
+    "critica_oposicion": 637,
     "mixta_disputa": 140
   },
   "fuentes": {

@@ -1,272 +1,367 @@
 # Reporte SNA - Fase 2: Modelado de Temas (LDA)
 
-_Generado: 2026-07-15 19:30 UTC_
+_Generado: 2026-07-21 17:23 UTC_
 
 ## 1. Barrido de K
 
 | K | Coherencia c_v | Perplexity |
 |---|---------------:|-----------:|
-| 25 | 0.3950 | -10.35 |
-| 26 | 0.4497 | -10.44 |
-| 27 | 0.4147 | -10.53 |
-| 28 | 0.4035 | -10.61 |
-| 29 | 0.4119 | -10.70 |
-| 30 | 0.4084 | -10.78 |
-| 31 | 0.4227 | -10.86 |
-| 32 | 0.4307 | -10.96 |
-| 33 | 0.3873 | -11.05 |
-| 34 | 0.4053 | -11.14 |
-| 35 | 0.4244 | -11.22 |
+| 50 | 0.4007 | -12.57 |
 
-**K seleccionado: 35** (c_v = 0.4244)
+**K seleccionado: 50** (c_v = 0.4007)
 
-**Criterio:** mayor K con coherencia >= 90% del maximo (0.4048)
+**Criterio:** mayor K con coherencia >= 90% del maximo (0.3606)
 
 ## 2. Temas descubiertos
 
-### Tema 0 (130 terminos)
+### Tema 0 (82 terminos)
 
-**Top 10:** representar, internacional, turistico, visitante, historico, turismo, brava, nivel, destino, reducir
+**Top 10:** mundial, felicidad, dia, deportivo, felicidades, feliz, celebrar, brava, orgullo, exito
 
-- Aristas internas (coocurrencia ventana=3): **3048**
+- Aristas internas (coocurrencia ventana=3): **1861**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 1 (82 terminos)
+### Tema 1 (94 terminos)
 
-**Top 10:** monica, villarreal, alcaldesa, presidenta, anaya, americo, excelente, gobernador, laredo, laguna
+**Top 10:** permanecer, camion, basura, capital, concentrar, consejo, secuestro, contenedor, ideal, extorsion
 
-- Aristas internas (coocurrencia ventana=3): **1368**
+- Aristas internas (coocurrencia ventana=3): **865**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 2 (169 terminos)
+### Tema 2 (97 terminos)
 
-**Top 10:** libertad, expresion, responsabilidad, diaz, movilizar, oro, establecimiento, finanza, torres, medalla
+**Top 10:** zona, persona, operativo, acuerdo, temperatura, personal, guardia, emergencia, situacion, norte
 
-- Aristas internas (coocurrencia ventana=3): **2265**
+- Aristas internas (coocurrencia ventana=3): **2564**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 3 (86 terminos)
+### Tema 3 (105 terminos)
 
-**Top 10:** mundial, partido, futbol, deportivo, final, equipo, seleccion, liga, deporte, electrico
+**Top 10:** temporada, cuerpo, accidente, educacion, estudiante, educativo, invitar, cruz, pemex, estacion
 
-- Aristas internas (coocurrencia ventana=3): **1457**
+- Aristas internas (coocurrencia ventana=3): **2048**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 4 (169 terminos)
+### Tema 4 (174 terminos)
 
-**Top 10:** madre, precio, tienda, comprar, producto, vender, hijo, hija, perdida, sucursal
+**Top 10:** incremento, advertir, cerrar, santa, sucursal, ojala, dolares, opinar, explicacion, propietario
 
-- Aristas internas (coocurrencia ventana=3): **4532**
+- Aristas internas (coocurrencia ventana=3): **3758**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 5 (124 terminos)
+### Tema 5 (90 terminos)
 
-**Top 10:** playa, autoridad, confirmar, nota, investigacion, denuncia, miramar, persona, presunto, detener
+**Top 10:** red, hora, social, voto, televisa, clinica, medio, cancer, camara, oficina
 
-- Aristas internas (coocurrencia ventana=3): **2781**
+- Aristas internas (coocurrencia ventana=3): **1238**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 6 (118 terminos)
+### Tema 6 (97 terminos)
 
-**Top 10:** evento, disfrutar, cfe, cultura, invitar, plaza, actividad, vacacion, cultural, experiencia
+**Top 10:** evento, espacio, cultura, cultural, experiencia, plaza, dif, actividad, antonio, vivir
 
-- Aristas internas (coocurrencia ventana=3): **3145**
+- Aristas internas (coocurrencia ventana=3): **2174**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 7 (136 terminos)
+### Tema 7 (79 terminos)
 
-**Top 10:** calor, agua, sol, maximo, aire, cielo, mar, cine, extremo, festejo
+**Top 10:** paz, foto, jugar, cine, recordar, fallecimiento, litro, fortaleza, legado, descansar
 
-- Aristas internas (coocurrencia ventana=3): **1980**
+- Aristas internas (coocurrencia ventana=3): **708**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 8 (163 terminos)
+### Tema 8 (122 terminos)
 
-**Top 10:** gente, creer, campos, cosa, salir, cualquiera, subir, puro, pobre, donde
+**Top 10:** responder, concierto, internet, inmediato, vacacional, pescador, respuesta, cancelar, posicion, reaccion
 
-- Aristas internas (coocurrencia ventana=3): **5524**
+- Aristas internas (coocurrencia ventana=3): **1727**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 9 (126 terminos)
+### Tema 9 (130 terminos)
 
-**Top 10:** mexico, pais, mexicano, claudia, veracruz, sheinbaum, frontera, grado, viva, mexicanos
+**Top 10:** carretera, claudia, sheinbaum, campos, unidos, correr, marina, gringo, documento, gobernadora
 
-- Aristas internas (coocurrencia ventana=3): **3561**
+- Aristas internas (coocurrencia ventana=3): **2725**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 10 (160 terminos)
+### Tema 10 (124 terminos)
 
-**Top 10:** policia, alcalde, emitir, robo, presidente, llamado, correr, president, gonzalez, deportista
+**Top 10:** respetar, creer, pais, emitir, presidente, mal, viejo, salir, cosa, trump
 
-- Aristas internas (coocurrencia ventana=3): **3763**
+- Aristas internas (coocurrencia ventana=3): **3253**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 11 (77 terminos)
+### Tema 11 (86 terminos)
 
-**Top 10:** gracias, columna, felicidad, felicidades, feliz, conversacion, resumen, saludo, exito, bendicion
+**Top 10:** justicia, laredo, denuncia, responsable, muerte, victima, clima, frontera, acto, aprovechar
 
-- Aristas internas (coocurrencia ventana=3): **1356**
+- Aristas internas (coocurrencia ventana=3): **1100**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 12 (132 terminos)
+### Tema 12 (86 terminos)
 
-**Top 10:** maria, venezuela, imagen, corina, volver, trump, machado, interno, eeuu, leer
+**Top 10:** mujer, violencia, menor, hombre, familiar, eleccion, derecho, entrevista, movilizar, camaron
 
-- Aristas internas (coocurrencia ventana=3): **2979**
+- Aristas internas (coocurrencia ventana=3): **1167**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 13 (57 terminos)
+### Tema 13 (31 terminos)
 
-**Top 10:** tamaulipas, tampico, madero, sur, altamira, ciudad, reynosa, matamoros, cdvictoria, region
+**Top 10:** tampico, tamaulipas, madero, altamira, reynosa, matamoros, cdvictoria, ciudad, nuevolaredo, cdmadero
 
-- Aristas internas (coocurrencia ventana=3): **687**
+- Aristas internas (coocurrencia ventana=3): **231**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 14 (122 terminos)
+### Tema 14 (92 terminos)
 
-**Top 10:** nino, historia, joven, padre, escuela, nina, comenzar, espacio, celebrar, futuro
+**Top 10:** nino, joven, padre, nina, etapa, crecer, familia, futuro, verde, adulto
 
-- Aristas internas (coocurrencia ventana=3): **3007**
+- Aristas internas (coocurrencia ventana=3): **1657**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 15 (114 terminos)
+### Tema 15 (85 terminos)
 
-**Top 10:** caso, registrar, nacional, general, indicar, asegurar, fiscalia, delito, justicia, senalar
+**Top 10:** caso, autoridad, senalar, entidad, region, presentar, rio, explicar, informar, servicio
 
-- Aristas internas (coocurrencia ventana=3): **3225**
+- Aristas internas (coocurrencia ventana=3): **1918**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 16 (131 terminos)
+### Tema 16 (81 terminos)
 
-**Top 10:** pesos, millon, acuerdo, buscar, mayo, empresa, red, publico, oficial, explicar
+**Top 10:** pesos, millon, pago, llamado, transporte, convertir, pension, superior, pieza, recibir
 
-- Aristas internas (coocurrencia ventana=3): **5416**
+- Aristas internas (coocurrencia ventana=3): **979**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 17 (145 terminos)
+### Tema 17 (81 terminos)
 
-**Top 10:** accidente, ocurrir, carretera, via, cierre, terminar, perder, muerte, camioneta, altura
+**Top 10:** calle, agua, sur, reportar, cfe, riesgo, avenida, falta, circulacion, via
 
-- Aristas internas (coocurrencia ventana=3): **3083**
+- Aristas internas (coocurrencia ventana=3): **1389**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 18 (111 terminos)
+### Tema 18 (95 terminos)
 
-**Top 10:** dia, mujer, temperatura, lluvia, cuerpo, martes, amor, mantener, encontrar, condicion
+**Top 10:** vida, amor, corazon, camino, caer, mundo, moises, fuerza, animal, nombre
 
-- Aristas internas (coocurrencia ventana=3): **2443**
+- Aristas internas (coocurrencia ventana=3): **1697**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 19 (148 terminos)
+### Tema 19 (91 terminos)
 
-**Top 10:** junio, exposicion, huachicol, viaje, blues, metro, sinaloa, generacion, aduana, boleto
+**Top 10:** esperar, fecha, maximo, noche, sabado, abierto, musica, tarde, viaje, volver
 
-- Aristas internas (coocurrencia ventana=3): **2407**
+- Aristas internas (coocurrencia ventana=3): **1340**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 20 (131 terminos)
+### Tema 20 (121 terminos)
 
-**Top 10:** llamar, luz, listo, litro, planta, jimenez, influir, nombre, ganar, dedicar
+**Top 10:** puente, listo, restaurante, metro, ataque, distrito, gomez, dengue, sentido, antiguo
 
-- Aristas internas (coocurrencia ventana=3): **1776**
+- Aristas internas (coocurrencia ventana=3): **1639**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 21 (126 terminos)
+### Tema 21 (74 terminos)
 
-**Top 10:** miguel, mario, hermana, enrique, permiso, prueba, mendez, diputado, candidato, voz
+**Top 10:** maria, mayo, final, nota, campeon, corina, venezuela, machado, extremo, mario
 
-- Aristas internas (coocurrencia ventana=3): **2134**
+- Aristas internas (coocurrencia ventana=3): **737**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 22 (117 terminos)
+### Tema 22 (97 terminos)
 
-**Top 10:** zona, colonia, seguridad, calle, proteccion, civil, riesgo, centro, operativo, municipio
+**Top 10:** laguna, registro, evitar, solicitar, informacion, frente, carpintero, forma, victoria, llegada
 
-- Aristas internas (coocurrencia ventana=3): **4134**
+- Aristas internas (coocurrencia ventana=3): **1962**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 23 (131 terminos)
+### Tema 23 (99 terminos)
 
-**Top 10:** julio, juan, puerto, san, guadalupe, antonio, etapa, rivera, pedro, tercer
+**Top 10:** desarrollo, proyecto, sector, infraestructura, empresa, economico, turistico, turismo, generar, oportunidad
 
-- Aristas internas (coocurrencia ventana=3): **2913**
+- Aristas internas (coocurrencia ventana=3): **2620**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 24 (150 terminos)
+### Tema 24 (114 terminos)
 
-**Top 10:** violencia, judicial, menor, derecho, electoral, ordenado, liberar, libre, milenio, ley
+**Top 10:** playa, abril, comision, cambio, condicion, bravo, mar, fenomeno, grupo, leon
 
-- Aristas internas (coocurrencia ventana=3): **3393**
+- Aristas internas (coocurrencia ventana=3): **1597**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 25 (130 terminos)
+### Tema 25 (97 terminos)
 
-**Top 10:** semana, provocar, santa, temporada, sanitario, acumulado, turista, jesus, triunfo, terreno
+**Top 10:** sol, lluvia, acumulado, prever, marca, definir, destacado, triunfo, ernesto, beca
 
-- Aristas internas (coocurrencia ventana=3): **1428**
+- Aristas internas (coocurrencia ventana=3): **800**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 26 (85 terminos)
+### Tema 26 (80 terminos)
 
-**Top 10:** informativo, mercado, noticias, comision, carmen, responder, convocatoria, aumento, comerciante, francisco
+**Top 10:** columna, informativo, domingo, puebla, incrementar, color, campana, madrugada, rojo, hermosa
 
-- Aristas internas (coocurrencia ventana=3): **706**
+- Aristas internas (coocurrencia ventana=3): **925**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 27 (120 terminos)
+### Tema 27 (75 terminos)
 
-**Top 10:** morena, corrupto, articulo, servir, corrupcion, pueblo, votar, crimen, politico, acabar
+**Top 10:** mexico, ciento, venta, electrico, rapido, caida, colombia, aumentar, pese, argentina
 
-- Aristas internas (coocurrencia ventana=3): **3201**
+- Aristas internas (coocurrencia ventana=3): **940**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 28 (141 terminos)
+### Tema 28 (118 terminos)
 
-**Top 10:** venta, hora, esperar, ambiente, verano, rio, clima, gustar, viernes, tormenta
+**Top 10:** hermoso, cierre, gustar, vacante, bonito, vivienda, legal, super, bello, arbol
 
-- Aristas internas (coocurrencia ventana=3): **2689**
+- Aristas internas (coocurrencia ventana=3): **1297**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 29 (113 terminos)
+### Tema 29 (88 terminos)
 
-**Top 10:** vida, ano, ruta, familia, ciencia, paz, mes, cumplir, financiero, ave
+**Top 10:** exposicion, energia, ambiental, rivera, ciencia, congreso, humano, liberar, viajar, cumplir
 
-- Aristas internas (coocurrencia ventana=3): **2118**
+- Aristas internas (coocurrencia ventana=3): **1119**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 30 (125 terminos)
+### Tema 30 (94 terminos)
 
-**Top 10:** quedar, casa, mandar, correo, opinion, pagar, ayuda, necesitar, sentir, ayudar
+**Top 10:** quedar, casa, gracias, conversacion, correo, opinion, video, presuntamente, luz, agosto
 
-- Aristas internas (coocurrencia ventana=3): **3101**
+- Aristas internas (coocurrencia ventana=3): **1455**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 31 (113 terminos)
+### Tema 31 (99 terminos)
 
-**Top 10:** gobierno, municipal, seguir, fortalecer, salud, servicio, bienestar, accion, atencion, programa
+**Top 10:** seguridad, estatal, secretaria, accion, municipio, civil, proteccion, sistema, seguro, permitir
 
-- Aristas internas (coocurrencia ventana=3): **4945**
+- Aristas internas (coocurrencia ventana=3): **3559**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 32 (153 terminos)
+### Tema 32 (126 terminos)
 
-**Top 10:** narco, baja, cartel, morir, jajaja, andar, parecer, militar, leon, horario
+**Top 10:** partido, horario, presion, estadio, bolsa, dato, alta, panista, compra, natural
 
-- Aristas internas (coocurrencia ventana=3): **4596**
+- Aristas internas (coocurrencia ventana=3): **1758**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 33 (136 terminos)
+### Tema 33 (133 terminos)
 
-**Top 10:** querer, pasar, hablar, mal, dejar, deber, problema, sacar, peor, pensar
+**Top 10:** madre, hijo, pensar, alguien, senor, hija, papa, pena, morir, tocar
 
-- Aristas internas (coocurrencia ventana=3): **5508**
+- Aristas internas (coocurrencia ventana=3): **3482**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
-### Tema 34 (104 terminos)
+### Tema 34 (77 terminos)
 
-**Top 10:** hernandez, jose, distinto, jueves, miercoles, pasion, marzo, garcia, rodriguez, domingo
+**Top 10:** publico, hernandez, alcalde, politico, juan, martinez, diaz, carlos, considerar, utilizar
 
-- Aristas internas (coocurrencia ventana=3): **1928**
+- Aristas internas (coocurrencia ventana=3): **1129**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 35 (84 terminos)
+
+**Top 10:** julio, semana, mandar, noticias, articulo, alto, anunciar, monterrey, oro, gol
+
+- Aristas internas (coocurrencia ventana=3): **1026**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 36 (122 terminos)
+
+**Top 10:** viva, saludo, saludos, adolfo, ala, rico, fan, amlo, encantar, pregunta
+
+- Aristas internas (coocurrencia ventana=3): **3253**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 37 (99 terminos)
+
+**Top 10:** gobernador, futbol, americo, equipo, seleccion, aumento, liga, internacional, representar, pasion
+
+- Aristas internas (coocurrencia ventana=3): **1512**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 38 (112 terminos)
+
+**Top 10:** nacional, veracruz, participar, proceso, sede, puesto, edicion, estudio, concluir, clase
+
+- Aristas internas (coocurrencia ventana=3): **1984**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 39 (91 terminos)
+
+**Top 10:** jose, gonzalez, carrera, escuela, angel, reyes, ceremonia, choque, bandera, eduardo
+
+- Aristas internas (coocurrencia ventana=3): **1125**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 40 (169 terminos)
+
+**Top 10:** calor, guadalupe, golfo, jesus, virgen, imagen, tramo, pluvial, sensacion, pablo
+
+- Aristas internas (coocurrencia ventana=3): **2281**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 41 (100 terminos)
+
+**Top 10:** ano, mes, comenzar, llegar, buscar, carmen, electoral, cuando, llamar, subir
+
+- Aristas internas (coocurrencia ventana=3): **1842**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 42 (80 terminos)
+
+**Top 10:** querer, gente, hablar, precio, dejar, pasar, terminar, donde, venir, intervencion
+
+- Aristas internas (coocurrencia ventana=3): **1641**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 43 (82 terminos)
+
+**Top 10:** san, ruta, pedro, blues, tormenta, tomar, mendez, directiva, tercer, corriente
+
+- Aristas internas (coocurrencia ventana=3): **669**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 44 (112 terminos)
+
+**Top 10:** junio, investigacion, confirmar, fiscalia, huachicol, jueves, fiscal, asegurar, ingreso, revelar
+
+- Aristas internas (coocurrencia ventana=3): **2171**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 45 (91 terminos)
+
+**Top 10:** atencion, hospital, medico, pedir, necesitar, ayuda, contar, encontrar, mercado, desaparecido
+
+- Aristas internas (coocurrencia ventana=3): **1281**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 46 (127 terminos)
+
+**Top 10:** reducir, hermana, denunciar, abandonado, jaibo, banda, vaso, abogado, memoria, presa
+
+- Aristas internas (coocurrencia ventana=3): **1851**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 47 (72 terminos)
+
+**Top 10:** villarreal, monica, presidenta, seguir, excelente, bienestar, alcaldesa, municipal, colonia, salud
+
+- Aristas internas (coocurrencia ventana=3): **1800**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 48 (75 terminos)
+
+**Top 10:** resumen, real, asociacion, popular, club, sinaloa, cambiar, karina, agregar, comentar
+
+- Aristas internas (coocurrencia ventana=3): **869**
+- Vinculos externos (coocurrencia ventana=12): **200**
+
+### Tema 49 (110 terminos)
+
+**Top 10:** gobierno, morena, dinero, deber, pagar, corrupto, puro, impuesto, andar, robo
+
+- Aristas internas (coocurrencia ventana=3): **3804**
 - Vinculos externos (coocurrencia ventana=12): **200**
 
 ---
@@ -286,40 +381,55 @@ _Generado: 2026-07-15 19:30 UTC_
 
 Cada celda `M[i][j]` = suma de coocurrencias de terminos del tema i con terminos del tema j (ventana=12, deduplicada).
 
-| De \\ Hacia | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 | T11 | T12 | T13 | T14 | T15 | T16 | T17 | T18 | T19 | T20 | T21 | T22 | T23 | T24 | T25 | T26 | T27 | T28 | T29 | T30 | T31 | T32 | T33 | T34 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| T0 | 0 | 942 | 51 | 213 | 0 | 61 | 196 | 95 | 0 | 386 | 0 | 149 | 37 | 4390 | 86 | 257 | 142 | 0 | 274 | 0 | 35 | 0 | 526 | 65 | 0 | 94 | 0 | 0 | 0 | 279 | 0 | 680 | 0 | 29 | 103 |
-| T1 | 77 | 0 | 0 | 330 | 0 | 83 | 763 | 0 | 377 | 904 | 0 | 4708 | 0 | 8647 | 783 | 0 | 480 | 0 | 682 | 0 | 276 | 0 | 1369 | 75 | 0 | 0 | 0 | 159 | 0 | 1000 | 0 | 8550 | 0 | 0 | 0 |
-| T2 | 74 | 301 | 0 | 17 | 0 | 52 | 84 | 22 | 17 | 120 | 214 | 903 | 78 | 964 | 68 | 136 | 165 | 0 | 91 | 21 | 0 | 31 | 265 | 39 | 40 | 28 | 260 | 227 | 16 | 112 | 853 | 505 | 0 | 67 | 15 |
-| T3 | 213 | 1207 | 0 | 0 | 0 | 0 | 107 | 81 | 32 | 590 | 33 | 413 | 69 | 3254 | 124 | 288 | 99 | 0 | 463 | 42 | 28 | 0 | 242 | 30 | 0 | 0 | 31 | 133 | 105 | 240 | 0 | 1020 | 0 | 113 | 44 |
-| T4 | 0 | 140 | 0 | 0 | 0 | 89 | 21 | 20 | 182 | 252 | 21 | 159 | 204 | 777 | 231 | 46 | 244 | 30 | 611 | 20 | 76 | 0 | 22 | 74 | 0 | 19 | 41 | 74 | 68 | 861 | 184 | 320 | 0 | 835 | 0 |
-| T5 | 61 | 237 | 0 | 0 | 0 | 0 | 150 | 0 | 185 | 243 | 29 | 213 | 74 | 2794 | 139 | 487 | 497 | 92 | 494 | 0 | 0 | 0 | 1332 | 0 | 32 | 36 | 0 | 102 | 107 | 429 | 269 | 900 | 28 | 471 | 31 |
-| T6 | 75 | 1699 | 50 | 46 | 0 | 87 | 0 | 84 | 0 | 80 | 0 | 506 | 0 | 4760 | 644 | 130 | 180 | 0 | 543 | 87 | 74 | 0 | 229 | 66 | 0 | 71 | 35 | 0 | 0 | 718 | 61 | 1298 | 0 | 0 | 0 |
-| T7 | 114 | 207 | 22 | 181 | 39 | 68 | 84 | 0 | 33 | 182 | 36 | 80 | 83 | 1923 | 44 | 93 | 159 | 0 | 809 | 0 | 49 | 41 | 543 | 46 | 66 | 69 | 19 | 88 | 169 | 302 | 45 | 317 | 0 | 107 | 20 |
-| T8 | 0 | 605 | 0 | 59 | 27 | 185 | 26 | 33 | 0 | 794 | 55 | 394 | 90 | 848 | 205 | 0 | 65 | 58 | 565 | 0 | 0 | 0 | 183 | 104 | 0 | 0 | 0 | 431 | 62 | 591 | 539 | 1010 | 117 | 1474 | 0 |
-| T9 | 291 | 1353 | 0 | 341 | 93 | 209 | 80 | 0 | 490 | 0 | 130 | 671 | 299 | 1821 | 430 | 320 | 566 | 45 | 825 | 167 | 128 | 0 | 287 | 0 | 52 | 0 | 0 | 790 | 192 | 628 | 200 | 1191 | 180 | 1147 | 45 |
-| T10 | 0 | 509 | 194 | 56 | 0 | 29 | 25 | 36 | 102 | 354 | 0 | 304 | 154 | 2040 | 145 | 86 | 114 | 26 | 297 | 0 | 0 | 0 | 615 | 0 | 0 | 0 | 64 | 165 | 46 | 302 | 193 | 1070 | 25 | 297 | 366 |
-| T11 | 0 | 5842 | 845 | 131 | 58 | 145 | 144 | 0 | 112 | 261 | 192 | 0 | 0 | 2768 | 555 | 0 | 0 | 0 | 1206 | 0 | 0 | 0 | 589 | 0 | 0 | 0 | 855 | 269 | 0 | 1652 | 1975 | 1709 | 0 | 283 | 0 |
-| T12 | 37 | 214 | 41 | 69 | 145 | 122 | 23 | 22 | 138 | 820 | 154 | 136 | 0 | 826 | 23 | 24 | 30 | 183 | 640 | 0 | 22 | 0 | 361 | 82 | 27 | 82 | 0 | 73 | 0 | 612 | 297 | 495 | 113 | 573 | 45 |
-| T13 | 1343 | 7293 | 0 | 1023 | 0 | 812 | 1814 | 418 | 146 | 821 | 341 | 1993 | 0 | 0 | 1313 | 1557 | 1603 | 0 | 1785 | 183 | 111 | 0 | 5862 | 465 | 128 | 177 | 138 | 0 | 459 | 1674 | 151 | 8114 | 0 | 403 | 550 |
-| T14 | 0 | 1849 | 0 | 0 | 89 | 71 | 574 | 0 | 89 | 430 | 67 | 821 | 0 | 3375 | 0 | 56 | 255 | 0 | 840 | 50 | 0 | 0 | 384 | 87 | 0 | 0 | 0 | 0 | 81 | 1210 | 93 | 1512 | 0 | 206 | 0 |
-| T15 | 257 | 871 | 37 | 87 | 0 | 397 | 130 | 38 | 0 | 356 | 0 | 39 | 0 | 4299 | 56 | 0 | 472 | 0 | 408 | 0 | 0 | 39 | 1778 | 204 | 92 | 40 | 44 | 0 | 0 | 393 | 0 | 1568 | 0 | 123 | 256 |
-| T16 | 45 | 1001 | 0 | 67 | 57 | 262 | 145 | 42 | 0 | 453 | 79 | 38 | 0 | 4875 | 255 | 363 | 0 | 47 | 332 | 0 | 42 | 46 | 666 | 84 | 0 | 0 | 41 | 0 | 0 | 876 | 291 | 2130 | 0 | 128 | 0 |
-| T17 | 0 | 62 | 0 | 26 | 49 | 316 | 0 | 0 | 77 | 293 | 63 | 20 | 300 | 1529 | 45 | 226 | 89 | 0 | 317 | 33 | 0 | 0 | 585 | 48 | 28 | 0 | 19 | 0 | 64 | 440 | 0 | 397 | 22 | 236 | 0 |
-| T18 | 125 | 1022 | 0 | 184 | 220 | 229 | 426 | 370 | 180 | 623 | 0 | 1458 | 104 | 3623 | 601 | 297 | 158 | 49 | 0 | 59 | 0 | 0 | 921 | 0 | 103 | 66 | 0 | 48 | 435 | 1540 | 174 | 1497 | 0 | 802 | 99 |
-| T19 | 37 | 182 | 21 | 85 | 20 | 0 | 342 | 0 | 32 | 390 | 42 | 83 | 0 | 1600 | 149 | 68 | 109 | 33 | 193 | 0 | 17 | 55 | 201 | 49 | 17 | 69 | 0 | 76 | 51 | 311 | 52 | 191 | 23 | 112 | 76 |
-| T20 | 72 | 521 | 0 | 116 | 94 | 77 | 74 | 49 | 192 | 303 | 39 | 198 | 57 | 921 | 71 | 19 | 133 | 0 | 374 | 17 | 0 | 0 | 40 | 21 | 0 | 0 | 21 | 99 | 19 | 379 | 178 | 345 | 40 | 518 | 18 |
-| T21 | 0 | 248 | 31 | 66 | 44 | 45 | 35 | 41 | 14 | 183 | 57 | 53 | 34 | 886 | 29 | 104 | 82 | 0 | 207 | 55 | 0 | 0 | 130 | 128 | 29 | 15 | 0 | 113 | 0 | 384 | 62 | 201 | 117 | 144 | 86 |
-| T22 | 68 | 1934 | 194 | 0 | 0 | 362 | 0 | 196 | 0 | 151 | 124 | 589 | 0 | 9046 | 134 | 1000 | 202 | 0 | 713 | 0 | 0 | 0 | 0 | 255 | 0 | 93 | 192 | 0 | 263 | 692 | 417 | 2334 | 0 | 77 | 70 |
-| T23 | 90 | 752 | 0 | 30 | 74 | 0 | 96 | 25 | 104 | 149 | 0 | 63 | 60 | 2997 | 167 | 255 | 292 | 27 | 213 | 0 | 0 | 42 | 760 | 0 | 25 | 0 | 0 | 0 | 50 | 312 | 31 | 881 | 90 | 28 | 274 |
-| T24 | 0 | 431 | 22 | 0 | 0 | 127 | 22 | 47 | 24 | 473 | 0 | 61 | 27 | 1426 | 106 | 246 | 183 | 28 | 516 | 0 | 0 | 0 | 341 | 25 | 0 | 0 | 0 | 88 | 44 | 562 | 0 | 1002 | 24 | 260 | 0 |
-| T25 | 191 | 230 | 28 | 19 | 71 | 212 | 139 | 104 | 23 | 123 | 0 | 33 | 82 | 1559 | 74 | 136 | 108 | 0 | 436 | 69 | 0 | 0 | 593 | 54 | 0 | 0 | 19 | 0 | 128 | 239 | 40 | 201 | 48 | 98 | 41 |
-| T26 | 37 | 373 | 260 | 31 | 57 | 0 | 81 | 19 | 68 | 34 | 101 | 949 | 58 | 890 | 0 | 148 | 228 | 19 | 162 | 0 | 37 | 0 | 430 | 16 | 39 | 19 | 0 | 101 | 386 | 185 | 1110 | 218 | 76 | 276 | 28 |
-| T27 | 0 | 610 | 194 | 133 | 54 | 102 | 0 | 29 | 531 | 1378 | 165 | 406 | 49 | 679 | 62 | 51 | 84 | 0 | 162 | 0 | 58 | 0 | 29 | 0 | 0 | 0 | 64 | 0 | 48 | 274 | 297 | 934 | 178 | 1110 | 0 |
-| T28 | 0 | 1177 | 0 | 105 | 0 | 134 | 147 | 65 | 62 | 320 | 0 | 316 | 0 | 2492 | 81 | 30 | 66 | 0 | 917 | 0 | 0 | 0 | 446 | 0 | 44 | 63 | 349 | 0 | 0 | 648 | 64 | 784 | 29 | 221 | 0 |
-| T29 | 52 | 1413 | 0 | 60 | 340 | 332 | 332 | 0 | 133 | 504 | 68 | 2014 | 51 | 2795 | 910 | 242 | 539 | 62 | 1446 | 0 | 0 | 56 | 692 | 53 | 85 | 0 | 0 | 53 | 189 | 0 | 254 | 3076 | 0 | 841 | 54 |
-| T30 | 0 | 319 | 853 | 0 | 38 | 208 | 61 | 0 | 217 | 305 | 193 | 2247 | 92 | 1033 | 128 | 0 | 291 | 0 | 407 | 0 | 0 | 0 | 461 | 0 | 0 | 0 | 1004 | 178 | 36 | 737 | 0 | 743 | 0 | 813 | 0 |
-| T31 | 0 | 8402 | 0 | 0 | 0 | 179 | 75 | 0 | 228 | 637 | 93 | 1092 | 0 | 9874 | 334 | 507 | 752 | 0 | 712 | 0 | 0 | 0 | 1507 | 0 | 0 | 0 | 76 | 206 | 174 | 1740 | 0 | 0 | 0 | 559 | 0 |
-| T32 | 26 | 233 | 0 | 0 | 0 | 50 | 31 | 0 | 302 | 680 | 25 | 34 | 135 | 1375 | 73 | 106 | 95 | 22 | 219 | 23 | 22 | 49 | 169 | 114 | 24 | 31 | 56 | 178 | 126 | 345 | 136 | 363 | 0 | 544 | 52 |
-| T33 | 0 | 446 | 0 | 78 | 243 | 318 | 0 | 0 | 1144 | 1217 | 114 | 418 | 308 | 1311 | 206 | 123 | 237 | 0 | 1045 | 0 | 38 | 0 | 265 | 0 | 40 | 0 | 105 | 559 | 88 | 1222 | 779 | 857 | 123 | 0 | 0 |
-| T34 | 129 | 1277 | 0 | 44 | 0 | 57 | 108 | 0 | 0 | 81 | 272 | 0 | 45 | 3351 | 122 | 402 | 36 | 0 | 196 | 0 | 0 | 0 | 708 | 274 | 0 | 0 | 28 | 0 | 26 | 220 | 0 | 668 | 27 | 0 | 0 |
+| De \\ Hacia | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 | T11 | T12 | T13 | T14 | T15 | T16 | T17 | T18 | T19 | T20 | T21 | T22 | T23 | T24 | T25 | T26 | T27 | T28 | T29 | T30 | T31 | T32 | T33 | T34 | T35 | T36 | T37 | T38 | T39 | T40 | T41 | T42 | T43 | T44 | T45 | T46 | T47 | T48 | T49 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| T0 | 0 | 0 | 317 | 0 | 0 | 58 | 301 | 0 | 0 | 0 | 113 | 51 | 173 | 4387 | 793 | 0 | 0 | 115 | 648 | 242 | 0 | 115 | 92 | 0 | 0 | 0 | 0 | 297 | 288 | 0 | 1187 | 116 | 57 | 106 | 0 | 66 | 54 | 317 | 88 | 0 | 0 | 1072 | 394 | 0 | 59 | 102 | 0 | 5421 | 0 | 152 |
+| T1 | 121 | 0 | 267 | 0 | 19 | 25 | 100 | 0 | 0 | 31 | 38 | 21 | 0 | 984 | 81 | 137 | 0 | 174 | 29 | 49 | 12 | 0 | 19 | 49 | 0 | 0 | 0 | 62 | 0 | 0 | 25 | 226 | 18 | 94 | 57 | 32 | 0 | 29 | 0 | 0 | 0 | 97 | 207 | 18 | 0 | 122 | 17 | 802 | 0 | 112 |
+| T2 | 452 | 0 | 0 | 0 | 0 | 57 | 206 | 0 | 0 | 0 | 99 | 0 | 66 | 4650 | 134 | 507 | 50 | 1103 | 140 | 376 | 0 | 0 | 103 | 549 | 105 | 209 | 0 | 196 | 0 | 0 | 247 | 1372 | 0 | 0 | 109 | 163 | 0 | 0 | 294 | 0 | 71 | 419 | 264 | 0 | 0 | 247 | 0 | 2023 | 50 | 211 |
+| T3 | 138 | 0 | 285 | 0 | 0 | 0 | 189 | 0 | 0 | 27 | 30 | 0 | 0 | 2097 | 256 | 126 | 106 | 60 | 59 | 38 | 0 | 0 | 24 | 142 | 0 | 40 | 0 | 65 | 0 | 0 | 48 | 351 | 0 | 35 | 94 | 21 | 0 | 0 | 125 | 209 | 20 | 147 | 67 | 51 | 0 | 86 | 0 | 839 | 25 | 103 |
+| T4 | 149 | 19 | 190 | 0 | 0 | 30 | 26 | 0 | 0 | 0 | 307 | 22 | 32 | 563 | 32 | 32 | 96 | 44 | 52 | 46 | 0 | 118 | 31 | 16 | 22 | 0 | 0 | 174 | 16 | 38 | 54 | 110 | 17 | 83 | 47 | 128 | 18 | 0 | 13 | 0 | 17 | 236 | 454 | 54 | 0 | 67 | 36 | 313 | 0 | 275 |
+| T5 | 213 | 0 | 281 | 0 | 0 | 0 | 131 | 30 | 26 | 0 | 126 | 34 | 98 | 1306 | 96 | 141 | 0 | 126 | 56 | 145 | 0 | 25 | 93 | 395 | 0 | 51 | 0 | 130 | 26 | 52 | 214 | 360 | 100 | 0 | 93 | 0 | 0 | 23 | 125 | 22 | 0 | 380 | 288 | 21 | 0 | 142 | 0 | 1448 | 102 | 169 |
+| T6 | 654 | 0 | 280 | 37 | 0 | 0 | 0 | 42 | 0 | 104 | 95 | 0 | 0 | 4154 | 717 | 0 | 0 | 118 | 207 | 162 | 0 | 50 | 0 | 166 | 44 | 0 | 0 | 129 | 0 | 0 | 604 | 419 | 0 | 0 | 114 | 0 | 59 | 0 | 96 | 37 | 0 | 89 | 182 | 0 | 37 | 102 | 0 | 4160 | 0 | 223 |
+| T7 | 282 | 0 | 90 | 0 | 0 | 50 | 144 | 0 | 0 | 16 | 97 | 22 | 86 | 624 | 321 | 36 | 53 | 30 | 141 | 30 | 43 | 72 | 0 | 83 | 54 | 15 | 0 | 81 | 0 | 18 | 136 | 378 | 17 | 91 | 30 | 19 | 0 | 73 | 76 | 62 | 41 | 217 | 256 | 33 | 32 | 32 | 0 | 845 | 18 | 87 |
+| T8 | 77 | 0 | 155 | 46 | 0 | 26 | 73 | 0 | 0 | 0 | 50 | 15 | 29 | 1110 | 65 | 63 | 31 | 82 | 0 | 18 | 14 | 117 | 0 | 33 | 25 | 19 | 0 | 132 | 173 | 15 | 41 | 99 | 102 | 13 | 64 | 17 | 48 | 33 | 50 | 54 | 0 | 177 | 141 | 229 | 0 | 35 | 18 | 584 | 0 | 287 |
+| T9 | 199 | 0 | 206 | 27 | 0 | 0 | 154 | 0 | 0 | 0 | 484 | 20 | 30 | 801 | 87 | 88 | 42 | 106 | 46 | 0 | 53 | 0 | 0 | 0 | 19 | 44 | 0 | 455 | 0 | 104 | 91 | 173 | 0 | 41 | 42 | 19 | 234 | 95 | 348 | 0 | 20 | 94 | 281 | 0 | 50 | 88 | 22 | 931 | 0 | 462 |
+| T10 | 238 | 0 | 170 | 0 | 0 | 0 | 162 | 0 | 0 | 249 | 0 | 33 | 161 | 939 | 92 | 34 | 98 | 76 | 137 | 44 | 0 | 264 | 0 | 38 | 0 | 0 | 452 | 742 | 0 | 0 | 1313 | 69 | 0 | 39 | 80 | 556 | 40 | 0 | 246 | 41 | 0 | 598 | 1684 | 0 | 0 | 75 | 0 | 959 | 105 | 805 |
+| T11 | 289 | 21 | 446 | 0 | 22 | 34 | 0 | 22 | 0 | 55 | 79 | 0 | 161 | 1267 | 63 | 236 | 56 | 236 | 92 | 94 | 47 | 45 | 108 | 17 | 23 | 64 | 0 | 120 | 0 | 0 | 79 | 181 | 18 | 43 | 39 | 0 | 0 | 0 | 62 | 0 | 17 | 203 | 146 | 18 | 110 | 94 | 17 | 324 | 0 | 196 |
+| T12 | 540 | 0 | 171 | 0 | 0 | 53 | 154 | 51 | 0 | 30 | 244 | 138 | 0 | 888 | 301 | 247 | 54 | 27 | 399 | 28 | 0 | 63 | 54 | 134 | 0 | 0 | 0 | 215 | 50 | 24 | 203 | 289 | 64 | 160 | 33 | 0 | 0 | 84 | 123 | 38 | 25 | 502 | 430 | 26 | 0 | 197 | 58 | 1144 | 47 | 275 |
+| T13 | 2686 | 121 | 2310 | 245 | 0 | 360 | 1713 | 118 | 0 | 0 | 0 | 0 | 219 | 0 | 799 | 1153 | 178 | 2144 | 179 | 302 | 0 | 604 | 238 | 2192 | 158 | 399 | 128 | 821 | 195 | 0 | 984 | 3786 | 0 | 0 | 509 | 550 | 0 | 885 | 804 | 273 | 0 | 1263 | 544 | 0 | 183 | 656 | 0 | 12094 | 422 | 965 |
+| T14 | 1263 | 0 | 173 | 0 | 0 | 43 | 752 | 83 | 0 | 0 | 92 | 40 | 184 | 2129 | 0 | 64 | 64 | 82 | 349 | 158 | 0 | 0 | 0 | 137 | 0 | 0 | 0 | 65 | 99 | 0 | 716 | 403 | 0 | 264 | 63 | 38 | 0 | 60 | 37 | 0 | 0 | 536 | 348 | 0 | 0 | 265 | 0 | 3727 | 123 | 167 |
+| T15 | 238 | 35 | 1185 | 34 | 0 | 71 | 0 | 0 | 39 | 0 | 34 | 0 | 107 | 3194 | 64 | 0 | 71 | 453 | 40 | 33 | 0 | 0 | 48 | 118 | 111 | 78 | 0 | 212 | 0 | 0 | 40 | 738 | 0 | 0 | 220 | 89 | 0 | 38 | 264 | 42 | 0 | 362 | 66 | 0 | 42 | 326 | 0 | 1557 | 38 | 284 |
+| T16 | 287 | 0 | 305 | 86 | 67 | 21 | 46 | 34 | 0 | 21 | 152 | 56 | 54 | 1230 | 140 | 196 | 0 | 76 | 60 | 0 | 0 | 41 | 58 | 115 | 0 | 0 | 0 | 260 | 0 | 24 | 122 | 380 | 0 | 0 | 234 | 36 | 0 | 154 | 158 | 21 | 0 | 461 | 369 | 45 | 56 | 403 | 0 | 484 | 23 | 369 |
+| T17 | 194 | 49 | 1316 | 33 | 0 | 33 | 154 | 30 | 53 | 40 | 107 | 0 | 0 | 4034 | 146 | 453 | 0 | 0 | 33 | 39 | 0 | 74 | 70 | 455 | 0 | 137 | 0 | 165 | 0 | 0 | 44 | 640 | 0 | 0 | 201 | 77 | 0 | 31 | 168 | 0 | 0 | 353 | 114 | 57 | 0 | 272 | 0 | 1988 | 36 | 127 |
+| T18 | 1267 | 0 | 274 | 37 | 0 | 0 | 207 | 44 | 0 | 0 | 137 | 74 | 240 | 1249 | 473 | 40 | 38 | 33 | 0 | 68 | 0 | 93 | 67 | 70 | 0 | 0 | 0 | 444 | 80 | 35 | 548 | 161 | 0 | 394 | 41 | 35 | 0 | 0 | 96 | 47 | 0 | 708 | 542 | 0 | 0 | 232 | 0 | 1633 | 75 | 203 |
+| T19 | 592 | 0 | 711 | 38 | 30 | 123 | 421 | 0 | 0 | 0 | 120 | 38 | 28 | 2023 | 292 | 140 | 0 | 63 | 115 | 0 | 0 | 95 | 33 | 122 | 78 | 63 | 28 | 124 | 24 | 0 | 229 | 23 | 50 | 76 | 0 | 23 | 0 | 41 | 80 | 0 | 0 | 329 | 276 | 23 | 27 | 144 | 0 | 600 | 0 | 66 |
+| T20 | 65 | 0 | 139 | 0 | 0 | 15 | 59 | 43 | 14 | 53 | 65 | 47 | 75 | 991 | 85 | 153 | 63 | 101 | 55 | 0 | 0 | 0 | 0 | 41 | 0 | 14 | 13 | 94 | 0 | 14 | 45 | 317 | 16 | 34 | 136 | 0 | 22 | 27 | 94 | 28 | 0 | 114 | 100 | 0 | 102 | 70 | 0 | 580 | 0 | 138 |
+| T21 | 403 | 0 | 71 | 0 | 61 | 25 | 101 | 0 | 83 | 0 | 516 | 26 | 63 | 1882 | 59 | 0 | 41 | 97 | 196 | 117 | 0 | 0 | 0 | 0 | 24 | 0 | 155 | 213 | 0 | 0 | 414 | 0 | 100 | 144 | 60 | 222 | 22 | 282 | 66 | 166 | 135 | 340 | 336 | 42 | 0 | 170 | 0 | 335 | 85 | 71 |
+| T22 | 371 | 0 | 619 | 24 | 0 | 71 | 46 | 0 | 0 | 0 | 22 | 50 | 54 | 2707 | 32 | 282 | 36 | 240 | 90 | 56 | 0 | 0 | 0 | 50 | 46 | 183 | 0 | 124 | 0 | 0 | 143 | 318 | 29 | 23 | 0 | 0 | 0 | 0 | 73 | 0 | 24 | 263 | 153 | 0 | 24 | 45 | 0 | 625 | 0 | 97 |
+| T23 | 90 | 0 | 591 | 0 | 0 | 164 | 166 | 66 | 0 | 0 | 38 | 0 | 47 | 6157 | 137 | 87 | 0 | 192 | 40 | 0 | 0 | 0 | 0 | 0 | 163 | 0 | 0 | 80 | 0 | 0 | 84 | 411 | 0 | 0 | 0 | 0 | 0 | 0 | 189 | 41 | 0 | 166 | 0 | 0 | 0 | 0 | 0 | 3616 | 46 | 363 |
+| T24 | 142 | 0 | 539 | 0 | 22 | 19 | 108 | 54 | 25 | 19 | 21 | 23 | 21 | 2206 | 28 | 230 | 0 | 150 | 39 | 98 | 0 | 45 | 84 | 357 | 0 | 56 | 0 | 160 | 0 | 0 | 50 | 331 | 0 | 0 | 0 | 60 | 0 | 0 | 111 | 0 | 0 | 234 | 93 | 0 | 22 | 69 | 0 | 420 | 0 | 67 |
+| T25 | 64 | 0 | 352 | 40 | 0 | 51 | 67 | 0 | 19 | 61 | 247 | 64 | 0 | 1030 | 20 | 186 | 0 | 279 | 76 | 143 | 0 | 0 | 201 | 64 | 56 | 0 | 0 | 184 | 33 | 45 | 51 | 196 | 0 | 0 | 49 | 62 | 53 | 35 | 131 | 36 | 81 | 152 | 187 | 131 | 30 | 51 | 0 | 283 | 25 | 347 |
+| T26 | 139 | 0 | 188 | 0 | 0 | 32 | 104 | 0 | 0 | 0 | 557 | 0 | 86 | 1055 | 38 | 0 | 0 | 80 | 28 | 87 | 0 | 169 | 45 | 56 | 34 | 0 | 0 | 157 | 26 | 35 | 1227 | 13 | 16 | 0 | 0 | 756 | 15 | 16 | 55 | 17 | 0 | 120 | 116 | 17 | 58 | 0 | 0 | 414 | 300 | 98 |
+| T27 | 557 | 0 | 259 | 0 | 68 | 77 | 162 | 41 | 0 | 395 | 804 | 34 | 104 | 1436 | 65 | 243 | 163 | 165 | 444 | 97 | 0 | 120 | 76 | 303 | 34 | 100 | 45 | 0 | 120 | 36 | 364 | 186 | 140 | 85 | 180 | 190 | 228 | 249 | 362 | 104 | 116 | 479 | 655 | 68 | 85 | 162 | 35 | 772 | 50 | 590 |
+| T28 | 674 | 0 | 88 | 0 | 0 | 26 | 203 | 0 | 173 | 0 | 111 | 0 | 50 | 1031 | 300 | 17 | 0 | 36 | 194 | 103 | 0 | 0 | 19 | 27 | 0 | 17 | 26 | 207 | 0 | 0 | 587 | 0 | 0 | 40 | 0 | 0 | 181 | 0 | 18 | 0 | 0 | 183 | 327 | 177 | 0 | 0 | 0 | 1708 | 17 | 123 |
+| T29 | 633 | 0 | 98 | 18 | 38 | 52 | 78 | 18 | 0 | 104 | 33 | 0 | 80 | 1200 | 159 | 37 | 44 | 59 | 101 | 74 | 0 | 72 | 0 | 23 | 0 | 45 | 20 | 88 | 0 | 0 | 58 | 37 | 34 | 21 | 34 | 0 | 17 | 115 | 115 | 16 | 21 | 201 | 135 | 19 | 0 | 71 | 18 | 579 | 0 | 158 |
+| T30 | 1409 | 0 | 247 | 0 | 0 | 0 | 524 | 0 | 0 | 62 | 1093 | 0 | 84 | 1590 | 642 | 0 | 43 | 44 | 389 | 50 | 0 | 345 | 116 | 43 | 0 | 0 | 1172 | 334 | 268 | 0 | 0 | 105 | 0 | 58 | 0 | 904 | 144 | 151 | 52 | 0 | 0 | 381 | 716 | 0 | 0 | 165 | 0 | 3266 | 465 | 287 |
+| T31 | 116 | 0 | 1143 | 56 | 0 | 65 | 216 | 107 | 0 | 52 | 0 | 50 | 0 | 6600 | 231 | 386 | 69 | 343 | 53 | 0 | 0 | 0 | 0 | 279 | 70 | 0 | 0 | 55 | 0 | 0 | 63 | 0 | 0 | 0 | 263 | 0 | 0 | 0 | 340 | 0 | 0 | 61 | 0 | 0 | 0 | 52 | 0 | 5240 | 51 | 694 |
+| T32 | 301 | 18 | 154 | 0 | 17 | 136 | 89 | 17 | 88 | 0 | 40 | 18 | 81 | 1066 | 93 | 56 | 49 | 25 | 0 | 125 | 16 | 220 | 46 | 32 | 0 | 0 | 16 | 280 | 0 | 34 | 50 | 70 | 0 | 17 | 119 | 0 | 17 | 198 | 132 | 16 | 20 | 186 | 145 | 0 | 22 | 70 | 35 | 220 | 35 | 209 |
+| T33 | 346 | 58 | 136 | 35 | 22 | 0 | 85 | 46 | 0 | 0 | 342 | 25 | 182 | 487 | 334 | 0 | 0 | 0 | 521 | 76 | 0 | 144 | 23 | 0 | 0 | 0 | 0 | 237 | 22 | 0 | 289 | 31 | 0 | 0 | 0 | 0 | 0 | 0 | 24 | 25 | 108 | 703 | 1021 | 49 | 0 | 135 | 0 | 398 | 0 | 193 |
+| T34 | 157 | 0 | 220 | 26 | 0 | 67 | 114 | 0 | 0 | 0 | 188 | 0 | 33 | 2438 | 92 | 248 | 212 | 259 | 41 | 0 | 85 | 60 | 0 | 161 | 0 | 32 | 0 | 180 | 0 | 0 | 65 | 628 | 70 | 0 | 0 | 0 | 0 | 30 | 150 | 410 | 120 | 287 | 228 | 40 | 63 | 133 | 0 | 1500 | 0 | 541 |
+| T35 | 162 | 0 | 341 | 21 | 114 | 0 | 77 | 0 | 0 | 0 | 661 | 0 | 21 | 2073 | 85 | 231 | 36 | 199 | 57 | 44 | 0 | 222 | 0 | 121 | 0 | 26 | 736 | 243 | 0 | 0 | 956 | 149 | 0 | 0 | 22 | 0 | 25 | 78 | 226 | 0 | 66 | 240 | 155 | 0 | 45 | 26 | 0 | 414 | 206 | 181 |
+| T36 | 452 | 0 | 0 | 0 | 18 | 0 | 94 | 0 | 20 | 317 | 354 | 0 | 17 | 537 | 90 | 17 | 36 | 0 | 0 | 37 | 22 | 73 | 16 | 0 | 0 | 53 | 0 | 417 | 181 | 17 | 296 | 0 | 17 | 35 | 17 | 25 | 0 | 0 | 92 | 0 | 0 | 72 | 270 | 18 | 0 | 90 | 18 | 1141 | 0 | 339 |
+| T37 | 725 | 0 | 57 | 0 | 0 | 0 | 116 | 0 | 0 | 27 | 0 | 0 | 36 | 2994 | 147 | 38 | 60 | 56 | 29 | 41 | 0 | 260 | 0 | 118 | 0 | 0 | 0 | 328 | 0 | 28 | 184 | 380 | 94 | 0 | 30 | 54 | 0 | 0 | 237 | 31 | 0 | 224 | 56 | 0 | 0 | 99 | 0 | 2306 | 0 | 285 |
+| T38 | 319 | 0 | 508 | 33 | 0 | 28 | 160 | 0 | 0 | 191 | 308 | 43 | 123 | 2365 | 98 | 293 | 110 | 168 | 125 | 30 | 40 | 66 | 50 | 349 | 44 | 34 | 0 | 362 | 0 | 30 | 91 | 907 | 44 | 0 | 97 | 153 | 73 | 186 | 0 | 32 | 0 | 468 | 278 | 0 | 31 | 0 | 0 | 1095 | 33 | 299 |
+| T39 | 301 | 0 | 69 | 209 | 0 | 22 | 210 | 47 | 40 | 0 | 140 | 0 | 38 | 1702 | 176 | 42 | 21 | 26 | 122 | 0 | 0 | 205 | 0 | 41 | 0 | 36 | 0 | 186 | 0 | 0 | 101 | 299 | 0 | 46 | 480 | 0 | 0 | 76 | 127 | 0 | 0 | 202 | 86 | 25 | 20 | 111 | 0 | 1021 | 46 | 56 |
+| T40 | 256 | 0 | 323 | 20 | 17 | 0 | 56 | 55 | 0 | 35 | 100 | 32 | 75 | 682 | 114 | 27 | 0 | 59 | 114 | 51 | 0 | 203 | 74 | 38 | 16 | 81 | 0 | 207 | 0 | 37 | 55 | 0 | 20 | 189 | 183 | 84 | 14 | 37 | 32 | 0 | 0 | 122 | 180 | 120 | 0 | 16 | 24 | 357 | 0 | 58 |
+| T41 | 1245 | 0 | 502 | 0 | 0 | 160 | 89 | 79 | 0 | 0 | 530 | 0 | 256 | 2047 | 536 | 330 | 227 | 255 | 511 | 163 | 0 | 176 | 89 | 166 | 76 | 0 | 0 | 380 | 0 | 145 | 459 | 306 | 0 | 255 | 107 | 182 | 0 | 81 | 265 | 88 | 0 | 0 | 1025 | 103 | 46 | 248 | 0 | 1187 | 51 | 375 |
+| T42 | 515 | 58 | 303 | 0 | 0 | 0 | 182 | 0 | 0 | 88 | 1541 | 40 | 227 | 1619 | 311 | 0 | 162 | 48 | 414 | 99 | 0 | 40 | 51 | 0 | 0 | 40 | 0 | 584 | 132 | 0 | 881 | 46 | 0 | 209 | 105 | 0 | 0 | 0 | 158 | 38 | 0 | 988 | 0 | 0 | 0 | 270 | 0 | 1852 | 0 | 1152 |
+| T43 | 112 | 18 | 238 | 51 | 54 | 21 | 65 | 33 | 229 | 18 | 74 | 18 | 42 | 845 | 37 | 36 | 45 | 198 | 23 | 57 | 0 | 81 | 59 | 77 | 18 | 146 | 17 | 122 | 177 | 19 | 58 | 92 | 0 | 82 | 74 | 17 | 18 | 61 | 39 | 41 | 120 | 212 | 235 | 0 | 0 | 168 | 17 | 590 | 0 | 122 |
+| T44 | 250 | 0 | 185 | 17 | 0 | 0 | 37 | 0 | 0 | 50 | 66 | 110 | 18 | 1944 | 83 | 265 | 56 | 72 | 17 | 97 | 102 | 56 | 46 | 57 | 22 | 30 | 58 | 216 | 0 | 0 | 52 | 255 | 22 | 0 | 63 | 45 | 0 | 20 | 143 | 20 | 0 | 189 | 37 | 0 | 0 | 20 | 0 | 363 | 0 | 135 |
+| T45 | 344 | 0 | 654 | 36 | 35 | 80 | 102 | 0 | 0 | 49 | 75 | 0 | 85 | 2214 | 265 | 295 | 248 | 211 | 202 | 47 | 0 | 170 | 0 | 0 | 0 | 0 | 0 | 131 | 0 | 37 | 281 | 309 | 35 | 42 | 75 | 0 | 55 | 35 | 0 | 61 | 0 | 319 | 447 | 35 | 0 | 0 | 72 | 2581 | 41 | 410 |
+| T46 | 95 | 17 | 84 | 0 | 36 | 18 | 158 | 0 | 18 | 22 | 155 | 48 | 141 | 830 | 69 | 19 | 17 | 33 | 99 | 51 | 0 | 202 | 17 | 55 | 0 | 0 | 0 | 71 | 0 | 18 | 48 | 115 | 35 | 61 | 67 | 0 | 18 | 32 | 34 | 29 | 24 | 211 | 141 | 17 | 0 | 139 | 0 | 415 | 0 | 101 |
+| T47 | 3131 | 0 | 394 | 0 | 0 | 237 | 1776 | 0 | 0 | 399 | 265 | 0 | 220 | 13205 | 1410 | 191 | 0 | 170 | 365 | 84 | 0 | 0 | 0 | 849 | 0 | 0 | 0 | 400 | 486 | 0 | 2006 | 2097 | 0 | 0 | 359 | 0 | 0 | 867 | 93 | 0 | 0 | 372 | 657 | 0 | 0 | 191 | 0 | 0 | 359 | 2008 |
+| T48 | 275 | 0 | 193 | 25 | 0 | 143 | 128 | 0 | 0 | 0 | 105 | 0 | 47 | 1364 | 170 | 109 | 23 | 117 | 102 | 40 | 0 | 85 | 19 | 243 | 0 | 25 | 300 | 122 | 0 | 0 | 558 | 466 | 0 | 0 | 49 | 225 | 0 | 60 | 55 | 46 | 0 | 238 | 179 | 0 | 0 | 90 | 0 | 1817 | 0 | 152 |
+| T49 | 337 | 0 | 398 | 37 | 0 | 84 | 223 | 50 | 46 | 213 | 738 | 122 | 133 | 1377 | 167 | 252 | 208 | 94 | 170 | 41 | 43 | 0 | 37 | 399 | 0 | 167 | 0 | 560 | 0 | 0 | 405 | 887 | 82 | 41 | 449 | 73 | 43 | 141 | 210 | 0 | 0 | 411 | 1262 | 0 | 0 | 376 | 0 | 2799 | 128 | 0 |

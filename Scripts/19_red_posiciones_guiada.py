@@ -33,6 +33,7 @@ import importlib.util
 import json
 import math
 import re
+import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -94,6 +95,99 @@ NOISE_WORDS = {
     "rt", "htt", "youtu", "youtube", "facebook", "twitter",
 }
 
+TOPIC_FRAMES = [
+    {
+        "title": "Gestión municipal y servicios públicos",
+        "subject": "la gestión del municipio y la calidad de los servicios cotidianos",
+        "inference": "sugiere que se evalúan respuestas institucionales, obras y necesidades de las colonias",
+        "triggers": {"tampico", "municipal", "municipio", "alcalde", "alcaldesa", "villarreal", "monica", "servicio", "colonia", "publico", "obra", "calle", "alumbrado", "basura"},
+    },
+    {
+        "title": "Agua, territorio y medio ambiente",
+        "subject": "el agua, el territorio y sus efectos ambientales o comunitarios",
+        "inference": "apunta a preocupaciones por abasto, infraestructura, contaminación o cuidado del entorno",
+        "triggers": {"agua", "lluvia", "laguna", "rio", "mar", "playa", "contaminacion", "ambiente", "drenaje", "inundacion", "sequia", "clima"},
+    },
+    {
+        "title": "Movilidad e infraestructura urbana",
+        "subject": "la movilidad, las calles y la infraestructura urbana",
+        "inference": "permite observar problemas de tránsito, mantenimiento, accesibilidad y ejecución de obra pública",
+        "triggers": {"transito", "trafico", "vialidad", "carretera", "puente", "calle", "avenida", "camion", "transporte", "auto", "obra", "pavimento", "banqueta"},
+    },
+    {
+        "title": "Seguridad, violencia y justicia",
+        "subject": "la seguridad, la violencia y las demandas de justicia",
+        "inference": "sugiere relatos de riesgo, denuncia, victimización o exigencia de intervención de las autoridades",
+        "triggers": {"seguridad", "violencia", "delito", "delincuente", "policia", "matar", "muerte", "asesinato", "criminal", "justicia", "desaparecido", "victima", "robar", "robo", "narco"},
+    },
+    {
+        "title": "Gobierno y disputa política",
+        "subject": "el gobierno, los partidos y la competencia política",
+        "inference": "indica una discusión sobre liderazgo, decisiones públicas, identidades partidistas y responsabilidades de gobierno",
+        "triggers": {"gobierno", "presidente", "presidenta", "morena", "pan", "pri", "partido", "politico", "politica", "eleccion", "voto", "obrador", "claudia", "sheinbaum"},
+    },
+    {
+        "title": "Corrupción y rendición de cuentas",
+        "subject": "la corrupción, el uso de recursos y la rendición de cuentas",
+        "inference": "sugiere acusaciones, sospechas o exigencias de transparencia dirigidas a actores públicos",
+        "triggers": {"corrupcion", "corrupto", "ratero", "robar", "dinero", "recurso", "impunidad", "mentira", "fraude", "denuncia", "transparencia"},
+    },
+    {
+        "title": "Economía, trabajo y costo de vida",
+        "subject": "el trabajo, el dinero y las condiciones económicas de la vida diaria",
+        "inference": "apunta a preocupaciones por ingresos, precios, empleo, comercio y capacidad de las familias para sostenerse",
+        "triggers": {"trabajo", "trabajador", "empleo", "dinero", "precio", "pesos", "pagar", "economia", "comercio", "negocio", "salario", "pobreza", "impuesto"},
+    },
+    {
+        "title": "Bienestar, salud y educación",
+        "subject": "el bienestar social, la salud y la educación",
+        "inference": "sugiere demandas de atención, acceso a derechos y valoración de instituciones que cuidan o forman a la población",
+        "triggers": {"salud", "hospital", "medico", "enfermo", "educacion", "escuela", "maestro", "estudiante", "bienestar", "pension", "apoyo", "ayuda", "derecho"},
+    },
+    {
+        "title": "Comunidad, familia y vida cotidiana",
+        "subject": "la vida comunitaria, las familias y las experiencias cotidianas",
+        "inference": "reúne relatos personales y valoraciones sobre convivencia, cuidado y problemas compartidos",
+        "triggers": {"familia", "madre", "padre", "hijo", "persona", "gente", "vecino", "comunidad", "casa", "vida", "dia", "amigo", "mujer", "hombre"},
+    },
+    {
+        "title": "Protesta, derechos y participación",
+        "subject": "la protesta, los derechos y la participación ciudadana",
+        "inference": "apunta a expresiones de inconformidad, organización colectiva y exigencia de respuesta pública",
+        "triggers": {"protesta", "marcha", "manifestacion", "exigir", "derecho", "pueblo", "ciudadano", "movimiento", "lucha", "libertad", "defender", "justicia"},
+    },
+    {
+        "title": "Apoyo y aprobación pública",
+        "subject": "las expresiones de apoyo, gratitud y aprobación",
+        "inference": "permite identificar respaldo emocional o político hacia personas, decisiones y acciones públicas",
+        "triggers": {"gracias", "excelente", "felicidad", "felicidades", "bien", "apoyo", "presidenta", "seguir", "orgullo", "bravo", "bendicion"},
+    },
+    {
+        "title": "Crítica, conflicto y desaprobación",
+        "subject": "la crítica, el conflicto y la desaprobación pública",
+        "inference": "concentra juicios negativos, confrontación y reclamos hacia actores o situaciones percibidas como problemáticas",
+        "triggers": {"mal", "peor", "mentira", "culpa", "corrupto", "ratero", "critica", "problema", "vergüenza", "odio", "desastre", "mierda"},
+    },
+    {
+        "title": "Identidad local, cultura y entretenimiento",
+        "subject": "la identidad local, la cultura, el deporte y el entretenimiento",
+        "inference": "sugiere conversaciones que construyen pertenencia, celebran acontecimientos o comentan contenidos de interés público",
+        "triggers": {"tampico", "jaibo", "futbol", "partido", "mundial", "musica", "video", "programa", "fiesta", "turismo", "playa", "historia", "cultura"},
+    },
+    {
+        "title": "México y asuntos nacionales",
+        "subject": "la identidad nacional y los asuntos públicos de México",
+        "inference": "vincula la conversación local con debates nacionales, figuras federales y valoraciones sobre el rumbo del país",
+        "triggers": {"mexico", "mexicano", "pais", "nacional", "federal", "presidente", "presidenta", "pueblo", "patria", "mundo"},
+    },
+    {
+        "title": "Medios y conversación digital",
+        "subject": "la circulación de información en medios y plataformas digitales",
+        "inference": "apunta a reacciones frente a noticias, videos, transmisiones y formas de amplificación en línea",
+        "triggers": {"video", "noticia", "medio", "canal", "red", "publicar", "comentario", "informacion", "television", "periodista", "facebook", "twitter", "youtube"},
+    },
+]
+
 TOKEN_RE = re.compile(r"[a-záéíóúüñ]{3,}", re.IGNORECASE)
 DEFAULT_BASE = Path(__file__).resolve().parent.parent / "SNA" / "Resultados" / "historico"
 DEFAULT_DATA = Path(__file__).resolve().parent.parent / "SNA" / "Datos" / "tampico_datos_tabulares_consolidados.csv"
@@ -101,6 +195,51 @@ DEFAULT_DATA = Path(__file__).resolve().parent.parent / "SNA" / "Datos" / "tampi
 
 def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent
+
+
+def _topic_key(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", str(value).strip().lower())
+    return "".join(char for char in text if not unicodedata.combining(char))
+
+
+def build_topic_reading(topic_id: int, words: list[str]) -> dict[str, str]:
+    """Produce una lectura semantica prudente a partir de los terminos LDA."""
+    clean_words = list(dict.fromkeys(str(word).strip() for word in words if str(word).strip()))
+    normalized = [_topic_key(word) for word in clean_words[:16]]
+    ranked_frames = []
+    for frame in TOPIC_FRAMES:
+        hits = [clean_words[index] for index, word in enumerate(normalized) if word in frame["triggers"]]
+        score = sum(16 - index for index, word in enumerate(normalized) if word in frame["triggers"])
+        if hits:
+            ranked_frames.append((score, len(hits), frame, hits))
+    ranked_frames.sort(key=lambda item: (item[0], item[1]), reverse=True)
+
+    evidence = ", ".join(clean_words[:6])
+    if ranked_frames:
+        _, _, primary, _ = ranked_frames[0]
+        distinct = next(
+            (item for item in ranked_frames[1:] if item[2]["title"] != primary["title"] and item[1] >= 2),
+            None,
+        )
+        suffix = next(
+            (word for word in clean_words[:4] if _topic_key(word) not in primary["triggers"]),
+            clean_words[0] if clean_words else f"tema {topic_id}",
+        )
+        title = f'{primary["title"]} · {suffix}'
+        summary = (
+            f'Este tema concentra mensajes sobre {primary["subject"]}. '
+            f'La combinación de {evidence} {primary["inference"]}.'
+        )
+        if distinct:
+            summary += f' También se cruza con {distinct[2]["subject"]}.'
+    else:
+        title = ", ".join(clean_words[:3]).capitalize() or f"Tema {topic_id}"
+        summary = (
+            f"Este grupo combina referencias a {evidence}. "
+            "Más que representar un asunto único, parece reunir experiencias, acciones y valoraciones que aparecen juntas en la conversación."
+        )
+    summary += " Es una guía interpretativa basada en vocabulario compartido, no una etiqueta definitiva."
+    return {"title": title, "summary": summary}
 
 
 def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
@@ -130,11 +269,8 @@ def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
                     word = part.split("(")[0].strip()
                     if word:
                         words.append(word)
-                info.setdefault(tid, {
-                    "title": f"T{tid:02d}: " + ", ".join(words[:3]),
-                    "summary": "Tema definido por sus palabras mas frecuentes.",
-                    "words": [],
-                })
+                reading = build_topic_reading(tid, words)
+                info.setdefault(tid, {"title": reading["title"], "summary": reading["summary"], "words": []})
                 info[tid]["words"] = words[:40]
 
     return info
@@ -828,17 +964,23 @@ def build_html(
             "centrality": int(bridge_score),
             "connectivity": int(topic_connections.get(tid, 0)),
         }
-    topic_checks = "\n".join(
-        f'<label class="topic-item" data-topic="{tid}" '
-        f'data-volume="{topic_metrics[tid]["volume"]}" '
-        f'data-centrality="{topic_metrics[tid]["centrality"]}" '
-        f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
-        f'<input type="checkbox" class="topic" data-topic="{tid}" checked> '
-        f'<span class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></span>'
-        f'T{tid:02d} · {html.escape(topic_info[tid].get("title", ""))}'
-        f' <small class="topic-score"></small></label>'
-        for tid in topics
-    )
+    topic_cards = []
+    for tid in topics:
+        info = topic_info[tid]
+        title = re.sub(rf"^T{tid:02d}\s*:\s*", "", str(info.get("title", ""))).strip()
+        words = [str(word).strip() for word in info.get("words", []) if str(word).strip()]
+        explanation = str(info.get("summary", "Tema definido por sus conexiones en la red."))
+        topic_cards.append(
+            f'<button class="network-topic-filter" data-network-topic="{tid}" data-topic="{tid}" '
+            f'data-volume="{topic_metrics[tid]["volume"]}" '
+            f'data-centrality="{topic_metrics[tid]["centrality"]}" '
+            f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
+            f'<span class="topic-card-title"><i class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></i>'
+            f'Tema {tid:02d} · {html.escape(title)}</span>'
+            f'<small class="topic-description">{html.escape(explanation)}</small>'
+            f'<small class="topic-score"></small></button>'
+        )
+    topic_cards_html = "\n".join(topic_cards)
 
     return f"""<!DOCTYPE html>
 <html>
@@ -850,23 +992,29 @@ def build_html(
 <style>
   :root {{ color-scheme: dark; }}
   body {{ margin:0; background:#121212; color:#eee; font-family:Arial, sans-serif; overflow:hidden; }}
-  #network {{ position:fixed; inset:0 360px 0 320px; background:#1d1d1d; }}
+  #network {{ position:fixed; inset:0 calc(360px - 1cm) 0 calc(320px - 1cm); background:#1d1d1d; }}
   #left, #right {{
     position:fixed; top:0; bottom:0; overflow:auto; z-index:5;
     background:#151515; border-color:#333; padding:12px; box-sizing:border-box;
   }}
-  #left {{ left:0; width:320px; border-right:1px solid #333; }}
-  #right {{ right:0; width:360px; border-left:1px solid #333; }}
+  #left {{ left:0; width:calc(320px - 1cm); border-right:1px solid #333; }}
+  #right {{ right:0; width:calc(360px - 1cm); border-left:1px solid #333; }}
   h1 {{ font-size:16px; margin:0 0 8px; }}
   h2 {{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:#aaa; margin:14px 0 6px; }}
   label {{ display:block; font-size:12px; margin:5px 0; line-height:1.3; }}
   input[type="text"] {{ width:100%; box-sizing:border-box; padding:7px; background:#101010; color:#fff; border:1px solid #444; border-radius:4px; }}
   select {{ width:100%; box-sizing:border-box; padding:6px; background:#101010; color:#fff; border:1px solid #444; border-radius:4px; }}
   input[type="range"] {{ width:100%; }}
+  .range-scale {{ display:flex; justify-content:space-between; margin-top:-3px; color:#999; font-size:10px; }}
+  .tool-help {{ margin:5px 0 0; color:#999; font-size:10px; line-height:1.35; }}
   button {{ background:#333; color:#fff; border:1px solid #555; border-radius:4px; padding:5px 8px; cursor:pointer; }}
   .grp {{ border:1px solid #333; border-radius:6px; padding:8px; margin-bottom:10px; background:#191919; }}
   .sw {{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }}
-  .topic-score {{ color:#888; }}
+  .network-topic-filter {{ display:block; width:100%; margin:5px 0; padding:7px; text-align:left; box-sizing:border-box; }}
+  .network-topic-filter.guided-active {{ outline:2px solid #f5f5f5; background:#505050; }}
+  .topic-card-title {{ display:block; font-size:12px; font-weight:bold; line-height:1.25; }}
+  .topic-description {{ display:block; margin:4px 0 0 15px; color:#aaa; font-size:10px; line-height:1.3; font-weight:normal; }}
+  .topic-score {{ display:block; margin:3px 0 0 15px; color:#75bfff; font-size:10px; }}
   .pill {{ display:inline-block; padding:2px 6px; margin:2px 3px 2px 0; border-radius:10px; background:#26384a; font-size:11px; }}
   .metric {{ display:grid; grid-template-columns:1fr auto; gap:6px; font-size:12px; border-bottom:1px solid #2b2b2b; padding:4px 0; }}
   .muted {{ color:#aaa; font-size:12px; line-height:1.35; }}
@@ -874,7 +1022,7 @@ def build_html(
   .level-bajo {{ color:#cfcfcf; }}
   .level-medio {{ color:#ffcc33; }}
   .level-alto {{ color:#ff6b6b; }}
-  #stats {{ position:fixed; left:332px; bottom:10px; z-index:8; background:#111; border:1px solid #444; border-radius:4px; padding:6px 8px; font-size:12px; }}
+  #stats {{ position:fixed; left:calc(332px - 1cm); top:10px; z-index:8; background:#111; border:1px solid #444; border-radius:4px; padding:6px 8px; font-size:12px; }}
 </style>
 </head>
 <body>
@@ -884,6 +1032,7 @@ def build_html(
   <div class="grp">
     <h2>Buscar</h2>
     <input id="search" type="text" placeholder="cuenta, palabra, posicion o tema...">
+    <div class="tool-help">Escribe una palabra o cuenta y pulsa Enter para encontrarla y acercar la red a ese punto.</div>
   </div>
   <div class="grp">
     <h2>Capas</h2>
@@ -891,15 +1040,28 @@ def build_html(
     <label><input type="checkbox" id="showPos" checked> posiciones</label>
     <label><input type="checkbox" id="showCuenta" checked> cuentas</label>
     <label><input type="checkbox" id="showPalabra" checked> palabras distintivas</label>
+    <div class="tool-help">Activa o desactiva tipos de nodos. Por ejemplo, deja solo temas y posiciones para obtener una vista más sencilla.</div>
   </div>
   <div class="grp">
     <h2>Senal indiciaria</h2>
     <label><input type="checkbox" class="level" data-level="bajo" checked> baja</label>
     <label><input type="checkbox" class="level" data-level="medio" checked> media</label>
     <label><input type="checkbox" class="level" data-level="alto" checked> alta</label>
+    <div class="tool-help">Filtra posiciones por la intensidad de señales atípicas: baja es más ordinaria; alta requiere una revisión más cuidadosa.</div>
   </div>
   <div class="grp">
-    <h2>Temas</h2>
+    <h2>Visual</h2>
+    <label>Separacion <span id="springV">0</span></label>
+    <input id="spring" type="range" min="0" max="100" value="0" step="1">
+    <div class="range-scale"><span>0</span><span>100</span></div>
+    <button id="reset">Reorganizar</button>
+    <button id="stopPhysics">Detener</button>
+    <button id="fitNetwork">Encajar</button>
+    <div class="tool-help">Separación aleja los grupos sin cambiar sus relaciones. Reorganizar activa el movimiento, Detener lo congela y Encajar centra toda la red.</div>
+  </div>
+  <div class="grp">
+    <h2>Temas de la red</h2>
+    <div class="muted">Se muestran hasta 50 temas según el orden elegido. Puedes activar más de uno para comparar o reunir conversaciones.</div>
     <label>Ordenar por</label>
     <select id="topicOrder">
       <option value="volume">Volumen (cuentas)</option>
@@ -907,21 +1069,14 @@ def build_html(
       <option value="connectivity">Conectividad (enlaces)</option>
       <option value="topic">Numero de tema</option>
     </select>
-    <div id="topicList">{topic_checks}</div>
-  </div>
-  <div class="grp">
-    <h2>Visual</h2>
-    <label>Separacion <span id="springV">100%</span></label>
-    <input id="spring" type="range" min="50" max="180" value="100">
-    <button id="reset">Reorganizar</button>
-    <button id="stopPhysics">Detener</button>
-    <button id="fitNetwork">Encajar</button>
+    <div class="tool-help">Volumen prioriza los temas con más cuentas; centralidad destaca los que sirven de puente; conectividad ordena por cantidad de enlaces.</div>
+    <div id="topicList">{topic_cards_html}</div>
   </div>
 </aside>
 <main id="network"></main>
 <aside id="right">
   <h1>Lectura</h1>
-  <div id="detail" class="muted">Haz clic en un tema, posicion, cuenta o palabra para ver sus detalles.</div>
+  <div id="detail" class="muted">Haz clic en cualquier elemento de la red. Aquí aparecerá una explicación de qué representa, sus cifras y las palabras o ejemplos que ayudan a interpretarlo.</div>
 </aside>
 <div id="stats"></div>
 <script>
@@ -946,26 +1101,23 @@ window.network = network;
 function sortTopicMenu() {{
   const mode = document.getElementById('topicOrder').value;
   const list = document.getElementById('topicList');
-  const labels = Array.from(list.querySelectorAll('.topic-item'));
+  const labels = Array.from(list.querySelectorAll('.network-topic-filter'));
   labels.sort((a, b) => {{
     if (mode === 'topic') return Number(a.dataset.topic) - Number(b.dataset.topic);
     return Number(b.dataset[mode] || 0) - Number(a.dataset[mode] || 0) ||
       Number(a.dataset.topic) - Number(b.dataset.topic);
   }});
-  labels.forEach(label => {{
+  labels.forEach((label, index) => {{
     const score = label.querySelector('.topic-score');
-    score.textContent = mode === 'topic' ? '' : `(${{label.dataset[mode] || 0}})`;
+    const metricNames = {{volume:'cuentas', centrality:'puentes', connectivity:'enlaces'}};
+    score.textContent = mode === 'topic' ? '' : `${{label.dataset[mode] || 0}} ${{metricNames[mode]}}`;
+    label.hidden = index >= 50;
     list.appendChild(label);
   }});
 }}
 document.getElementById('topicOrder').addEventListener('change', sortTopicMenu);
 sortTopicMenu();
 
-function activeTopics() {{
-  const s = {{}};
-  document.querySelectorAll('.topic:checked').forEach(el => s[parseInt(el.dataset.topic)] = true);
-  return s;
-}}
 function activeLevels() {{
   const s = {{}};
   document.querySelectorAll('.level:checked').forEach(el => s[el.dataset.level] = true);
@@ -979,14 +1131,14 @@ function layerFlags() {{
     palabra: document.getElementById('showPalabra').checked
   }};
 }}
-function nodeVisible(n, topics, levels, flags) {{
+function nodeVisible(n, levels, flags) {{
   if (!flags[n.kind]) return false;
-  if ((n.kind === 'tema' || n.kind === 'posicion') && n.tema !== undefined && !topics[n.tema]) return false;
   if (n.kind === 'posicion' && !levels[n.ibea]) return false;
+  if (typeof window.guidedNodeAllowed === 'function' && !window.guidedNodeAllowed(n)) return false;
   return true;
 }}
 function rebuild() {{
-  const topics = activeTopics(), levels = activeLevels(), flags = layerFlags();
+  const levels = activeLevels(), flags = layerFlags();
   const visible = {{}};
   const finalVisible = {{}};
   const connected = {{}};
@@ -994,7 +1146,7 @@ function rebuild() {{
   const nodeUpdates = [];
   const edgeUpdates = [];
   nodes.forEach(n => {{
-    visible[n.id] = nodeVisible(n, topics, levels, flags);
+    visible[n.id] = nodeVisible(n, levels, flags);
   }});
   edges.forEach(e => {{
     const ef = nodes.get(e.from), et = nodes.get(e.to);
@@ -1068,20 +1220,8 @@ document.querySelectorAll('input').forEach(el => {{
 }});
 document.getElementById('spring').addEventListener('input', e => {{
   const next = parseInt(e.target.value, 10);
-  document.getElementById('springV').textContent = next + '%';
-  const ratio = next / lastSeparation;
-  const positions = network.getPositions();
-  const ids = Object.keys(positions);
-  if (ids.length && Number.isFinite(ratio) && ratio > 0) {{
-    let cx = 0, cy = 0;
-    ids.forEach(id => {{ cx += positions[id].x; cy += positions[id].y; }});
-    cx /= ids.length; cy /= ids.length;
-    ids.forEach(id => {{
-      network.moveNode(id, cx + (positions[id].x - cx) * ratio, cy + (positions[id].y - cy) * ratio);
-    }});
-  }}
-  lastSeparation = next;
-  network.setOptions({{physics: {{forceAtlas2Based: {{springLength: Math.round(60 + next * 0.8)}}}}}});
+  document.getElementById('springV').textContent = next;
+  applySeparation(next);
 }});
 document.getElementById('reset').addEventListener('click', () => {{
   network.setOptions({{physics: {{enabled:true, stabilization: {{enabled:false}}}}}});
@@ -1112,7 +1252,19 @@ network.on('click', p => {{
   if (p.nodes.length) render(p.nodes[0]);
 }});
 rebuild();
-let lastSeparation = 100;
+const BASE_POSITIONS = network.getPositions();
+const BASE_IDS = Object.keys(BASE_POSITIONS);
+const BASE_CENTER = BASE_IDS.reduce((center, id) => ({{x:center.x + BASE_POSITIONS[id].x / BASE_IDS.length, y:center.y + BASE_POSITIONS[id].y / BASE_IDS.length}}), {{x:0, y:0}});
+function applySeparation(value) {{
+  const normalized = Math.max(0, Math.min(100, Number(value) || 0)) / 100;
+  const scale = 1 + normalized * 1.25;
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false, forceAtlas2Based: {{springLength: Math.round(170 + normalized * 150)}}}}}});
+  BASE_IDS.forEach(id => {{
+    const base = BASE_POSITIONS[id];
+    network.moveNode(id, BASE_CENTER.x + (base.x - BASE_CENTER.x) * scale, BASE_CENTER.y + (base.y - BASE_CENTER.y) * scale);
+  }});
+}}
 requestAnimationFrame(() => network.fit({{animation:false}}));
 </script>
 </body>
@@ -1230,11 +1382,20 @@ def main() -> None:
                 kind="tema",
                 label=str(meta.get(node_id, {}).get("title", node_id)),
             )
+        network_topics: set[int] = set()
+        if node.get("tema") is not None:
+            network_topics.add(int(node["tema"]))
+        for position in meta.get(node_id, {}).get("posiciones", []):
+            if position.get("tema_id") is not None:
+                network_topics.add(int(position["tema_id"]))
+        annotations.setdefault(node_id, {})["network_topics"] = sorted(network_topics)
     inject_guided_layer(
         html_path,
         annotations,
         lexicons.category_colors,
-        "Posiciones, temas, polaridad y postura",
+        "Filtros por capas",
+        mount_id="right",
+        layered_filters=True,
     )
     write_annotation_outputs(
         out_dir,

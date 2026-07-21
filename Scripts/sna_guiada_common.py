@@ -323,7 +323,8 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
     for node_id, item in annotations.items():
         categories = item.get("categories") or []
         polarity = item.get("polarity") or "neutral"
-        if not categories and polarity == "neutral":
+        network_topics = item.get("network_topics") or []
+        if not categories and polarity == "neutral" and not network_topics:
             continue
         compact[node_id] = {
             "categories": categories,
@@ -334,6 +335,7 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
             "stance": item.get("stance") or "sin_postura",
             "stance_label": item.get("stance_label") or STANCE_LABELS["sin_postura"],
             "stance_score": item.get("stance_score") or item.get("polarity_score") or 0.0,
+            "network_topics": network_topics,
         }
     return compact
 
@@ -344,6 +346,9 @@ def inject_guided_layer(
     category_colors: dict[str, str],
     title: str,
     panel_top_px: int = 12,
+    network_topic_labels: dict[int, str] | None = None,
+    mount_id: str | None = None,
+    layered_filters: bool = False,
 ) -> None:
     """Inyecta un panel no destructivo de localizacion y color en una red vis."""
     source = html_path.read_text(encoding="utf-8")
@@ -356,63 +361,105 @@ def inject_guided_layer(
         f'<span style="background:{color}"></span>{html.escape(category)}</button>'
         for category, color in category_colors.items()
     )
+    network_topic_buttons = "".join(
+        f'<button class="guided-target" data-network-topic="{int(topic_id)}">'
+        f'<span style="background:#777"></span>{html.escape(label)}</button>'
+        for topic_id, label in (network_topic_labels or {}).items()
+    )
+    topic_filter_section = (
+        f"<h4>Temas de la red</h4>{network_topic_buttons}"
+        if network_topic_buttons else ""
+    )
+    topic_filter_markup = f"\n  {topic_filter_section}" if topic_filter_section else ""
+    filter_help = (
+        '<div class="guided-help">Suma opciones dentro de una capa y cruza las capas entre si.</div>'
+        if layered_filters else ""
+    )
+    filter_help_markup = f"\n  {filter_help}" if filter_help else ""
+    panel_position = (
+        "position:static; width:auto; max-height:none; overflow:visible; padding:0 0 10px; "
+        "background:transparent; border:0; border-bottom:1px solid #444; "
+        "border-radius:0; box-shadow:none;"
+        if mount_id else
+        f"position:fixed; top:{panel_top_px}px; right:12px; width:290px; "
+        f"max-height:calc(100vh - {panel_top_px + 12}px); overflow:auto; padding:12px; "
+        "background:rgba(18,18,18,.96); border:1px solid #666; "
+        "border-radius:6px; box-shadow:0 4px 18px #0008;"
+    )
+    mount_script = (
+        f"const guidedMount = document.getElementById({json.dumps(mount_id)});\n"
+        "  const guidedPanel = document.getElementById('guidedPanel');\n"
+        "  if (guidedMount && guidedPanel) guidedMount.insertBefore(guidedPanel, guidedMount.firstChild);"
+        if mount_id else ""
+    )
     panel = f"""
 <style>
-#guidedPanel {{ position:fixed; top:{panel_top_px}px; right:12px; z-index:2147483001;
-  width:290px; max-height:calc(100vh - {panel_top_px + 12}px); overflow:auto; padding:12px;
-  color:#eee; background:rgba(18,18,18,.96); border:1px solid #666;
-  border-radius:6px; font:12px Arial,sans-serif; box-shadow:0 4px 18px #0008; }}
+#guidedPanel {{ {panel_position} z-index:2147483001; box-sizing:border-box;
+  color:#eee; font:12px Arial,sans-serif; }}
 #guidedPanel h3 {{ margin:0 0 8px; font-size:14px; }}
 #guidedPanel h4 {{ margin:10px 0 5px; padding-top:7px; border-top:1px solid #444;
   color:#bbb; font-size:10px; text-transform:uppercase; }}
 #guidedPanel button, #guidedPanel select {{ background:#303030; color:#eee;
-  border:1px solid #666; border-radius:3px; padding:4px 6px; cursor:pointer; }}
+  border:1px solid #666; border-radius:3px; padding:4px 6px; cursor:pointer;
+  box-sizing:border-box; min-width:0; }}
 #guidedPanel button:hover {{ background:#454545; }}
 #guidedPanel button.guided-active {{ outline:2px solid #f5f5f5; background:#505050; }}
 #guidedPanel .guided-target {{ width:100%; display:flex; align-items:center;
   gap:6px; margin:3px 0; text-align:left; }}
 #guidedPanel .guided-target span {{ width:11px; height:11px; border-radius:50%; flex:none; }}
-#guidedPanel .guided-row {{ display:flex; gap:5px; margin:4px 0; }}
-#guidedPanel .guided-row button {{ flex:1; }}
+#guidedPanel .guided-row {{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; margin:4px 0; }}
+#guidedPanel .guided-row button {{ white-space:normal; overflow-wrap:anywhere; }}
+#guidedPanel .guided-row button:only-child {{ grid-column:1 / -1; }}
 #guidedPanel select, #guidedPanel input[type=range] {{ width:100%; }}
+#guidedPanel .guided-help {{ color:#aaa; line-height:1.35; margin:0 0 8px; }}
+#guidedPanel .guided-option-help {{ color:#999; font-size:10px; line-height:1.35; margin:4px 0 7px; }}
 #guidedStats {{ margin-top:7px; color:#bbb; line-height:1.35; }}
 </style>
 <div id="guidedPanel">
-  <h3>{html.escape(title)}</h3>
+  <h3>{html.escape(title)}</h3>{filter_help_markup}
   <label>Color de nodos
     <select id="guidedColorMode">
       <option value="original">Estructura original</option>
-      <option value="category">Tema rastreado</option>
+      <option value="category">Tema estructural</option>
       <option value="polarity">Polaridad</option>
       <option value="stance">Postura discursiva</option>
     </select>
   </label>
-  <h4>Temas rastreados</h4>
+  <div class="guided-option-help">Elige cómo se colorean los puntos. Esto cambia la lectura visual, no los datos ni las conexiones.</div>{topic_filter_markup}
+  <h4>Temas estructurales</h4>
   {category_buttons}
+  <div class="guided-option-help">Pulsa uno o varios asuntos para ver únicamente los nodos cuyo vocabulario coincide con ellos.</div>
   <label>Confianza minima: <b id="guidedConfidenceValue">0.00</b></label>
   <input id="guidedConfidence" type="range" min="0" max="100" value="0">
+  <div class="guided-option-help">Súbela para exigir coincidencias más claras; bájala para incluir asociaciones más amplias.</div>
   <h4>Polaridad lexica</h4>
   <div class="guided-row">
     <button data-polarity="positiva">Positiva</button>
     <button data-polarity="negativa">Negativa</button>
     <button data-polarity="mixta">Mixta</button>
   </div>
+  <div class="guided-option-help">Permite aislar lenguaje favorable, desfavorable o combinado. Describe palabras usadas, no necesariamente la intención completa.</div>
   <h4>Postura discursiva</h4>
   <div class="guided-row">
     <button data-stance="apoyo_defensa">Apoyo/defensa</button>
     <button data-stance="critica_oposicion">Crítica/oposición</button>
     <button data-stance="mixta_disputa">Mixta/disputa</button>
   </div>
+  <div class="guided-option-help">Separa mensajes que parecen apoyar, criticar o disputar una posición. Úsalo como orientación para leer ejemplos.</div>
   <div class="guided-row"><button id="guidedReset">Restaurar vista</button></div>
+  <div class="guided-option-help">Restaurar elimina todos los filtros y vuelve a mostrar la red completa.</div>
   <div id="guidedStats">Preparando capa guiada...</div>
 </div>
 <script>
 (function() {{
+  {mount_script}
   const GUIDED_META = {annotations_json};
   const CATEGORY_COLORS = {colors_json};
   const POLARITY_COLORS = {polarity_json};
   const STANCE_COLORS = {stance_json};
   const originals = {{}};
+  const LAYERED_FILTERS = {str(layered_filters).lower()};
+  const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set()}};
   let guidedFocus = null;
   let guidedNodes = null;
   let guidedNetwork = null;
@@ -440,16 +487,18 @@ def inject_guided_layer(
         font: node.font
       }};
     }});
+    document.querySelectorAll('[data-network-topic]').forEach(btn =>
+      btn.addEventListener('click', () => toggleFilter('topic', btn.dataset.networkTopic, btn)));
     document.querySelectorAll('#guidedPanel [data-category]').forEach(btn =>
-      btn.addEventListener('click', () => locate('category', btn.dataset.category)));
+      btn.addEventListener('click', () => LAYERED_FILTERS ? toggleFilter('category', btn.dataset.category, btn) : locate('category', btn.dataset.category)));
     document.querySelectorAll('#guidedPanel [data-polarity]').forEach(btn =>
-      btn.addEventListener('click', () => locate('polarity', btn.dataset.polarity)));
+      btn.addEventListener('click', () => LAYERED_FILTERS ? toggleFilter('polarity', btn.dataset.polarity, btn) : locate('polarity', btn.dataset.polarity)));
     document.querySelectorAll('#guidedPanel [data-stance]').forEach(btn =>
-      btn.addEventListener('click', () => locate('stance', btn.dataset.stance)));
+      btn.addEventListener('click', () => LAYERED_FILTERS ? toggleFilter('stance', btn.dataset.stance, btn) : locate('stance', btn.dataset.stance)));
     document.getElementById('guidedColorMode').addEventListener('change', recolor);
     document.getElementById('guidedConfidence').addEventListener('input', function() {{
       document.getElementById('guidedConfidenceValue').textContent = confidence().toFixed(2);
-      recolor();
+      if (LAYERED_FILTERS) applyLayerFilters(); else recolor();
     }});
     document.getElementById('guidedReset').addEventListener('click', resetGuided);
     const categorized = Object.values(GUIDED_META).filter(m => (m.categories || []).length).length;
@@ -468,8 +517,39 @@ def inject_guided_layer(
     if (focus.kind === 'polarity') return meta.polarity === focus.value;
     return meta.stance === focus.value;
   }}
+  function hasActiveFilters() {{
+    return Object.values(activeFilters).some(values => values.size > 0);
+  }}
+  function matchesLayerFilters(meta) {{
+    if (!hasActiveFilters()) return true;
+    if (!meta) return false;
+    if (activeFilters.topic.size && !(meta.network_topics || []).some(value => activeFilters.topic.has(String(value)))) return false;
+    if (activeFilters.category.size && !Array.from(activeFilters.category).some(value => categoryMatch(meta, value))) return false;
+    if (activeFilters.polarity.size && !activeFilters.polarity.has(meta.polarity)) return false;
+    if (activeFilters.stance.size && !activeFilters.stance.has(meta.stance)) return false;
+    return true;
+  }}
+  function toggleFilter(kind, value, button) {{
+    const values = activeFilters[kind];
+    if (values.has(value)) values.delete(value); else values.add(value);
+    button.classList.toggle('guided-active', values.has(value));
+    if (kind !== 'topic') document.getElementById('guidedColorMode').value = kind;
+    applyLayerFilters();
+  }}
+  function applyLayerFilters() {{
+    window.guidedNodeAllowed = node => matchesLayerFilters(GUIDED_META[String(node.id)]);
+    if (typeof rebuild === 'function') rebuild();
+    else guidedNodes.update(guidedNodes.get().map(node => ({{id:node.id, hidden:!window.guidedNodeAllowed(node)}})));
+    recolor();
+    const matching = Object.keys(GUIDED_META).filter(id => matchesLayerFilters(GUIDED_META[id]) && guidedNodes.get(id) && !guidedNodes.get(id).hidden);
+    guidedNetwork.unselectAll();
+    guidedNetwork.selectNodes(matching.slice(0, 1000));
+    document.getElementById('guidedStats').innerHTML = hasActiveFilters()
+      ? '<b>' + matching.length + '</b> nodos en el subconjunto activo'
+      : 'Sin filtros de capa activos';
+  }}
   function setActiveButton(kind, value) {{
-    document.querySelectorAll('#guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
+    document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
     let selector = '[data-stance="' + value + '"]';
     if (kind === 'category') selector = '[data-category="' + value + '"]';
     else if (kind === 'polarity') selector = '[data-polarity="' + value + '"]';
@@ -534,10 +614,13 @@ def inject_guided_layer(
   }}
   function resetGuided() {{
     guidedFocus = null;
-    document.querySelectorAll('#guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
+    Object.values(activeFilters).forEach(values => values.clear());
+    window.guidedNodeAllowed = null;
+    document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
     document.getElementById('guidedColorMode').value = 'original';
     document.getElementById('guidedConfidence').value = '0';
     document.getElementById('guidedConfidenceValue').textContent = '0.00';
+    if (typeof rebuild === 'function') rebuild();
     guidedNetwork.unselectAll(); recolor(); guidedNetwork.fit({{animation:true}});
   }}
   setTimeout(initGuided, 0);

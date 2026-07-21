@@ -5,6 +5,7 @@ tampico,municipal,822
 tampico,presidenta,778
 tampico,seguir,656
 tampico,gobierno,619
+tamaulipas,sur,554
 tampico,alcaldesa,546
 tampico,zona,513
 tampico,excelente,505
@@ -15,7 +16,6 @@ tampico,colonia,406
 tampico,anaya,393
 tampico,bienestar,380
 tampico,ano,358
-sur,zona,356
 tampico,fortalecer,348
 tampico,centro,347
 tampico,calle,345
@@ -25,6 +25,7 @@ tampico,mexico,324
 tampico,nota,322
 tampico,seguridad,318
 tamaulipas,zona,313
+tampico,sur,308
 tampico,nacional,306
 tampico,espacio,291
 tampico,accion,287
@@ -104,7 +105,9 @@ ciudad,ano,154
 tampico,apoyo,154
 tampico,lleno,153
 tampico,casa,151
+ciudad,sur,150
 tampico,actividad,148
+tamaulipas,region,148
 tampico,estatal,148
 tampico,historia,147
 tampico,puerto,147
@@ -140,6 +143,7 @@ tamaulipas,temperatura,130
 tampico,unidad,128
 tampico,ciudadano,128
 tamaulipas,gobernador,128
+responsabilidad,columna,128
 tampico,cultural,127
 tampico,caso,127
 tampico,dejar,126
@@ -195,7 +199,3 @@ tamaulipas,colonia,109
 tampico,operativo,109
 tampico,ofrecer,108
 tampico,entrega,108
-tampico,recorrido,108
-tamaulipas,familia,107
-tampico,vialidad,107
-ciudad,nacional,107
