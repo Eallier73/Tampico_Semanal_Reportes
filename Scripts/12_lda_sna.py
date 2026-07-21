@@ -7,8 +7,8 @@ Pipeline:
   2. Tokeniza y lematiza con spaCy (es_core_news_md) - reusando la misma
      limpieza que en el script anterior, para que el vocabulario sea comparable.
   3. Construye el diccionario gensim y el corpus BoW.
-  4. Entrenamiento LDA con K=50 para explorar una lectura de mayor detalle
-     dentro de una tolerancia respecto de la mejor coherencia c_v.
+  4. Barrido LDA de K=25 a K=35 y selección por coherencia c_v para evitar
+     sobresegmentar la conversación en temas débiles o redundantes.
   5. Asignacion hard: cada termino va al tema con mayor P(term|tema).
   6. Cohesion intracluster: coocurrencias (ventana=3) entre los terminos
      de cada tema. Output por tema: aristas internas con peso.
@@ -348,12 +348,12 @@ def barrido_lda(
     corpus: list,
     dictionary,
     docs: list[list[str]],
-    k_min: int = 5,
-    k_max: int = 10,
+    k_min: int = 25,
+    k_max: int = 35,
     passes: int = 10,
     iterations: int = 100,
     seed: int = 42,
-    selection_mode: str = "informative",
+    selection_mode: str = "coherence",
     coherence_ratio: float = 0.90,
 ) -> tuple[list[dict], dict, object]:
     """
@@ -880,10 +880,10 @@ def main() -> None:
         "--txt-path", required=False, default=None,
         help="Ruta al archivo .txt (solo si --input txt)",
     )
-    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=50)
-    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=50)
+    parser.add_argument("--k-min", "--K-min", dest="k_min", type=int, default=25)
+    parser.add_argument("--k-max", "--K-max", dest="k_max", type=int, default=35)
     parser.add_argument(
-        "--selection-mode", choices=["informative", "coherence"], default="informative",
+        "--selection-mode", choices=["informative", "coherence"], default="coherence",
         help=(
             "informative elige el mayor K dentro de la tolerancia de coherencia; "
             "coherence elige exclusivamente la mayor c_v"

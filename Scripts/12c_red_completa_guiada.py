@@ -217,11 +217,14 @@ def build_topic_info(tdf: pd.DataFrame | None) -> dict[str, dict[str, Any]]:
     """Prepara las lecturas que se muestran en filtros y tarjetas."""
     topic_info: dict[str, dict[str, Any]] = {}
     terminos: dict[int, list[str]] = {}
+    editorial: dict[int, dict[str, Any]] = {}
 
     if tdf is not None and not tdf.empty:
         if {"tema_id", "top_20_terminos"}.issubset(tdf.columns):
             for _, row in tdf.iterrows():
-                terminos[int(row["tema_id"])] = _terminos_desde_texto(row["top_20_terminos"])
+                tid = int(row["tema_id"])
+                terminos[tid] = _terminos_desde_texto(row["top_20_terminos"])
+                editorial[tid] = row.to_dict()
         else:
             col_pal = "palabra" if "palabra" in tdf.columns else (
                 "termino" if "termino" in tdf.columns else None
@@ -254,6 +257,19 @@ def build_topic_info(tdf: pd.DataFrame | None) -> dict[str, dict[str, Any]]:
             ),
             "words": words,
         })
+
+    for tid, row in editorial.items():
+        info = topic_info.setdefault(str(tid), {"title": f"Tema {tid}", "summary": "", "words": terminos.get(tid, [])})
+        curated_title = str(row.get("titulo_curado", "")).strip()
+        curated_summary = str(row.get("resumen_curado", "")).strip()
+        if curated_title and curated_title.lower() != "nan":
+            info["title"] = curated_title
+        if curated_summary and curated_summary.lower() != "nan":
+            info["summary"] = curated_summary
+        info["quality"] = str(row.get("calidad_tema", "sin_evaluar"))
+        info["visible_by_default"] = str(row.get("visible_por_defecto", "true")).lower() in {"true", "1", "si", "sí"}
+        info["coherence"] = float(row.get("coherencia_tema_cv", 0) or 0)
+        info["quality_reason"] = str(row.get("motivo_calidad", ""))
 
     return topic_info
 

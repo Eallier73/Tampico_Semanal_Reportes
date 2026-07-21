@@ -2,7 +2,7 @@
   "n_nodos": 2835,
   "n_nodos_con_categoria": 1396,
   "n_nodos_con_polaridad": 2026,
-  "n_nodos_con_postura": 2026,
+  "n_nodos_con_postura": 185,
   "categorias": {
     "Morena": 546,
     "Obras": 536,
@@ -22,11 +22,12 @@
     "mixta": 348
   },
   "posturas": {
-    "apoyo_defensa": 956,
-    "sin_postura": 809,
-    "critica_oposicion": 722,
-    "mixta_disputa": 348
+    "sin_postura": 2650,
+    "apoyo_defensa": 154,
+    "critica_oposicion": 27,
+    "mixta_disputa": 4
   },
+  "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",
   "fuentes": {
     "temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",
     "positivas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_positivas.txt",

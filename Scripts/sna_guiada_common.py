@@ -6,6 +6,7 @@ from __future__ import annotations
 import html
 import json
 import math
+import re
 import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -53,10 +54,141 @@ STANCE_LABELS = {
     "sin_postura": "Sin postura",
 }
 
+# La postura se refiere especificamente a Monica Villarreal y a su
+# administracion municipal. No reutiliza los diccionarios de polaridad.
+STANCE_TARGET_WORDS = {
+    "monica", "villarreal", "alcaldesa", "tampicogob", "ayuntamiento",
+}
+STANCE_SUPPORT_WORDS = {
+    "apoyo", "apoyar", "respaldo", "respaldar", "defensa", "defender",
+    "confiar", "confianza", "felicitar", "felicidades", "gracias",
+    "excelente", "adelante", "compromiso", "resultado", "resultados",
+    "orgullo", "bienestar", "cuidar", "cumplir", "transformacion",
+}
+STANCE_CRITIC_WORDS = {
+    "corrupta", "corrupto", "corrupcion", "ratera", "ratero", "ladrona",
+    "ladron", "inepta", "inepto", "incompetente", "pesima", "pesimo",
+    "mentirosa", "mentiroso", "mentira", "robo", "saqueo", "nepotismo",
+    "abandono", "incumplir", "incumplimiento", "fracaso", "renuncia",
+    "dimision", "verguenza", "delincuente", "criminal",
+}
+_TARGET_PATTERNS = [
+    re.compile(pattern)
+    for pattern in (
+        r"\bmonica(?:\s+villarreal(?:\s+anaya)?)?\b",
+        r"\bvillarreal\b",
+        r"\balcaldesa\b",
+        r"\bpresidenta\s+municipal\b",
+        r"\bgobierno\s+(?:municipal|de\s+tampico)\b",
+        r"\bayuntamiento(?:\s+de\s+tampico)?\b",
+        r"\bmunicipio\s+de\s+tampico\b",
+        r"\badministracion\s+municipal\b",
+        r"\btampico\s*gob\b",
+    )
+]
+_DEFENSE_PATTERNS = [
+    re.compile(pattern)
+    for pattern in (
+        r"\b(?:no|nunca)\s+(?:la\s+)?(?:ataquen|critiquen|insulten|difamen)\b",
+        r"\bdejen\s+de\s+(?:atacar|criticar|insultar|difamar)\b",
+        r"\b(?:injusto|coraje)\s+que\s+(?:la\s+)?(?:ataquen|critiquen|insulten)\b",
+        r"\b(?:estamos|estoy)\s+contigo\b",
+        r"\bno\s+esta\s+sola\b",
+        r"\bcuenta\s+conmigo\b",
+        r"\bcon\s+monica\b",
+    )
+]
+_CRITIC_PATTERNS = [
+    re.compile(pattern)
+    for pattern in (
+        r"\bfuera\s+(?:monica|villarreal|la\s+alcaldesa)\b",
+        r"\b(?:monica|villarreal|alcaldesa).{0,30}\b(?:renuncia|que\s+se\s+vaya)\b",
+        r"\b(?:no|nunca)\s+(?:sirve|cumple|trabaja|resuelve)\b",
+        r"\b(?:ya\s+)?no\s+(?:la\s+)?apoyo\b",
+    )
+]
+
 
 def normalize(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value).strip().lower())
     return "".join(ch for ch in text if not unicodedata.combining(ch))
+
+
+def stance_from_evidence(support_hits: float, critic_hits: float) -> dict[str, Any]:
+    total = max(0.0, support_hits) + max(0.0, critic_hits)
+    score = (support_hits - critic_hits) / total if total else 0.0
+    if total <= 0:
+        stance = "sin_postura"
+    elif score >= 0.25:
+        stance = "apoyo_defensa"
+    elif score <= -0.25:
+        stance = "critica_oposicion"
+    else:
+        stance = "mixta_disputa"
+    return {
+        "stance": stance,
+        "stance_label": STANCE_LABELS[stance],
+        "stance_score": round(score, 4),
+        "stance_support_hits": round(support_hits, 2),
+        "stance_critic_hits": round(critic_hits, 2),
+        "stance_evidence": round(total, 2),
+    }
+
+
+def classify_stance_text(value: Any) -> dict[str, Any]:
+    """Clasifica postura hacia la alcaldesa/administracion, no tono emocional."""
+    normalized = normalize(value)
+    tokens = re.findall(r"[a-z]{3,}", normalized)
+    target_hits = sum(len(pattern.findall(normalized)) for pattern in _TARGET_PATTERNS)
+    if target_hits <= 0:
+        return {**stance_from_evidence(0.0, 0.0), "stance_target_hits": 0}
+
+    support_hits = float(sum(token in STANCE_SUPPORT_WORDS for token in tokens))
+    critic_hits = float(sum(token in STANCE_CRITIC_WORDS for token in tokens))
+    defensive_hits = sum(bool(pattern.search(normalized)) for pattern in _DEFENSE_PATTERNS)
+    direct_critic_hits = sum(bool(pattern.search(normalized)) for pattern in _CRITIC_PATTERNS)
+    support_hits += 2.0 * defensive_hits
+    critic_hits += 2.0 * direct_critic_hits
+
+    # "No apoyo" expresa critica, aunque contenga literalmente apoyo.
+    if re.search(r"\b(?:ya\s+)?no\s+(?:la\s+)?apoyo\b", normalized):
+        support_hits = max(0.0, support_hits - 1.0)
+
+    result = stance_from_evidence(support_hits, critic_hits)
+    result["stance_target_hits"] = target_hits
+    return result
+
+
+def aggregate_stance_texts(values: Iterable[Any]) -> dict[str, Any]:
+    support_hits = 0.0
+    critic_hits = 0.0
+    target_hits = 0
+    classified_messages = 0
+    for value in values:
+        item = classify_stance_text(value)
+        target_hits += int(item.get("stance_target_hits", 0))
+        support_hits += float(item.get("stance_support_hits", 0.0))
+        critic_hits += float(item.get("stance_critic_hits", 0.0))
+        classified_messages += int(item.get("stance_evidence", 0.0) > 0)
+    result = stance_from_evidence(support_hits, critic_hits)
+    result.update({
+        "stance_target_hits": target_hits,
+        "stance_classified_messages": classified_messages,
+    })
+    return result
+
+
+def apply_stance_evidence(
+    annotation: dict[str, Any], evidence: dict[str, Any]
+) -> dict[str, Any]:
+    for key in (
+        "stance", "stance_label", "stance_score", "stance_support_hits",
+        "stance_critic_hits", "stance_evidence", "stance_target_hits",
+        "stance_classified_messages",
+    ):
+        if key in evidence:
+            annotation[key] = evidence[key]
+    return annotation
 
 
 @dataclass
@@ -158,7 +290,7 @@ def annotate_word(word: str, lexicons: GuidedLexicons) -> dict[str, Any]:
     else:
         polarity = "neutral"
         polarity_score = 0.0
-    stance = stance_from_score(polarity_score, int(in_positive) + int(in_negative))
+    stance_data = stance_from_evidence(0.0, 0.0)
     primary = categories[0] if categories else None
     return {
         "kind": "palabra",
@@ -169,9 +301,7 @@ def annotate_word(word: str, lexicons: GuidedLexicons) -> dict[str, Any]:
         "delta_pmi": primary["delta_pmi"] if primary else 0.0,
         "polarity": polarity,
         "polarity_score": polarity_score,
-        "stance": stance,
-        "stance_label": STANCE_LABELS[stance],
-        "stance_score": polarity_score,
+        **stance_data,
         "positive_hits": int(in_positive),
         "negative_hits": int(in_negative),
         "matched_weight": int(bool(categories) or in_positive or in_negative),
@@ -194,11 +324,13 @@ def aggregate_words(
     positive_hits = 0.0
     negative_hits = 0.0
     matched_weight = 0.0
+    stance_word_weights: Counter[str] = Counter()
     for word, raw_weight in weighted_words:
         weight = max(0.0, float(raw_weight))
         if weight <= 0:
             continue
         annotation = annotate_word(str(word), lexicons)
+        stance_word_weights[normalize(word)] += weight
         matched = False
         for category in annotation["categories"]:
             score = weight * float(category["confidence"])
@@ -238,7 +370,14 @@ def aggregate_words(
         polarity = "negativa"
     else:
         polarity = "mixta"
-    stance = stance_from_score(polarity_score, polarity_total)
+    target_hits = sum(stance_word_weights[word] for word in STANCE_TARGET_WORDS)
+    support_hits = sum(stance_word_weights[word] for word in STANCE_SUPPORT_WORDS)
+    critic_hits = sum(stance_word_weights[word] for word in STANCE_CRITIC_WORDS)
+    stance_data = stance_from_evidence(
+        support_hits if target_hits else 0.0,
+        critic_hits if target_hits else 0.0,
+    )
+    stance_data["stance_target_hits"] = round(target_hits, 2)
     primary = categories[0] if categories else None
     return {
         "kind": kind,
@@ -249,24 +388,11 @@ def aggregate_words(
         "delta_pmi": 0.0,
         "polarity": polarity,
         "polarity_score": round(polarity_score, 4),
-        "stance": stance,
-        "stance_label": STANCE_LABELS[stance],
-        "stance_score": round(polarity_score, 4),
+        **stance_data,
         "positive_hits": round(positive_hits, 2),
         "negative_hits": round(negative_hits, 2),
         "matched_weight": round(matched_weight, 2),
     }
-
-
-def stance_from_score(score: float, evidence_weight: float) -> str:
-    """Mapea polaridad agregada a apoyo/defensa vs critica/oposicion."""
-    if evidence_weight <= 0:
-        return "sin_postura"
-    if score >= 0.20:
-        return "apoyo_defensa"
-    if score <= -0.20:
-        return "critica_oposicion"
-    return "mixta_disputa"
 
 
 def write_annotation_outputs(
@@ -296,6 +422,8 @@ def write_annotation_outputs(
             "postura": item.get("stance", "sin_postura"),
             "postura_etiqueta": item.get("stance_label", STANCE_LABELS["sin_postura"]),
             "postura_score": item.get("stance_score", 0.0),
+            "evidencia_postura": item.get("stance_evidence", 0.0),
+            "mensajes_con_postura": item.get("stance_classified_messages", 0),
             "coincidencias_positivas": item.get("positive_hits", 0),
             "coincidencias_negativas": item.get("negative_hits", 0),
             "peso_coincidente": item.get("matched_weight", 0),
@@ -309,6 +437,7 @@ def write_annotation_outputs(
         "categorias": dict(category_counts.most_common()),
         "polaridades": dict(polarity_counts.most_common()),
         "posturas": dict(stance_counts.most_common()),
+        "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",
         "fuentes": {key: str(value) for key, value in source_paths.items()},
     }
     (out_dir / f"{prefix}_resumen.json").write_text(
@@ -323,8 +452,9 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
     for node_id, item in annotations.items():
         categories = item.get("categories") or []
         polarity = item.get("polarity") or "neutral"
+        stance = item.get("stance") or "sin_postura"
         network_topics = item.get("network_topics") or []
-        if not categories and polarity == "neutral" and not network_topics:
+        if not categories and polarity == "neutral" and stance == "sin_postura" and not network_topics:
             continue
         compact[node_id] = {
             "categories": categories,
@@ -332,9 +462,9 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
             "category_confidence": item.get("category_confidence") or 0.0,
             "polarity": polarity,
             "polarity_score": item.get("polarity_score") or 0.0,
-            "stance": item.get("stance") or "sin_postura",
+            "stance": stance,
             "stance_label": item.get("stance_label") or STANCE_LABELS["sin_postura"],
-            "stance_score": item.get("stance_score") or item.get("polarity_score") or 0.0,
+            "stance_score": item.get("stance_score") or 0.0,
             "network_topics": network_topics,
         }
     return compact
@@ -422,7 +552,7 @@ def inject_guided_layer(
       <option value="original">Estructura original</option>
       <option value="category">Tema estructural</option>
       <option value="polarity">Polaridad</option>
-      <option value="stance">Postura discursiva</option>
+      <option value="stance">Postura hacia Mónica/gobierno</option>
     </select>
   </label>
   <div class="guided-option-help">Elige cómo se colorean los puntos. Esto cambia la lectura visual, no los datos ni las conexiones.</div>{topic_filter_markup}
@@ -439,13 +569,13 @@ def inject_guided_layer(
     <button data-polarity="mixta">Mixta</button>
   </div>
   <div class="guided-option-help">Permite aislar lenguaje favorable, desfavorable o combinado. Describe palabras usadas, no necesariamente la intención completa.</div>
-  <h4>Postura discursiva</h4>
+  <h4>Postura hacia Mónica/gobierno</h4>
   <div class="guided-row">
     <button data-stance="apoyo_defensa">Apoyo/defensa</button>
     <button data-stance="critica_oposicion">Crítica/oposición</button>
     <button data-stance="mixta_disputa">Mixta/disputa</button>
   </div>
-  <div class="guided-option-help">Separa mensajes que parecen apoyar, criticar o disputar una posición. Úsalo como orientación para leer ejemplos.</div>
+  <div class="guided-option-help">Mide la posición respecto a Mónica Villarreal o el gobierno municipal mediante referencias al actor y señales de respaldo o crítica. No reutiliza la polaridad.</div>
   <div class="guided-row"><button id="guidedReset">Restaurar vista</button></div>
   <div class="guided-option-help">Restaurar elimina todos los filtros y vuelve a mostrar la red completa.</div>
   <div id="guidedStats">Preparando capa guiada...</div>

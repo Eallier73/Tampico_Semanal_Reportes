@@ -1,0 +1,24 @@
+{
+  "n_temas": 50,
+  "calidades": {
+    "alta": 21,
+    "media": 17,
+    "baja": 12
+  },
+  "ocultos_por_defecto": [
+    3,
+    8,
+    20,
+    22,
+    24,
+    26,
+    30,
+    34,
+    35,
+    37,
+    38,
+    48
+  ],
+  "criterio": "coherencia c_v por tema + reglas editoriales por firma lexica",
+  "nota": "los temas de calidad baja se conservan y pueden recuperarse en la interfaz"
+}

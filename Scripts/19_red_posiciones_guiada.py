@@ -49,11 +49,15 @@ from sna_guiada_common import (
     DEFAULT_POSITIVE_DICTIONARY,
     DEFAULT_TOPIC_DICTIONARY,
     aggregate_words,
+    aggregate_stance_texts,
+    apply_stance_evidence,
     annotate_word,
     inject_guided_layer,
     load_lexicons,
+    stance_from_evidence,
     write_annotation_outputs,
 )
+from sna_position_labels import classify_position_name
 
 TEMA_COLORS = [
     "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
@@ -272,6 +276,16 @@ def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
                 reading = build_topic_reading(tid, words)
                 info.setdefault(tid, {"title": reading["title"], "summary": reading["summary"], "words": []})
                 info[tid]["words"] = words[:40]
+                curated_title = str(row.get("titulo_curado", "")).strip()
+                curated_summary = str(row.get("resumen_curado", "")).strip()
+                if curated_title and curated_title.lower() != "nan":
+                    info[tid]["title"] = curated_title
+                if curated_summary and curated_summary.lower() != "nan":
+                    info[tid]["summary"] = curated_summary
+                info[tid]["quality"] = str(row.get("calidad_tema", "sin_evaluar"))
+                info[tid]["visible_by_default"] = str(row.get("visible_por_defecto", "true")).lower() in {"true", "1", "si", "sí"}
+                info[tid]["coherence"] = float(row.get("coherencia_tema_cv", 0) or 0)
+                info[tid]["quality_reason"] = str(row.get("motivo_calidad", ""))
 
     return info
 
@@ -416,7 +430,10 @@ def position_message_stats(
             "duplicate_share": 0.0,
             "top_url_share": 0.0,
             "examples": [],
+            "stance": aggregate_stance_texts([]),
         }
+
+    stance = aggregate_stance_texts(rows["texto_limpio"].fillna(""))
 
     hours = rows["fecha_dt"].dt.floor("h").value_counts(dropna=True)
     max_hour_share = float(hours.iloc[0] / total) if len(hours) else 0.0
@@ -456,6 +473,7 @@ def position_message_stats(
         "duplicate_share": round(duplicate_share, 4),
         "top_url_share": round(top_url_share, 4),
         "examples": examples,
+        "stance": stance,
     }
 
 
@@ -467,16 +485,8 @@ def hhi(values: list[float]) -> float:
     return float(sum(s * s for s in shares))
 
 
-def classify_name(words: list[str]) -> str:
-    wset = set(words)
-    core = ", ".join(words[:4])
-    if wset & CRITIC_WORDS:
-        return f"Critica/ataque: {core}"
-    if wset & CLAIM_WORDS:
-        return f"Reclamo/exigencia: {core}"
-    if wset & SUPPORT_WORDS:
-        return f"Apoyo/defensa: {core}"
-    return f"Enfoque: {core}"
+def classify_name(words: list[str], topic_title: str = "") -> str:
+    return classify_position_name(words, topic_title)
 
 
 def coordination_score(
@@ -615,7 +625,7 @@ def compute_positions(
                 top5_share,
             )
             title = topic_info.get(tema, {}).get("title", f"T{tema:02d}")
-            name = classify_name([w.lower() for w in top_words])
+            name = classify_name([w.lower() for w in top_words], title)
             summary = make_summary(title, name, len(users_set), top_words, level)
             platforms = platform_breakdown(cuentas, users_set)
 
@@ -639,6 +649,14 @@ def compute_positions(
                 "top_url_share": msg_stats["top_url_share"],
                 "ibea_score": score,
                 "ibea_nivel": level,
+                "postura_actor": msg_stats["stance"]["stance"],
+                "postura_actor_etiqueta": msg_stats["stance"]["stance_label"],
+                "postura_actor_score": msg_stats["stance"]["stance_score"],
+                "postura_actor_apoyo": msg_stats["stance"]["stance_support_hits"],
+                "postura_actor_critica": msg_stats["stance"]["stance_critic_hits"],
+                "postura_actor_evidencia": msg_stats["stance"]["stance_evidence"],
+                "postura_actor_referencias": msg_stats["stance"]["stance_target_hits"],
+                "postura_actor_mensajes": msg_stats["stance"]["stance_classified_messages"],
             })
 
             for rank, (word, count) in enumerate(word_pairs, 1):
@@ -728,6 +746,7 @@ def build_network_data(
             "title": info.get("title", f"T{tema:02d}"),
             "kind": "tema",
             "tema": tema,
+            "topic_quality": info.get("quality", "sin_evaluar"),
             "shape": "dot",
             "color": {"background": color, "border": "#f2f2f2"},
             "font": {"size": 24, "color": "#ffffff", "face": "arial"},
@@ -742,6 +761,9 @@ def build_network_data(
             "summary": info.get("summary", ""),
             "words": info.get("words", []),
             "n_cuentas": int(topic_counts.loc[tema]),
+            "quality": info.get("quality", "sin_evaluar"),
+            "coherence": float(info.get("coherence", 0) or 0),
+            "quality_reason": info.get("quality_reason", ""),
         }
 
     positions_per_theme = positions.groupby("tema_id")["posicion_id"].count().to_dict()
@@ -762,6 +784,7 @@ def build_network_data(
             "title": str(row["nombre"]),
             "kind": "posicion",
             "tema": tema,
+            "topic_quality": topic_info.get(tema, {}).get("quality", "sin_evaluar"),
             "ibea": str(row["ibea_nivel"]),
             "shape": "diamond",
             "color": {"background": color, "border": border, "highlight": {"background": color, "border": "#ffffff"}},
@@ -794,6 +817,11 @@ def build_network_data(
             "top_subclusters": str(row["top_subclusters"]),
             "ibea_score": float(row["ibea_score"]),
             "ibea_nivel": str(row["ibea_nivel"]),
+            "postura_actor": str(row["postura_actor"]),
+            "postura_actor_etiqueta": str(row["postura_actor_etiqueta"]),
+            "postura_actor_score": float(row["postura_actor_score"]),
+            "postura_actor_evidencia": float(row["postura_actor_evidencia"]),
+            "postura_actor_mensajes": int(row["postura_actor_mensajes"]),
             "metricas": {
                 "mono_tema_share": float(row["mono_tema_share"]),
                 "top5_cuentas_share": float(row["top5_cuentas_share"]),
@@ -976,6 +1004,7 @@ def build_html(
             f'data-volume="{topic_metrics[tid]["volume"]}" '
             f'data-centrality="{topic_metrics[tid]["centrality"]}" '
             f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
+            f'<span data-topic-quality="{html.escape(str(info.get("quality", "sin_evaluar")))}"></span>'
             f'<span class="topic-card-title"><i class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></i>'
             f'<span class="topic-title-text">Tema {tid:02d}</span>'
             f'<span class="topic-disclosure" role="button" tabindex="0" aria-expanded="false" '
@@ -1024,6 +1053,7 @@ def build_html(
   .topic-word-row {{ display:block; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }}
   .topic-word-row b {{ color:#888; font-weight:normal; }}
   .topic-score {{ display:block; margin:3px 0 0 15px; color:#75bfff; font-size:10px; }}
+  .quality-note {{ color:#d8b15c; }}
   .pill {{ display:inline-block; padding:2px 6px; margin:2px 3px 2px 0; border-radius:10px; background:#26384a; font-size:11px; }}
   .metric {{ display:grid; grid-template-columns:1fr auto; gap:6px; font-size:12px; border-bottom:1px solid #2b2b2b; padding:4px 0; }}
   .muted {{ color:#aaa; font-size:12px; line-height:1.35; }}
@@ -1081,7 +1111,9 @@ def build_html(
   </div>
   <div class="grp">
     <h2>Temas de la red</h2>
-    <div class="muted">Se muestran hasta 50 temas según el orden elegido. Puedes activar más de uno para comparar o reunir conversaciones.</div>
+    <div class="muted">Se muestran los temas más confiables según el orden elegido. Los agrupamientos débiles se ocultan inicialmente para reducir ruido, pero nunca se eliminan.</div>
+    <label><input type="checkbox" id="showLowQuality"> mostrar temas de baja calidad</label>
+    <div class="tool-help">Actívalo para auditar los temas que mezclan asuntos o formatos editoriales y que no conviene usar directamente en conclusiones.</div>
     <label>Ordenar por</label>
     <select id="topicOrder">
       <option value="volume">Volumen (cuentas)</option>
@@ -1162,11 +1194,14 @@ function sortTopicMenu() {{
     const score = label.querySelector('.topic-score');
     const metricNames = {{volume:'cuentas', centrality:'puentes', connectivity:'enlaces'}};
     score.textContent = mode === 'topic' ? '' : `${{label.dataset[mode] || 0}} ${{metricNames[mode]}}`;
-    label.hidden = index >= 50;
+    const lowQuality = label.querySelector('[data-topic-quality]')?.dataset.topicQuality === 'baja';
+    const showLowQuality = document.getElementById('showLowQuality').checked;
+    label.hidden = index >= 50 || (lowQuality && !showLowQuality);
     list.appendChild(label);
   }});
 }}
 document.getElementById('topicOrder').addEventListener('change', sortTopicMenu);
+document.getElementById('showLowQuality').addEventListener('change', sortTopicMenu);
 sortTopicMenu();
 document.querySelectorAll('.topic-disclosure').forEach(disclosure => {{
   function toggleExplanation(event) {{
@@ -1199,6 +1234,7 @@ function layerFlags() {{
 }}
 function nodeVisible(n, levels, flags) {{
   if (!flags[n.kind]) return false;
+  if ((n.kind === 'tema' || n.kind === 'posicion') && n.topic_quality === 'baja' && !document.getElementById('showLowQuality').checked) return false;
   if (n.kind === 'posicion' && !levels[n.ibea]) return false;
   if (typeof window.guidedNodeAllowed === 'function' && !window.guidedNodeAllowed(n)) return false;
   return true;
@@ -1246,11 +1282,16 @@ function render(id) {{
   let h = '';
   if (m.kind === 'tema') {{
     h += `<h1>${{esc(id)}} · ${{esc(m.title)}}</h1><p>${{esc(m.summary)}}</p>`;
+    h += `<div class="metric"><span>calidad temática</span><b>${{esc(m.quality)}}</b></div>`;
+    if (m.quality === 'baja') h += `<div class="muted quality-note">Se conserva para auditoría, pero puede mezclar conversaciones. Motivo: ${{esc(m.quality_reason)}}.</div>`;
     h += `<div class="metric"><span>cuentas mapeadas</span><b>${{m.n_cuentas}}</b></div>`;
     h += '<h2>Palabras guia</h2>' + (m.words || []).slice(0, 40).map(w => `<span class="pill">${{esc(w)}}</span>`).join('');
   }} else if (m.kind === 'posicion') {{
     h += `<h1>${{esc(id)}} · ${{esc(m.nombre)}}</h1>`;
     h += `<p>${{esc(m.resumen)}}</p>`;
+    h += `<div class="metric"><span>postura hacia Mónica/gobierno</span><b>${{esc(m.postura_actor_etiqueta)}}</b></div>`;
+    h += `<div class="muted">Se calcula con referencias explícitas al actor y señales de respaldo o crítica; es independiente del tono emocional.</div>`;
+    h += `<div class="metric"><span>mensajes con evidencia de postura</span><b>${{m.postura_actor_mensajes}}</b></div>`;
     h += `<div class="metric"><span>senal indiciaria</span><b class="level-${{esc(m.ibea_nivel)}}">${{esc(m.ibea_nivel)}} (${{m.ibea_score}})</b></div>`;
     h += `<div class="metric"><span>cuentas</span><b>${{m.n_cuentas}}</b></div>`;
     h += `<div class="metric"><span>mensajes de esas cuentas</span><b>${{m.n_msgs}}</b></div>`;
@@ -1421,6 +1462,36 @@ def main() -> None:
         int(tema): [(str(r.palabra), float(r.conteo)) for r in grp.itertuples()]
         for tema, grp in position_words.groupby("tema_id")
     }
+    position_stance = {
+        str(row.posicion_id): {
+            "stance": str(row.postura_actor),
+            "stance_label": str(row.postura_actor_etiqueta),
+            "stance_score": float(row.postura_actor_score),
+            "stance_support_hits": float(row.postura_actor_apoyo),
+            "stance_critic_hits": float(row.postura_actor_critica),
+            "stance_evidence": float(row.postura_actor_evidencia),
+            "stance_target_hits": int(row.postura_actor_referencias),
+            "stance_classified_messages": int(row.postura_actor_mensajes),
+        }
+        for row in positions.itertuples()
+    }
+    network_accounts = {
+        str(meta.get(str(node["id"]), {}).get("usuario", ""))
+        for node in nodes if node.get("kind") == "cuenta"
+    }
+    account_stance = {
+        str(usuario): aggregate_stance_texts(grp["texto_limpio"].fillna(""))
+        for usuario, grp in mensajes[mensajes["usuario"].isin(network_accounts)].groupby("usuario")
+    }
+    topic_stance: dict[int, dict[str, Any]] = {}
+    for tema, group in positions.groupby("tema_id"):
+        stance = stance_from_evidence(
+            float(group["postura_actor_apoyo"].sum()),
+            float(group["postura_actor_critica"].sum()),
+        )
+        stance["stance_target_hits"] = int(group["postura_actor_referencias"].sum())
+        stance["stance_classified_messages"] = int(group["postura_actor_mensajes"].sum())
+        topic_stance[int(tema)] = stance
     for node in nodes:
         node_id = str(node["id"])
         kind = str(node.get("kind", ""))
@@ -1430,24 +1501,27 @@ def main() -> None:
             annotations[node_id] = item
         elif kind == "cuenta":
             user = str(meta.get(node_id, {}).get("usuario", node.get("search", "")))
-            annotations[node_id] = aggregate_words(
+            item = aggregate_words(
                 account_words.get(user, []), lexicons, kind="cuenta", label=user
             )
+            annotations[node_id] = apply_stance_evidence(item, account_stance.get(user, {}))
         elif kind == "posicion":
-            annotations[node_id] = aggregate_words(
+            item = aggregate_words(
                 position_weighted.get(node_id, []),
                 lexicons,
                 kind="posicion",
                 label=str(meta.get(node_id, {}).get("nombre", node_id)),
             )
+            annotations[node_id] = apply_stance_evidence(item, position_stance.get(node_id, {}))
         elif kind == "tema":
             tema = int(node.get("tema", -1))
-            annotations[node_id] = aggregate_words(
+            item = aggregate_words(
                 topic_weighted.get(tema, []),
                 lexicons,
                 kind="tema",
                 label=str(meta.get(node_id, {}).get("title", node_id)),
             )
+            annotations[node_id] = apply_stance_evidence(item, topic_stance.get(tema, {}))
         network_topics: set[int] = set()
         if node.get("tema") is not None:
             network_topics.add(int(node["tema"]))

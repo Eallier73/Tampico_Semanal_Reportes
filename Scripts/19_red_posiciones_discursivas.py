@@ -40,6 +40,9 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
+from sna_guiada_common import aggregate_stance_texts
+from sna_position_labels import classify_position_name
+
 TEMA_COLORS = [
     "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
     "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
@@ -122,6 +125,16 @@ def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
                     "words": [],
                 })
                 info[tid]["words"] = words[:40]
+                curated_title = str(row.get("titulo_curado", "")).strip()
+                curated_summary = str(row.get("resumen_curado", "")).strip()
+                if curated_title and curated_title.lower() != "nan":
+                    info[tid]["title"] = curated_title
+                if curated_summary and curated_summary.lower() != "nan":
+                    info[tid]["summary"] = curated_summary
+                info[tid]["quality"] = str(row.get("calidad_tema", "sin_evaluar"))
+                info[tid]["visible_by_default"] = str(row.get("visible_por_defecto", "true")).lower() in {"true", "1", "si", "sí"}
+                info[tid]["coherence"] = float(row.get("coherencia_tema_cv", 0) or 0)
+                info[tid]["quality_reason"] = str(row.get("motivo_calidad", ""))
 
     return info
 
@@ -266,7 +279,10 @@ def position_message_stats(
             "duplicate_share": 0.0,
             "top_url_share": 0.0,
             "examples": [],
+            "stance": aggregate_stance_texts([]),
         }
+
+    stance = aggregate_stance_texts(rows["texto_limpio"].fillna(""))
 
     hours = rows["fecha_dt"].dt.floor("h").value_counts(dropna=True)
     max_hour_share = float(hours.iloc[0] / total) if len(hours) else 0.0
@@ -306,6 +322,7 @@ def position_message_stats(
         "duplicate_share": round(duplicate_share, 4),
         "top_url_share": round(top_url_share, 4),
         "examples": examples,
+        "stance": stance,
     }
 
 
@@ -317,16 +334,8 @@ def hhi(values: list[float]) -> float:
     return float(sum(s * s for s in shares))
 
 
-def classify_name(words: list[str]) -> str:
-    wset = set(words)
-    core = ", ".join(words[:4])
-    if wset & CRITIC_WORDS:
-        return f"Critica/ataque: {core}"
-    if wset & CLAIM_WORDS:
-        return f"Reclamo/exigencia: {core}"
-    if wset & SUPPORT_WORDS:
-        return f"Apoyo/defensa: {core}"
-    return f"Enfoque: {core}"
+def classify_name(words: list[str], topic_title: str = "") -> str:
+    return classify_position_name(words, topic_title)
 
 
 def coordination_score(
@@ -465,7 +474,7 @@ def compute_positions(
                 top5_share,
             )
             title = topic_info.get(tema, {}).get("title", f"T{tema:02d}")
-            name = classify_name([w.lower() for w in top_words])
+            name = classify_name([w.lower() for w in top_words], title)
             summary = make_summary(title, name, len(users_set), top_words, level)
             platforms = platform_breakdown(cuentas, users_set)
 
@@ -489,6 +498,14 @@ def compute_positions(
                 "top_url_share": msg_stats["top_url_share"],
                 "ibea_score": score,
                 "ibea_nivel": level,
+                "postura_actor": msg_stats["stance"]["stance"],
+                "postura_actor_etiqueta": msg_stats["stance"]["stance_label"],
+                "postura_actor_score": msg_stats["stance"]["stance_score"],
+                "postura_actor_apoyo": msg_stats["stance"]["stance_support_hits"],
+                "postura_actor_critica": msg_stats["stance"]["stance_critic_hits"],
+                "postura_actor_evidencia": msg_stats["stance"]["stance_evidence"],
+                "postura_actor_referencias": msg_stats["stance"]["stance_target_hits"],
+                "postura_actor_mensajes": msg_stats["stance"]["stance_classified_messages"],
             })
 
             for rank, (word, count) in enumerate(word_pairs, 1):
@@ -644,6 +661,11 @@ def build_network_data(
             "top_subclusters": str(row["top_subclusters"]),
             "ibea_score": float(row["ibea_score"]),
             "ibea_nivel": str(row["ibea_nivel"]),
+            "postura_actor": str(row["postura_actor"]),
+            "postura_actor_etiqueta": str(row["postura_actor_etiqueta"]),
+            "postura_actor_score": float(row["postura_actor_score"]),
+            "postura_actor_evidencia": float(row["postura_actor_evidencia"]),
+            "postura_actor_mensajes": int(row["postura_actor_mensajes"]),
             "metricas": {
                 "mono_tema_share": float(row["mono_tema_share"]),
                 "top5_cuentas_share": float(row["top5_cuentas_share"]),
@@ -1019,6 +1041,9 @@ function render(id) {{
   }} else if (m.kind === 'posicion') {{
     h += `<h1>${{esc(id)}} · ${{esc(m.nombre)}}</h1>`;
     h += `<p>${{esc(m.resumen)}}</p>`;
+    h += `<div class="metric"><span>postura hacia Mónica/gobierno</span><b>${{esc(m.postura_actor_etiqueta)}}</b></div>`;
+    h += `<div class="muted">Se calcula con referencias explícitas al actor y señales de respaldo o crítica; es independiente del tono emocional.</div>`;
+    h += `<div class="metric"><span>mensajes con evidencia de postura</span><b>${{m.postura_actor_mensajes}}</b></div>`;
     h += `<div class="metric"><span>senal indiciaria</span><b class="level-${{esc(m.ibea_nivel)}}">${{esc(m.ibea_nivel)}} (${{m.ibea_score}})</b></div>`;
     h += `<div class="metric"><span>cuentas</span><b>${{m.n_cuentas}}</b></div>`;
     h += `<div class="metric"><span>mensajes de esas cuentas</span><b>${{m.n_msgs}}</b></div>`;
