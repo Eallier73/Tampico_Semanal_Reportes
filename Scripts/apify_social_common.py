@@ -141,13 +141,24 @@ def run_actor_plans(
     for plan in plans:
         print(f"▶ Apify: {plan.name}")
         run = client.actor(actor_id).call(run_input=plan.actor_input)
+        run_id = run.get("id") if run else None
+        status = run.get("status") if run else None
+        print(f"  corrida={run_id or 'sin_id'} estado={status or 'desconocido'}")
+        if status and status != "SUCCEEDED":
+            raise RuntimeError(
+                f"La corrida {run_id or 'sin_id'} de {plan.name} terminó con estado {status}"
+            )
         dataset_id = run.get("defaultDatasetId") if run else None
         if not dataset_id:
             print(f"  ⚠️ Sin dataset: {plan.name}")
             continue
         items = list(client.dataset(dataset_id).iterate_items())
+        errors = [item for item in items if item.get("errorCode")]
+        if errors:
+            codes = sorted({str(item.get("errorCode")) for item in errors})
+            print(f"  ⚠️ {len(errors)} resultado(s) de error: {', '.join(codes)}")
         print(f"  ✅ {len(items)} resultados")
-        collected.extend((plan, item) for item in items)
+        collected.extend((plan, item) for item in items if not item.get("errorCode"))
     return collected
 
 

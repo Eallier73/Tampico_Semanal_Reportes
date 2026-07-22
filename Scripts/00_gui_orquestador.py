@@ -30,6 +30,7 @@ def manual_load_dotenv(path: Path) -> bool:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ENV_FILE = REPO_ROOT / ".env.local"
+SCRIPTS_DIR = Path(__file__).resolve().parent
 
 try:
     from dotenv import load_dotenv
@@ -59,6 +60,187 @@ PIPELINES = ORQ.PIPELINES
 PIPELINES_BY_CODE = ORQ.PIPELINES_BY_CODE
 DEFAULT_GLOBAL_ISO_WEEK = ORQ.DEFAULT_GLOBAL_ISO_WEEK
 DEFAULT_GLOBAL_SINCE, DEFAULT_GLOBAL_BEFORE = ORQ.iso_week_to_range(DEFAULT_GLOBAL_ISO_WEEK)
+
+SNA_DATA_DIR = REPO_ROOT / "SNA" / "Datos"
+SNA_HISTORICAL_CSV = SNA_DATA_DIR / "tampico_datos_tabulares_consolidados.csv"
+SNA_LAST_TWO_WEEKS_CSV = (
+    SNA_DATA_DIR / "tampico_datos_tabulares_ultimas_2_semanas.csv"
+)
+SNA_LAST_WEEK_CSV = SNA_DATA_DIR / "tampico_datos_tabulares_ultima_semana.csv"
+SNA_RESULTS_ROOT = REPO_ROOT / "SNA" / "Resultados"
+
+
+def build_sna_run(scope: str) -> dict[str, object]:
+    """Construye la cadena SNA y mantiene aislados corpus, resultados y HTML."""
+    if scope == "historico":
+        label = "material histórico (fuentes locales + RAdAR)"
+        input_csv = SNA_HISTORICAL_CSV
+        results_dir = SNA_RESULTS_ROOT / "historico"
+        consolidate_args = ["--output", str(input_csv)]
+        scope_short = "histórico"
+        network_scope = "Tampico histórico"
+        accounts_scope = "histórica"
+        corpus_label = "histórico consolidado de Tampico con RAdAR"
+        filename_scope = "historico"
+        log_name = "ultima_ejecucion.log"
+    elif scope == "ultimas_2_semanas":
+        label = "últimas 2 semanas (solo fuentes locales)"
+        input_csv = SNA_LAST_TWO_WEEKS_CSV
+        results_dir = SNA_RESULTS_ROOT / "ultimas_2_semanas"
+        consolidate_args = ["--last-weeks", "2", "--output", str(input_csv)]
+        scope_short = "de las últimas 2 semanas"
+        network_scope = "Tampico · últimas 2 semanas"
+        accounts_scope = "de las últimas 2 semanas"
+        corpus_label = "últimas 2 semanas locales disponibles de Tampico"
+        filename_scope = "ultimas_2_semanas"
+        log_name = "ultima_ejecucion_ultimas_2_semanas.log"
+    elif scope == "ultima_semana":
+        label = "última semana (solo fuentes locales)"
+        input_csv = SNA_LAST_WEEK_CSV
+        results_dir = SNA_RESULTS_ROOT / "ultima_semana"
+        consolidate_args = ["--last-weeks", "1", "--output", str(input_csv)]
+        scope_short = "de la última semana disponible"
+        network_scope = "Tampico · última semana"
+        accounts_scope = "de la última semana disponible"
+        corpus_label = "última semana local disponible de Tampico"
+        filename_scope = "ultima_semana"
+        log_name = "ultima_ejecucion_ultima_semana.log"
+    else:
+        raise ValueError(f"Alcance SNA desconocido: {scope}")
+
+    clusters_dir = results_dir / "clusters"
+    accounts_dir = results_dir / "cuentas_clusters"
+    complete_name = f"red_tampico_{filename_scope}.html"
+    accounts_name = f"red_tampico_cuentas_{filename_scope}.html"
+    positions_name = f"red_tampico_posiciones_{filename_scope}.html"
+    guided_complete_name = f"red_tampico_{filename_scope}_guiada.html"
+    guided_accounts_name = f"red_tampico_cuentas_{filename_scope}_guiada.html"
+    guided_positions_name = f"red_tampico_posiciones_{filename_scope}_guiada.html"
+
+    # Conserva los nombres históricos actuales para no romper marcadores o
+    # vínculos ya usados, pero los alcances recientes siempre tienen nombres propios.
+    if scope == "historico":
+        accounts_name = "red_tampico_cuentas.html"
+        positions_name = "red_tampico_posiciones.html"
+        guided_complete_name = "red_tampico_historico_guiada.html"
+        guided_accounts_name = "red_tampico_cuentas_guiada.html"
+        guided_positions_name = "red_tampico_posiciones_guiada.html"
+
+    steps = [
+        ("Consolidar corpus SNA", "11_consolidar_historico_sna.py", consolidate_args),
+        (
+            "Modelar temas LDA",
+            "12_lda_sna.py",
+            [
+                "--input-csv", str(input_csv),
+                "--output-dir", str(clusters_dir),
+                "--k-min", "25", "--k-max", "35",
+                "--selection-mode", "coherence",
+            ],
+        ),
+        (
+            "Evaluar calidad temática",
+            "sna_topic_quality.py",
+            ["--clusters-dir", str(clusters_dir)],
+        ),
+        (
+            "Calcular subclusters Louvain",
+            "12b_subclusters_louvain.py",
+            [
+                "--clusters-dir", str(clusters_dir),
+                "--resolution", "1.4", "--min-sub-size", "3",
+            ],
+        ),
+        (
+            "Diagnosticar umbrales",
+            "12c_diagnostico_umbrales.py",
+            ["--clusters-dir", str(clusters_dir)],
+        ),
+        (
+            "Generar red completa",
+            "12c_red_completa.py",
+            [
+                "--clusters-dir", str(clusters_dir),
+                "--output-filename", complete_name,
+                "--scope-label", scope_short,
+            ],
+        ),
+        (
+            "Mapear cuentas a clusters",
+            "18_cuentas_clusters.py",
+            [
+                "--clusters-dir", str(clusters_dir),
+                "--output-dir", str(accounts_dir),
+            ],
+        ),
+        (
+            "Generar red de cuentas",
+            "12d_red_cuentas.py",
+            [
+                "--base-dir", str(results_dir),
+                "--output-filename", accounts_name,
+                "--scope-label", accounts_scope,
+                "--corpus-label", corpus_label,
+            ],
+        ),
+        (
+            "Generar red de posiciones discursivas",
+            "19_red_posiciones_discursivas.py",
+            [
+                "--base-dir", str(results_dir),
+                "--input-csv", str(input_csv),
+                "--output-filename", positions_name,
+                "--scope-label", network_scope,
+                "--corpus-label", corpus_label,
+            ],
+        ),
+        (
+            "Generar red completa guiada",
+            "12c_red_completa_guiada.py",
+            [
+                "--clusters-dir", str(clusters_dir),
+                "--output-filename", guided_complete_name,
+                "--scope-label", scope_short,
+            ],
+        ),
+        (
+            "Generar red de cuentas guiada",
+            "12d_red_cuentas_guiada.py",
+            [
+                "--base-dir", str(results_dir),
+                "--output-filename", guided_accounts_name,
+                "--scope-label", accounts_scope,
+                "--corpus-label", corpus_label,
+            ],
+        ),
+        (
+            "Generar red de posiciones guiada",
+            "19_red_posiciones_guiada.py",
+            [
+                "--base-dir", str(results_dir),
+                "--input-csv", str(input_csv),
+                "--output-filename", guided_positions_name,
+                "--scope-label", network_scope,
+                "--corpus-label", corpus_label,
+                "--positions-per-topic", "5",
+                "--words-per-position", "35",
+            ],
+        ),
+    ]
+    guided_dir = clusters_dir / "red_guiada"
+    return {
+        "scope": scope,
+        "label": label,
+        "input_csv": input_csv,
+        "results_dir": results_dir,
+        "run_log": results_dir / log_name,
+        "steps": steps,
+        "final_outputs": [
+            guided_dir / guided_complete_name,
+            guided_dir / guided_accounts_name,
+            guided_dir / guided_positions_name,
+        ],
+    }
 
 
 def validate_date(value: str) -> str:
@@ -175,32 +357,6 @@ class OrquestadorGUI:
         self.before_var = tk.StringVar(value=DEFAULT_GLOBAL_BEFORE)
         ttk.Entry(date_frame, textvariable=self.before_var, width=15).grid(row=1, column=3, sticky=tk.W, padx=5)
 
-        pipeline_frame = ttk.LabelFrame(main_frame, text="Seleccion de Pipelines", padding="10")
-        pipeline_frame.pack(fill=tk.BOTH, expand=True, pady=5)
-
-        self.pipeline_vars: dict[str, tk.BooleanVar] = {}
-        canvas = tk.Canvas(pipeline_frame)
-        scrollbar = ttk.Scrollbar(pipeline_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-        scrollable_frame.bind(
-            "<Configure>",
-            lambda event: canvas.configure(scrollregion=canvas.bbox("all")),
-        )
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        for pipe in PIPELINES:
-            var = tk.BooleanVar(value=False)
-            self.pipeline_vars[pipe.code] = var
-            ttk.Checkbutton(
-                scrollable_frame,
-                text=f"{pipe.code}) {pipe.label}",
-                variable=var,
-            ).pack(anchor=tk.W, pady=2)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
         options_frame = ttk.Frame(main_frame, padding="5")
         options_frame.pack(fill=tk.X)
 
@@ -225,6 +381,57 @@ class OrquestadorGUI:
             variable=self.continue_error_var,
         ).pack(side=tk.LEFT, padx=10)
 
+        sna_frame = ttk.LabelFrame(main_frame, text="Análisis SNA", padding="8")
+        sna_frame.pack(fill=tk.X, pady=5)
+
+        ttk.Label(
+            sna_frame,
+            text=(
+                "Histórico incorpora las fuentes locales y RAdAR. Dos semanas y "
+                "última semana usan exclusivamente las fuentes locales de Tampico."
+            ),
+            wraplength=800,
+        ).grid(row=0, column=0, columnspan=2, sticky=tk.W, padx=5)
+
+        self.sna_history_button = ttk.Button(
+            sna_frame,
+            text="EJECUTAR SNA MATERIAL HISTÓRICO",
+            command=lambda: self.start_sna_execution("historico"),
+        )
+        self.sna_history_button.grid(
+            row=1, column=0, sticky=tk.EW, padx=5, pady=(7, 3)
+        )
+
+        self.sna_recent_button = ttk.Button(
+            sna_frame,
+            text="EJECUTAR SNA DOS SEMANAS",
+            command=lambda: self.start_sna_execution("ultimas_2_semanas"),
+        )
+        self.sna_recent_button.grid(
+            row=1, column=1, sticky=tk.EW, padx=5, pady=(7, 3)
+        )
+
+        self.sna_last_week_button = ttk.Button(
+            sna_frame,
+            text="EJECUTAR SNA ÚLTIMA SEMANA",
+            command=lambda: self.start_sna_execution("ultima_semana"),
+        )
+        self.sna_last_week_button.grid(
+            row=2, column=0, columnspan=2, sticky=tk.EW, padx=5, pady=3
+        )
+        sna_frame.columnconfigure(0, weight=1)
+        sna_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(
+            sna_frame,
+            text=(
+                "Cada alcance conserva un CSV, una carpeta de resultados y una "
+                "bitácora propios; ejecutar uno no sobrescribe los otros."
+            ),
+            foreground="gray",
+            font=("Helvetica", 8),
+        ).grid(row=3, column=0, columnspan=2, sticky=tk.W, padx=5)
+
         control_frame = ttk.Frame(main_frame, padding="10")
         control_frame.pack(fill=tk.X)
 
@@ -233,6 +440,35 @@ class OrquestadorGUI:
 
         self.stop_button = ttk.Button(control_frame, text="DETENER", command=self.stop_execution, state=tk.DISABLED)
         self.stop_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
+
+        pipeline_frame = ttk.LabelFrame(main_frame, text="Seleccion de Pipelines", padding="10")
+        pipeline_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        self.pipeline_vars: dict[str, tk.BooleanVar] = {}
+        canvas = tk.Canvas(pipeline_frame)
+        scrollbar = ttk.Scrollbar(pipeline_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda event: canvas.configure(scrollregion=canvas.bbox("all")),
+        )
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        for pipe in PIPELINES:
+            # SNA se ofrece arriba como tres acciones completas y explícitas.
+            if pipe.key == "analisis_sna":
+                continue
+            var = tk.BooleanVar(value=False)
+            self.pipeline_vars[pipe.code] = var
+            ttk.Checkbutton(
+                scrollable_frame,
+                text=f"{pipe.code}) {pipe.label}",
+                variable=var,
+            ).pack(anchor=tk.W, pady=2)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
 
         log_frame = ttk.LabelFrame(main_frame, text="Consola de Salida", padding="5")
         log_frame.pack(fill=tk.BOTH, expand=True, pady=5)
@@ -326,6 +562,10 @@ class OrquestadorGUI:
         return unique_selected
 
     def start_execution(self) -> None:
+        if self.running_process is not None:
+            messagebox.showwarning("En ejecución", "Ya hay un proceso en ejecución.")
+            return
+
         selected = self.get_selected_pipelines()
         if not selected:
             messagebox.showwarning("Atencion", "Selecciona al menos un pipeline para ejecutar.")
@@ -350,10 +590,44 @@ class OrquestadorGUI:
         self.log(f"Pipelines a ejecutar: {', '.join(spec.label for spec in selected)}")
 
         self.play_button.config(state=tk.DISABLED)
+        self.set_sna_buttons_state(tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
         self.stop_requested = False
 
         thread = threading.Thread(target=self.run_pipelines, args=(selected, since, before), daemon=True)
+        thread.start()
+
+    def build_python_exec(self) -> str:
+        if self.use_venv_var.get() and self.venv_python:
+            return self.venv_python
+        return sys.executable
+
+    def set_sna_buttons_state(self, state: str) -> None:
+        self.sna_history_button.config(state=state)
+        self.sna_recent_button.config(state=state)
+        self.sna_last_week_button.config(state=state)
+
+    def start_sna_execution(self, scope: str) -> None:
+        if self.running_process is not None:
+            messagebox.showwarning("En ejecución", "Ya hay un proceso en ejecución.")
+            return
+
+        run = build_sna_run(scope)
+        steps = run["steps"]
+        self.clear_log()
+        self.log(f"Iniciando SNA: {run['label']}")
+        self.log("Etapas: " + ", ".join(label for label, _, _ in steps))
+
+        self.play_button.config(state=tk.DISABLED)
+        self.set_sna_buttons_state(tk.DISABLED)
+        self.stop_button.config(state=tk.NORMAL)
+        self.stop_requested = False
+
+        thread = threading.Thread(
+            target=self.run_sna_pipelines,
+            args=(run,),
+            daemon=True,
+        )
         thread.start()
 
     def stop_execution(self) -> None:
@@ -436,12 +710,117 @@ class OrquestadorGUI:
         self.log("\nProceso terminado.")
         self.root.after(0, self.finish_ui)
 
+    def run_sna_pipelines(self, run: dict[str, object]) -> None:
+        python_exec = self.build_python_exec()
+        steps = run["steps"]
+        results_dir = Path(run["results_dir"])
+        run_log = Path(run["run_log"])
+        final_outputs = [Path(path) for path in run["final_outputs"]]
+        had_error = False
+        success = False
+        results_dir.mkdir(parents=True, exist_ok=True)
+
+        with run_log.open("w", encoding="utf-8", buffering=1) as log_handle:
+            def sna_log(message: str) -> None:
+                self.log(message)
+                log_handle.write(message + "\n")
+
+            try:
+                sna_log(f"Inicio: {datetime.now().isoformat(timespec='seconds')}")
+                sna_log(f"Intérprete: {python_exec}")
+                sna_log(f"Alcance: {run['label']}")
+
+                for label, script_name, args in steps:
+                    if self.stop_requested:
+                        had_error = True
+                        break
+
+                    cmd = [python_exec, str(SCRIPTS_DIR / script_name), *args]
+                    sna_log(f"\n--- Ejecutando SNA: {label} ---")
+                    sna_log(f"Comando: {ORQ.render_command(cmd)}")
+
+                    try:
+                        self.running_process = subprocess.Popen(
+                            cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            text=True,
+                            cwd=str(REPO_ROOT),
+                            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+                            bufsize=1,
+                            universal_newlines=True,
+                        )
+                        assert self.running_process.stdout is not None
+                        for line in self.running_process.stdout:
+                            sna_log(line.rstrip())
+
+                        self.running_process.wait()
+                        return_code = self.running_process.returncode
+                        if return_code == 0:
+                            sna_log(f"{label} finalizado con éxito.")
+                            continue
+
+                        had_error = True
+                        if self.stop_requested:
+                            sna_log("Proceso SNA detenido por el usuario.")
+                            break
+                        sna_log(f"Error en {label} (código {return_code}).")
+                        if not self.continue_error_var.get():
+                            sna_log("Abortando ejecución SNA.")
+                            break
+                    except Exception as exc:
+                        had_error = True
+                        sna_log(f"Error inesperado en {label}: {exc}")
+                        if not self.continue_error_var.get():
+                            break
+
+                if not had_error and not self.stop_requested:
+                    missing_outputs = [path for path in final_outputs if not path.exists()]
+                    if missing_outputs:
+                        had_error = True
+                        sna_log("Faltan resultados finales:")
+                        for path in missing_outputs:
+                            sna_log(f"  - {path}")
+                    else:
+                        success = True
+                        sna_log("Resultados SNA generados:")
+                        for path in final_outputs:
+                            sna_log(f"  - {path}")
+
+                if success:
+                    sna_log("\nSNA finalizado correctamente.")
+                elif not self.stop_requested:
+                    sna_log("\nSNA incompleto: no se generaron los tres HTML finales.")
+                sna_log(f"Bitácora: {run_log}")
+            finally:
+                self.root.after(0, self.finish_sna_ui, success, run)
+
     def finish_ui(self) -> None:
         self.play_button.config(state=tk.NORMAL)
+        self.set_sna_buttons_state(tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
         self.running_process = None
         if not self.stop_requested:
             messagebox.showinfo("Finalizado", "La ejecucion de los pipelines ha concluido.")
+
+    def finish_sna_ui(self, success: bool, run: dict[str, object]) -> None:
+        self.play_button.config(state=tk.NORMAL)
+        self.set_sna_buttons_state(tk.NORMAL)
+        self.stop_button.config(state=tk.DISABLED)
+        self.running_process = None
+        if self.stop_requested:
+            return
+        if success:
+            messagebox.showinfo(
+                "SNA finalizado",
+                f"Se generó el análisis de {run['label']} en:\n{run['results_dir']}",
+            )
+        else:
+            messagebox.showerror(
+                "SNA incompleto",
+                "La cadena se detuvo antes de generar los resultados finales. "
+                f"Revisa la bitácora:\n{run['run_log']}",
+            )
 
 
 if __name__ == "__main__":

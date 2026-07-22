@@ -1,30 +1,32 @@
 {
-  "n_nodos": 2835,
-  "n_nodos_con_categoria": 1396,
-  "n_nodos_con_polaridad": 2026,
-  "n_nodos_con_postura": 185,
+  "n_nodos": 5618,
+  "n_nodos_con_categoria": 1970,
+  "n_nodos_con_polaridad": 2993,
+  "n_nodos_con_postura": 192,
   "categorias": {
-    "Morena": 546,
-    "Obras": 536,
-    "Delitos": 496,
-    "Corrupcion": 488,
-    "Prevencion": 427,
-    "Vialidad": 258,
-    "Basura": 191,
-    "Americo": 150,
-    "Alumbrado": 128,
-    "Agua": 102
+    "Morena": 678,
+    "Obras": 672,
+    "Corrupcion": 622,
+    "Delitos": 606,
+    "Gobierno municipal": 519,
+    "Prevencion": 514,
+    "Mónica Villarreal": 502,
+    "Vialidad": 326,
+    "Basura": 245,
+    "Americo": 177,
+    "Alumbrado": 146,
+    "Agua": 113
   },
   "polaridades": {
-    "positiva": 956,
-    "neutral": 809,
-    "negativa": 722,
-    "mixta": 348
+    "neutral": 2625,
+    "positiva": 1416,
+    "negativa": 1192,
+    "mixta": 385
   },
   "posturas": {
-    "sin_postura": 2650,
-    "apoyo_defensa": 154,
-    "critica_oposicion": 27,
+    "sin_postura": 5426,
+    "apoyo_defensa": 160,
+    "critica_oposicion": 28,
     "mixta_disputa": 4
   },
   "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",

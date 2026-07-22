@@ -17,6 +17,12 @@ import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_consolidados.csv"
+DEFAULT_LAST_TWO_WEEKS_OUTPUT = (
+    REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_ultimas_2_semanas.csv"
+)
+DEFAULT_LAST_WEEK_OUTPUT = (
+    REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_ultima_semana.csv"
+)
 DEFAULT_RADAR_DIR = Path("/home/emilio/Documentos/RAdAR/Datos_RAdAR/Juntos")
 SOURCE_ROOTS: list[tuple[Path, str]] = [(REPO_ROOT, "")]
 
@@ -123,6 +129,15 @@ def date_or_source_week(value: Any, path: Path) -> str:
     return match.group(1) if match else raw
 
 
+def week_from_date_or_path(value: Any, path: Path) -> str:
+    """Usa la fecha del registro y recurre a la ruta solo como respaldo."""
+    parsed = pd.to_datetime(text(value), errors="coerce", utc=True)
+    if not pd.isna(parsed):
+        iso = parsed.isocalendar()
+        return f"{iso.year}_W{iso.week:02d}"
+    return week_from_path(path)
+
+
 def stable_hash(*values: Any) -> str:
     raw = "|".join(text(value) for value in values)
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()
@@ -184,7 +199,7 @@ def base_record(
     **extra: Any,
 ) -> dict[str, Any]:
     relative = source_relative(path)
-    week = week_from_path(path)
+    week = week_from_date_or_path(fecha, path)
     clean = clean_and_extract(contenido)
     fallback_key = "|".join([plataforma, tipo_registro, usuario, fecha, contenido])
     dedup_key = f"{plataforma}:{tipo_registro}:{stable_key or hashlib.sha1(fallback_key.encode('utf-8')).hexdigest()}"
@@ -543,15 +558,47 @@ def consolidate_radar(
     return records, inventory
 
 
-def consolidate(radar_dir: Path | None = None) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+def latest_source_weeks(limit: int) -> list[str]:
+    """Obtiene las semanas ISO más recientes de las fuentes locales."""
+    weeks = {
+        week
+        for _, pattern, _ in SOURCES
+        for path in REPO_ROOT.glob(pattern)
+        if (week := week_from_path(path))
+    }
+    return sorted(weeks)[-limit:]
+
+
+def consolidate(
+    radar_dir: Path | None = None,
+    last_weeks: int | None = None,
+) -> tuple[pd.DataFrame, list[dict[str, Any]], list[str]]:
+    selected_weeks = latest_source_weeks(last_weeks) if last_weeks else []
+    if last_weeks and len(selected_weeks) < last_weeks:
+        raise RuntimeError(
+            f"Se solicitaron {last_weeks} semanas locales, pero solo hay "
+            f"{len(selected_weeks)} disponible(s)."
+        )
+    if selected_weeks:
+        print(
+            f"[ALCANCE] Últimas {len(selected_weeks)} semanas locales: "
+            + ", ".join(selected_weeks),
+            flush=True,
+        )
+
     records: list[dict[str, Any]] = []
     inventory: list[dict[str, Any]] = []
     for family, pattern, adapter in SOURCES:
-        for path in sorted(REPO_ROOT.glob(pattern)):
+        paths = sorted(REPO_ROOT.glob(pattern))
+        if selected_weeks:
+            paths = [path for path in paths if week_from_path(path) in selected_weeks]
+        for path in paths:
             frame = read_csv(path)
             inventory.append({"familia": family, "archivo": str(path.relative_to(REPO_ROOT)), "filas": len(frame)})
             for _, row in frame.iterrows():
                 record = adapter(row, path)
+                if selected_weeks and text(record.get("semana")) not in selected_weeks:
+                    continue
                 if text(record.get("texto_original")):
                     records.append(record)
 
@@ -562,7 +609,7 @@ def consolidate(radar_dir: Path | None = None) -> tuple[pd.DataFrame, list[dict[
         inventory.extend(radar_inventory)
 
     if not records:
-        return pd.DataFrame(columns=OUTPUT_COLUMNS), inventory
+        return pd.DataFrame(columns=OUTPUT_COLUMNS), inventory, selected_weeks
 
     raw = pd.DataFrame(records)
     consolidated: list[dict[str, Any]] = []
@@ -582,28 +629,60 @@ def consolidate(radar_dir: Path | None = None) -> tuple[pd.DataFrame, list[dict[
             output[column] = ""
     output = output[OUTPUT_COLUMNS]
     output = output.sort_values(["fecha", "plataforma", "tipo_registro", "id"], na_position="last").reset_index(drop=True)
-    return output, inventory
+    return output, inventory, selected_weeks
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--output", type=Path)
     parser.add_argument("--radar-dir", type=Path, default=DEFAULT_RADAR_DIR)
     parser.add_argument(
         "--sin-radar", action="store_true",
         help="Consolida solo las fuentes del repo de Tampico",
     )
+    parser.add_argument(
+        "--last-weeks",
+        type=int,
+        metavar="N",
+        help="Consolida solo las N semanas ISO locales más recientes; RAdAR se excluye.",
+    )
     args = parser.parse_args()
+    if args.last_weeks is not None and args.last_weeks < 1:
+        parser.error("--last-weeks debe ser mayor que cero")
 
-    radar_dir = None if args.sin_radar else args.radar_dir
+    output_path = args.output
+    if output_path is None:
+        if args.last_weeks == 2:
+            output_path = DEFAULT_LAST_TWO_WEEKS_OUTPUT
+        elif args.last_weeks == 1:
+            output_path = DEFAULT_LAST_WEEK_OUTPUT
+        elif args.last_weeks:
+            output_path = (
+                REPO_ROOT / "SNA" / "Datos"
+                / f"tampico_datos_tabulares_ultimas_{args.last_weeks}_semanas.csv"
+            )
+        else:
+            output_path = DEFAULT_OUTPUT
+
+    radar_dir = None if args.sin_radar or args.last_weeks else args.radar_dir
     if radar_dir and not radar_dir.exists():
         print(f"[AVISO] No existe RAdAR: {radar_dir}; se continua sin esa fuente")
         radar_dir = None
-    output, inventory = consolidate(radar_dir=radar_dir)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    output.to_csv(args.output, index=False, encoding="utf-8")
+    output, inventory, selected_weeks = consolidate(
+        radar_dir=radar_dir,
+        last_weeks=args.last_weeks,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output.to_csv(output_path, index=False, encoding="utf-8")
 
-    print(f"Archivo: {args.output}")
+    print(f"Archivo: {output_path}")
+    if selected_weeks:
+        scope_label = " | ".join(selected_weeks) + " (solo fuentes locales)"
+    elif radar_dir:
+        scope_label = "histórico local + RAdAR"
+    else:
+        scope_label = "histórico local"
+    print(f"Alcance: {scope_label}")
     print(f"Archivos fuente: {len(inventory)}")
     print(f"Filas fuente: {sum(item['filas'] for item in inventory)}")
     if radar_dir:

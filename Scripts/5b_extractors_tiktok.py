@@ -4,12 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import re
+import unicodedata
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
 from apify_social_common import (
     ActorRunPlan,
+    deduplicate_rows,
     first,
     in_window,
     integer,
@@ -30,6 +33,43 @@ from queries_config import TIKTOK_HASHTAGS, TIKTOK_PROFILES, TIKTOK_SEARCH_QUERI
 
 ACTOR_ID = "clockworks/tiktok-scraper"
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def normalize_match(value: Any) -> str:
+    raw = unicodedata.normalize("NFKD", str(value or "").lower())
+    plain = "".join(ch for ch in raw if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", " ", plain).strip()
+
+
+def official_item(item: dict[str, Any]) -> bool:
+    username = normalize_match(
+        first(item, "authorMeta.name", "authorMeta.nickName", "author")
+    ).replace(" ", "")
+    official_handles = {
+        normalize_match(value).replace(" ", "") for value in TIKTOK_PROFILES
+    }
+    return bool(username and username in official_handles)
+
+
+def relevant_item(plan: ActorRunPlan, item: dict[str, Any]) -> bool:
+    """Conserva fuentes oficiales y filtra coincidencias aproximadas ruidosas."""
+    if plan.institutional or official_item(item):
+        return True
+    text = normalize_match(first(item, "text", "desc"))
+    words = set(text.split())
+    if {"monica", "villarreal"} <= words:
+        return True
+    government_terms = {
+        "alcaldesa", "ayuntamiento", "cabildo", "gobierno", "municipal",
+        "municipio", "presidenta", "regidor", "regidores",
+        "hospital", "infraestructura", "obra", "obras", "salud",
+        "seguridad",
+    }
+    if "monicavillarreal" in words and (
+        "tampico" in words or bool(words & government_terms)
+    ):
+        return True
+    return "tampico" in words and bool(words & government_terms)
 
 
 def search_date_filter(since: str, before: str) -> str:
@@ -95,13 +135,16 @@ def normalize_item(
     since: str,
     before: str,
 ) -> dict[str, Any] | None:
+    if not relevant_item(plan, item):
+        return None
     raw_date = first(item, "createTimeISO", "createTime", "timestamp")
     if not in_window(raw_date, since, before):
         return None
     url = str(first(item, "webVideoUrl", "url"))
+    institutional = plan.institutional or official_item(item)
     return {
         "id": first(item, "id") or url,
-        "tipo_registro": "publicacion_institucional" if plan.institutional else "mencion",
+        "tipo_registro": "publicacion_institucional" if institutional else "mencion",
         "origen_busqueda": plan.name,
         "query_busqueda": first(item, "searchQuery", "input") or plan.query,
         "input_url": first(item, "input"),
@@ -114,7 +157,7 @@ def normalize_item(
         "comentarios": integer(first(item, "commentCount", "comments")),
         "shares": integer(first(item, "shareCount", "shares")),
         "vistas": integer(first(item, "playCount", "views")),
-        "es_institucional": plan.institutional,
+        "es_institucional": institutional,
         "datos_originales_json": json_original(item),
     }
 
@@ -155,7 +198,15 @@ def main() -> None:
         return
     token = require_token(args.token)
     raw_items = run_actor_plans(ACTOR_ID, plans, token)
-    rows = [row for plan, item in raw_items if (row := normalize_item(plan, item, args.since, args.before))]
+    rows = deduplicate_rows(
+        row
+        for plan, item in raw_items
+        if (row := normalize_item(plan, item, args.since, args.before))
+    )
+    print(
+        f"ℹ️ TikTok: {len(raw_items)} publicaciones crudas; "
+        f"{len(rows)} pertinentes tras fecha y filtro local"
+    )
     outputs = write_social_outputs(rows, output_base, report_tag)
     print(f"✅ TikTok: {len(rows)} filas dentro de [{args.since}, {args.before})")
     for path in outputs.values():

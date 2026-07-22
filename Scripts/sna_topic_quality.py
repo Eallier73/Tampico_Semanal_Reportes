@@ -146,17 +146,25 @@ def coherence_quality(value: float) -> str:
     return "alta"
 
 
-def compute_per_topic_coherence(corpus_path: Path, topics: list[list[str]]) -> list[float]:
+def compute_per_topic_coherence(
+    corpus_path: Path,
+    topics: list[list[str]],
+) -> list[float | None]:
     from gensim.corpora import Dictionary
     from gensim.models.coherencemodel import CoherenceModel
 
     corpus_df = pd.read_csv(corpus_path, usecols=["lemas"])
     docs = [str(value).split() for value in corpus_df["lemas"].fillna("")]
     dictionary = Dictionary(docs)
-    valid_topics = [
+    filtered_topics = [
         [word for word in topic if word in dictionary.token2id]
         for topic in topics
     ]
+    valid_indices = [index for index, topic in enumerate(filtered_topics) if topic]
+    if not valid_indices:
+        return [None] * len(topics)
+
+    valid_topics = [filtered_topics[index] for index in valid_indices]
     model = CoherenceModel(
         topics=valid_topics,
         texts=docs,
@@ -164,7 +172,10 @@ def compute_per_topic_coherence(corpus_path: Path, topics: list[list[str]]) -> l
         coherence="c_v",
         processes=1,
     )
-    return [float(value) for value in model.get_coherence_per_topic()]
+    result: list[float | None] = [None] * len(topics)
+    for index, value in zip(valid_indices, model.get_coherence_per_topic()):
+        result[index] = float(value)
+    return result
 
 
 def enrich_topics(clusters_dir: Path) -> pd.DataFrame:
@@ -181,24 +192,39 @@ def enrich_topics(clusters_dir: Path) -> pd.DataFrame:
 
     enriched: list[dict[str, Any]] = []
     for (_, row), words, coherence in zip(topics_df.iterrows(), topic_words, coherences):
-        rule = matching_rule(words)
-        quality = rule.quality if rule else coherence_quality(coherence)
-        title = rule.title if rule else ""
-        if rule:
+        missing_coherence = coherence is None
+        coherence_value = 0.0 if missing_coherence else coherence
+        rule = None if missing_coherence else matching_rule(words)
+        if missing_coherence:
+            quality = "baja"
+            title = "Tema sin términos suficientes"
+            summary = (
+                "El modelo no asignó términos con peso suficiente a este tema. "
+                "Se conserva para mantener la numeración del análisis, pero se oculta "
+                "por defecto y no debe interpretarse como una conversación sustantiva."
+            )
+            reason = "sin términos válidos para calcular coherencia"
+        elif rule:
+            quality = rule.quality
+            title = rule.title
             summary = rule.summary
             reason = rule.reason
-        elif quality == "baja":
+        else:
+            quality = coherence_quality(coherence_value)
+            title = ""
+
+        if not missing_coherence and not rule and quality == "baja":
             summary = (
                 "Este agrupamiento tiene baja coherencia estadística y puede mezclar conversaciones distintas. "
                 "Se conserva para auditoría, pero conviene revisar sus mensajes antes de usarlo en conclusiones."
             )
             reason = "coherencia c_v baja"
-        else:
+        elif not missing_coherence and not rule:
             summary = ""
             reason = "coherencia c_v"
         enriched.append({
             **row.to_dict(),
-            "coherencia_tema_cv": round(coherence, 4),
+            "coherencia_tema_cv": round(coherence_value, 4),
             "calidad_tema": quality,
             "visible_por_defecto": quality != "baja",
             "titulo_curado": title,

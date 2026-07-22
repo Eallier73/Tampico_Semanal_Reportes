@@ -340,7 +340,7 @@ def choose_k(n_accounts: int, requested: int) -> int:
         return 1
     if n_accounts < 90:
         return min(2, requested)
-    return min(requested, max(2, n_accounts // 120), 4)
+    return min(requested, max(2, n_accounts // 120), n_accounts)
 
 
 def build_topic_matrix(topic_rows: pd.DataFrame, max_vocab: int) -> tuple[list[str], list[dict[str, float]]]:
@@ -378,7 +378,9 @@ def words_for_position(topic_rows: pd.DataFrame, users: set[str], limit: int) ->
     if rows.empty:
         return []
     rows = rows[~rows["palabra"].str.lower().isin(NOISE_WORDS)]
-    out = rows.groupby("palabra")["conteo"].sum().sort_values(ascending=False).head(limit)
+    out = rows.groupby("palabra")["conteo"].sum().sort_values(ascending=False)
+    if limit > 0:
+        out = out.head(limit)
     return [(str(k), int(v)) for k, v in out.items()]
 
 
@@ -773,10 +775,21 @@ def build_network_data(
         pos_id = str(row["posicion_id"])
         border = LEVEL_COLORS.get(str(row["ibea_nivel"]), "#999")
         total_pos = max(1, int(positions_per_theme.get(tema, 1)))
-        pos_angle = (2 * math.pi * (int(row["posicion_num"]) - 1) / total_pos) - (math.pi / 2)
+        position_index = int(row["posicion_num"]) - 1
+        positions_per_ring = 10
+        position_ring = position_index // positions_per_ring
+        position_slot = position_index % positions_per_ring
+        positions_in_ring = min(
+            positions_per_ring,
+            total_pos - position_ring * positions_per_ring,
+        )
+        pos_angle = (
+            2 * math.pi * position_slot / max(1, positions_in_ring)
+        ) - (math.pi / 2)
         tx, ty = topic_coords.get(tema, (0.0, 0.0))
-        px = round(tx + math.cos(pos_angle) * 105, 2)
-        py = round(ty + math.sin(pos_angle) * 105, 2)
+        position_radius = 105 + position_ring * 95
+        px = round(tx + math.cos(pos_angle) * position_radius, 2)
+        py = round(ty + math.sin(pos_angle) * position_radius, 2)
         position_coords[pos_id] = (px, py)
         nodes.append({
             "id": pos_id,
@@ -894,30 +907,44 @@ def build_network_data(
             "dashes": True,
         })
 
-    word_node_ids: dict[str, str] = {}
-    top_words = (
-        position_words.sort_values(["posicion_id", "rank"])
-        .groupby("posicion_id")
-        .head(words_per_position)
-    )
+    top_words = position_words.sort_values(["posicion_id", "rank"])
+    if words_per_position > 0:
+        top_words = top_words.groupby("posicion_id").head(words_per_position)
+    words_in_position = top_words.groupby("posicion_id").size().to_dict()
     max_word_count = max(1, int(top_words["conteo"].max())) if not top_words.empty else 1
+    # Una palabra puede cumplir funciones distintas en dos posiciones. Se
+    # conserva un nodo por pareja posicion-palabra para no fusionar grupos ni
+    # reducir artificialmente el numero de palabras visibles.
+    word_node_ids: dict[tuple[str, str], str] = {}
     for _, row in top_words.iterrows():
         word = str(row["palabra"])
-        if word not in word_node_ids:
-            node_id = f"W{len(word_node_ids) + 1}"
-            word_node_ids[word] = node_id
-            pos_id = str(row["posicion_id"])
+        pos_id = str(row["posicion_id"])
+        tema = int(row["tema_id"])
+        word_key = (pos_id, word)
+        if word_key not in word_node_ids:
             px, py = position_coords.get(pos_id, (0.0, 0.0))
             rank = int(row["rank"])
-            angle = (2 * math.pi * ((rank - 1) % max(1, words_per_position)) / max(1, words_per_position)) + math.pi
-            radius = 110 + 6 * (rank % 3)
+            word_index = rank - 1
+            words_per_ring = 24
+            word_ring = word_index // words_per_ring
+            word_slot = word_index % words_per_ring
+            words_this_ring = min(
+                words_per_ring,
+                int(words_in_position.get(pos_id, 1)) - word_ring * words_per_ring,
+            )
+            angle = (
+                2 * math.pi * word_slot / max(1, words_this_ring)
+            ) + math.pi
+            radius = 110 + word_ring * 28
+            node_id = f"W{len(word_node_ids) + 1}"
+            word_node_ids[word_key] = node_id
             nodes.append({
                 "id": node_id,
                 "label": word,
                 "kind": "palabra",
-                "tema": int(row["tema_id"]),
+                "tema": tema,
                 "shape": "dot",
-                "color": {"background": "#222222", "border": TEMA_COLORS[int(row["tema_id"]) % len(TEMA_COLORS)]},
+                "color": {"background": "#222222", "border": TEMA_COLORS[tema % len(TEMA_COLORS)]},
                 "font": {"size": 16, "color": "#f7f7f7", "face": "arial"},
                 "size": scalar_size(float(row["conteo"]), 1, max_word_count, 8, 22),
                 "x": round(px + math.cos(angle) * radius, 2),
@@ -928,10 +955,10 @@ def build_network_data(
                 "palabra": word,
                 "posiciones": [],
             }
-        pos_id = str(row["posicion_id"])
-        meta[word_node_ids[word]]["posiciones"].append({
+        node_id = word_node_ids[word_key]
+        meta[node_id]["posiciones"].append({
             "posicion_id": pos_id,
-            "tema_id": int(row["tema_id"]),
+            "tema_id": tema,
             "conteo": int(row["conteo"]),
             "rank": int(row["rank"]),
         })
@@ -939,7 +966,7 @@ def build_network_data(
         edges.append({
             "id": f"e{edge_id}",
             "from": pos_id,
-            "to": word_node_ids[word],
+            "to": node_id,
             "value": max(1, int(row["conteo"])),
             "kind": "posicion_palabra",
             "color": {"color": TEMA_COLORS[int(row["tema_id"]) % len(TEMA_COLORS)], "opacity": 0.40},
@@ -1383,17 +1410,32 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base-dir", type=Path, default=DEFAULT_BASE)
     ap.add_argument("--input-csv", type=Path, default=DEFAULT_DATA)
-    ap.add_argument("--positions-per-topic", type=int, default=3)
+    ap.add_argument(
+        "--positions-per-topic",
+        type=int,
+        default=5,
+        help="Máximo de posiciones por tema (default: 5).",
+    )
     ap.add_argument("--min-account-words", type=int, default=5)
     ap.add_argument("--min-topic-words", type=int, default=3)
     ap.add_argument("--min-topic-pct", type=float, default=12.0)
     ap.add_argument("--max-vocab", type=int, default=90)
     ap.add_argument("--accounts-per-position", type=int, default=18)
-    ap.add_argument("--words-per-position", type=int, default=12)
+    ap.add_argument(
+        "--words-per-position",
+        type=int,
+        default=35,
+        help="Máximo de palabras distintivas por posición (default: 35).",
+    )
     ap.add_argument("--diccionario-temas", type=Path, default=DEFAULT_TOPIC_DICTIONARY)
     ap.add_argument("--diccionario-positivo", type=Path, default=DEFAULT_POSITIVE_DICTIONARY)
     ap.add_argument("--diccionario-negativo", type=Path, default=DEFAULT_NEGATIVE_DICTIONARY)
+    ap.add_argument("--output-filename", default="red_tampico_posiciones_guiada.html")
+    ap.add_argument("--scope-label", default="Tampico histórico")
+    ap.add_argument("--corpus-label", default="histórico consolidado de Tampico")
     args = ap.parse_args()
+    if Path(args.output_filename).name != args.output_filename:
+        ap.error("--output-filename debe ser solo un nombre de archivo")
 
     base = args.base_dir
     out_dir = base / "clusters" / "red_guiada"
@@ -1439,8 +1481,8 @@ def main() -> None:
         accounts_per_position=args.accounts_per_position,
         words_per_position=args.words_per_position,
     )
-    html_out = build_html(nodes, edges, meta, topic_info, base, "Tampico historico")
-    html_path = out_dir / "red_tampico_posiciones_guiada.html"
+    html_out = build_html(nodes, edges, meta, topic_info, base, args.scope_label)
+    html_path = out_dir / args.output_filename
     html_path.write_text(html_out, encoding="utf-8")
 
     print("      aplicando temas rastreados, polaridad y postura")
@@ -1549,7 +1591,7 @@ def main() -> None:
     )
 
     metrics = {
-        "corpus": "historico consolidado de Tampico",
+        "corpus": args.corpus_label,
         "n_mensajes": int(len(mensajes)),
         "n_cuentas_total": int(len(cuentas)),
         "n_posiciones": int(len(positions)),
@@ -1569,7 +1611,7 @@ def main() -> None:
 
     print("[5/5] OK")
     for path in [
-        out_dir / "red_tampico_posiciones_guiada.html",
+        html_path,
         out_dir / "posiciones_discursivas_guiada.csv",
         out_dir / "cuentas_posiciones_guiada.csv",
         out_dir / "palabras_posiciones_guiada.csv",

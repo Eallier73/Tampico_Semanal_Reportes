@@ -22,6 +22,11 @@ DEFAULT_DICT_DIR = Path(
 DEFAULT_TOPIC_DICTIONARY = DEFAULT_DICT_DIR / "diccionario_pmi_confianza_v10.xlsx"
 DEFAULT_POSITIVE_DICTIONARY = DEFAULT_DICT_DIR / "diccionario_palabras_positivas.txt"
 DEFAULT_NEGATIVE_DICTIONARY = DEFAULT_DICT_DIR / "diccionario_palabras_negativas.txt"
+LOCAL_TOPIC_DICTIONARY = (
+    Path(__file__).resolve().parent
+    / "diccionarios"
+    / "diccionario_temas_estructurales_tampico_local.csv"
+)
 
 CATEGORY_COLORS = {
     "Agua": "#1f77b4",
@@ -30,6 +35,8 @@ CATEGORY_COLORS = {
     "Basura": "#2ca02c",
     "Corrupcion": "#d62728",
     "Delitos": "#8c564b",
+    "Gobierno municipal": "#6a51a3",
+    "Mónica Villarreal": "#c62828",
     "Morena": "#e377c2",
     "Obras": "#ff7f0e",
     "Prevencion": "#17becf",
@@ -229,11 +236,27 @@ def load_lexicons(
         if not path.exists():
             raise FileNotFoundError(f"No existe el diccionario requerido: {path}")
 
+    required_columns = ["Categoria", "Palabra", "Delta_PMI", "Confianza"]
+    required = set(required_columns)
     topics = pd.read_excel(topic_dictionary)
-    required = {"Categoria", "Palabra", "Delta_PMI", "Confianza"}
     if not required.issubset(topics.columns):
         raise ValueError(
             f"El Excel debe contener {sorted(required)}; contiene {list(topics.columns)}"
+        )
+
+    # El diccionario de RAdAR aporta las categorias generales. Este suplemento
+    # versionado en Tampico agrega actores y gobierno local sin modificar el
+    # archivo externo ni copiar nombres propios de otros municipios.
+    if LOCAL_TOPIC_DICTIONARY.exists():
+        local_topics = pd.read_csv(LOCAL_TOPIC_DICTIONARY)
+        if not required.issubset(local_topics.columns):
+            raise ValueError(
+                f"El suplemento local debe contener {sorted(required)}; "
+                f"contiene {list(local_topics.columns)}"
+            )
+        topics = pd.concat(
+            [topics, local_topics[required_columns]],
+            ignore_index=True,
         )
 
     raw_topic_words = topics["Palabra"].astype(str).tolist()

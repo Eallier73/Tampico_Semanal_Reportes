@@ -1,0 +1,21 @@
+Categoria,Palabra,Delta_PMI,Confianza
+Gobierno municipal,gobierno,0.0,0.90
+Gobierno municipal,municipal,0.0,0.90
+Gobierno municipal,gobierno municipal,0.0,0.95
+Gobierno municipal,TampicoGob,0.0,0.98
+Gobierno municipal,ayuntamiento,0.0,0.95
+Gobierno municipal,Tampico,0.0,0.82
+Gobierno municipal,municipio,0.0,0.90
+Gobierno municipal,administración,0.0,0.90
+Gobierno municipal,cabildo,0.0,0.90
+Gobierno municipal,GobiernoTampico,0.0,0.95
+Mónica Villarreal,Mónica,0.0,0.98
+Mónica Villarreal,Villarreal,0.0,0.98
+Mónica Villarreal,Mónica Villarreal,0.0,1.00
+Mónica Villarreal,Mónica Villarreal Anaya,0.0,1.00
+Mónica Villarreal,MonicaVTampico,0.0,1.00
+Mónica Villarreal,MonicaVillarreal,0.0,0.98
+Mónica Villarreal,MonicaVillarrealAnaya,0.0,0.98
+Mónica Villarreal,VillarrealAnaya,0.0,0.95
+Mónica Villarreal,alcaldesa,0.0,0.90
+Mónica Villarreal,presidenta municipal,0.0,0.90

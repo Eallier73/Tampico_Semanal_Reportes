@@ -841,6 +841,7 @@ def render_pyvis(
     metricas_tema: pd.DataFrame,
     temas_sospechosos_set: set[int] | None = None,
     topic_info: dict[str, dict[str, Any]] | None = None,
+    scope_label: str = "histórico",
 ) -> bool:
     try:
         from pyvis.network import Network  # noqa: PLC0415
@@ -991,6 +992,14 @@ def render_pyvis(
     net.write_html(str(out_path), open_browser=False)
     # Inyectar CSS + panel de filtros por capa de aristas
     html = out_path.read_text(encoding="utf-8")
+    safe_scope = (
+        str(scope_label).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    )
+    html = html.replace(
+        '<meta charset="utf-8">',
+        f'<meta charset="utf-8">\n        <title>Red {safe_scope} de Tampico</title>',
+        1,
+    )
     # PyVis agrega Bootstrap desde CDN aunque vis-network vaya incrustado.
     # Esta visualizacion no usa esos componentes; quitarlos la hace autocontenida.
     bootstrap_cdn = """        <link
@@ -1814,7 +1823,15 @@ def main() -> int:
     parser.add_argument("--umbral-intra-sub", type=float)
     parser.add_argument("--umbral-intra-cluster", type=float)
     parser.add_argument("--umbral-extra", type=float)
+    parser.add_argument(
+        "--output-filename",
+        default="red_tampico_historico.html",
+        help="Nombre del HTML dentro de red_completa/.",
+    )
+    parser.add_argument("--scope-label", default="histórico")
     args = parser.parse_args()
+    if Path(args.output_filename).name != args.output_filename:
+        parser.error("--output-filename debe ser solo un nombre de archivo")
 
     sna_dir = args.clusters_dir
 
@@ -1841,7 +1858,7 @@ def main() -> int:
             "Ejecuta primero 12c_diagnostico_umbrales.py o especifica los tres umbrales."
         )
 
-    print("[red_completa] corpus historico de Tampico")
+    print(f"[red_completa] corpus {args.scope_label} de Tampico")
     print(
         "[red_completa] umbrales: "
         f"intra_sub={args.umbral_intra_sub}, "
@@ -1985,7 +2002,7 @@ def main() -> int:
                 for _, r in top10.iterrows():
                     top_by_sub.append([str(r["palabra"]), contexto])
 
-    html_path = out_dir / "red_tampico_historico.html"
+    html_path = out_dir / args.output_filename
     render_pyvis(
             G,
             html_path,
@@ -1996,6 +2013,7 @@ def main() -> int:
             res["temas"],
             temas_sospechosos_set,
             topic_info,
+            args.scope_label,
         )
 
     # Resumen en consola

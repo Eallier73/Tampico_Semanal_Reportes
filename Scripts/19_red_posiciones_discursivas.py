@@ -1144,7 +1144,12 @@ def main() -> None:
     ap.add_argument("--max-vocab", type=int, default=90)
     ap.add_argument("--accounts-per-position", type=int, default=18)
     ap.add_argument("--words-per-position", type=int, default=12)
+    ap.add_argument("--output-filename", default="red_tampico_posiciones.html")
+    ap.add_argument("--scope-label", default="Tampico histórico")
+    ap.add_argument("--corpus-label", default="histórico consolidado de Tampico")
     args = ap.parse_args()
+    if Path(args.output_filename).name != args.output_filename:
+        ap.error("--output-filename debe ser solo un nombre de archivo")
 
     base = args.base_dir
     out_dir = base / "clusters" / "red_posiciones"
@@ -1190,11 +1195,12 @@ def main() -> None:
         accounts_per_position=args.accounts_per_position,
         words_per_position=args.words_per_position,
     )
-    html_out = build_html(nodes, edges, meta, topic_info, base, "Tampico historico")
-    (out_dir / "red_tampico_posiciones.html").write_text(html_out, encoding="utf-8")
+    html_out = build_html(nodes, edges, meta, topic_info, base, args.scope_label)
+    html_path = out_dir / args.output_filename
+    html_path.write_text(html_out, encoding="utf-8")
 
     metrics = {
-        "corpus": "historico consolidado de Tampico",
+        "corpus": args.corpus_label,
         "n_mensajes": int(len(mensajes)),
         "n_cuentas_total": int(len(cuentas)),
         "n_posiciones": int(len(positions)),
@@ -1214,7 +1220,7 @@ def main() -> None:
 
     print("[5/5] OK")
     for path in [
-        out_dir / "red_tampico_posiciones.html",
+        html_path,
         out_dir / "posiciones_discursivas.csv",
         out_dir / "cuentas_posiciones.csv",
         out_dir / "palabras_posiciones.csv",

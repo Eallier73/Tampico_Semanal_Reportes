@@ -191,7 +191,7 @@ def plataformas_unicas(cuentas_sel):
 
 
 def build_pyvis_html(nodos_palabras, aristas_palabras, cuentas_sel,
-                     aristas_cuenta, plataformas):
+                     aristas_cuenta, plataformas, scope_label):
     """
     Construye el HTML final. Patron limpio: panel HTML puro al inicio,
     un solo <script> con todo el JS al final del body (despues de pyvis).
@@ -264,7 +264,7 @@ def build_pyvis_html(nodos_palabras, aristas_palabras, cuentas_sel,
 <html>
 <head>
 <meta charset="utf-8">
-<title>Red historica de Tampico - palabras y cuentas</title>
+<title>Red {scope_label} de Tampico - palabras y cuentas</title>
 {vis_css}
 {vis_js}
 <style>
@@ -611,14 +611,19 @@ def main():
     ap.add_argument("--peso-min", type=int, default=1)
     ap.add_argument("--peso-arista", type=float, default=4.0,
                     help="peso minimo para aristas palabra-palabra (filtro base)")
+    ap.add_argument("--output-filename", default="red_tampico_cuentas.html")
+    ap.add_argument("--scope-label", default="histórica")
+    ap.add_argument("--corpus-label", default="histórico consolidado de Tampico")
     args = ap.parse_args()
+    if Path(args.output_filename).name != args.output_filename:
+        ap.error("--output-filename debe ser solo un nombre de archivo")
 
     base = args.base_dir
     nodos_path = base / "clusters" / "red_completa" / "nodos_metricas.csv"
     aristas_path = base / "clusters" / "red_completa" / "aristas_clasificadas.csv"
     ctas_res_path = base / "cuentas_clusters" / "cuentas_resumen.csv"
     palxcta_path = base / "cuentas_clusters" / "palabras_x_cuenta.csv"
-    out_html = base / "clusters" / "red_completa" / "red_tampico_cuentas.html"
+    out_html = base / "clusters" / "red_completa" / args.output_filename
     out_json = base / "clusters" / "red_completa" / "metricas_cuentas.json"
 
     print(f"[1/5] Cargando nodos (palabras) desde {nodos_path}")
@@ -651,12 +656,14 @@ def main():
     print(f"      plataformas presentes: {plataformas}")
 
     print(f"[5/5] Generando HTML en {out_html}")
-    html = build_pyvis_html(nodos, aristas, cuentas_sel, aristas_cuenta, plataformas)
+    html = build_pyvis_html(
+        nodos, aristas, cuentas_sel, aristas_cuenta, plataformas, args.scope_label
+    )
     out_html.write_text(html, encoding="utf-8")
     print(f"      tamano: {out_html.stat().st_size} bytes")
 
     metrics = {
-        "corpus": "historico consolidado de Tampico",
+        "corpus": args.corpus_label,
         "n_palabras": len(nodos),
         "n_aristas_palabra": len(aristas),
         "n_cuentas_sel": len(cuentas_sel),

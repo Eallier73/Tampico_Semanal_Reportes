@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
 from apify_social_common import (
     ActorRunPlan,
+    deduplicate_rows,
     first,
     in_window,
     integer,
@@ -33,6 +36,37 @@ from queries_config import (
 
 ACTOR_ID = "apify/instagram-scraper"
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def normalize_match(value: Any) -> str:
+    raw = unicodedata.normalize("NFKD", str(value or "").lower())
+    plain = "".join(ch for ch in raw if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", " ", plain).strip()
+
+
+def relevant_discovery_item(plan: ActorRunPlan, item: dict[str, Any]) -> bool:
+    """Evita conservar cuentas aproximadas ajenas a Tampico en búsqueda de usuarios."""
+    if plan.institutional or plan.name.startswith(("Hashtags", "Etiquetas @")):
+        return True
+    haystack = normalize_match(
+        " ".join(
+            str(value)
+            for value in (
+                first(item, "ownerUsername", "owner.username", "username"),
+                first(item, "caption", "text"),
+            )
+        )
+    )
+    if "monicavtampico" in haystack:
+        return True
+    if "monica" in haystack and "villarreal" in haystack:
+        return True
+    government_terms = {
+        "alcaldesa", "ayuntamiento", "cabildo", "gobierno", "municipal",
+        "municipio", "presidenta",
+    }
+    words = set(haystack.split())
+    return "tampico" in words and bool(words & government_terms)
 
 
 def profile_url(value: str) -> str:
@@ -115,6 +149,8 @@ def normalize_item(
     since: str,
     before: str,
 ) -> dict[str, Any] | None:
+    if not relevant_discovery_item(plan, item):
+        return None
     raw_date = first(item, "timestamp", "takenAt", "createdAt", "date")
     if not in_window(raw_date, since, before):
         return None
@@ -219,11 +255,15 @@ def main() -> None:
         return
     token = require_token(args.token)
     raw_items = run_actor_plans(ACTOR_ID, plans, token)
-    rows = [
+    rows = deduplicate_rows(
         row
         for plan, item in raw_items
         for row in normalize_items(plan, item, args.since, args.before)
-    ]
+    )
+    print(
+        f"ℹ️ Instagram: {len(raw_items)} publicaciones crudas; "
+        f"{len(rows)} filas pertinentes tras fecha y filtro local"
+    )
     outputs = write_social_outputs(rows, output_base, report_tag)
     print(f"✅ Instagram: {len(rows)} filas dentro de [{args.since}, {args.before})")
     for path in outputs.values():

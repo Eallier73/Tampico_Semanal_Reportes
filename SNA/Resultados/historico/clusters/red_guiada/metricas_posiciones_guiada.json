@@ -1,28 +1,31 @@
 {
-  "corpus": "historico consolidado de Tampico",
+  "corpus": "histórico consolidado de Tampico con RAdAR",
   "n_mensajes": 150573,
   "n_cuentas_total": 47887,
-  "n_posiciones": 110,
+  "n_posiciones": 121,
   "n_cuentas_posicion": 8915,
-  "n_nodes_html": 2835,
-  "n_edges_html": 3314,
+  "n_nodes_html": 5618,
+  "n_edges_html": 5835,
   "params": {
-    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/historico",
-    "input_csv": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_consolidados.csv",
-    "positions_per_topic": 3,
+    "base_dir": "SNA/Resultados/historico",
+    "input_csv": "SNA/Datos/tampico_datos_tabulares_consolidados.csv",
+    "positions_per_topic": 5,
     "min_account_words": 5,
     "min_topic_words": 3,
     "min_topic_pct": 12.0,
     "max_vocab": 90,
     "accounts_per_position": 18,
-    "words_per_position": 12,
+    "words_per_position": 35,
     "diccionario_temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",
     "diccionario_positivo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_positivas.txt",
-    "diccionario_negativo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_negativas.txt"
+    "diccionario_negativo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_negativas.txt",
+    "output_filename": "red_tampico_posiciones_guiada.html",
+    "scope_label": "Tampico histórico",
+    "corpus_label": "histórico consolidado de Tampico con RAdAR"
   },
   "ibea_por_nivel": {
-    "bajo": 80,
-    "medio": 29,
+    "bajo": 90,
+    "medio": 30,
     "alto": 1
   }
 }

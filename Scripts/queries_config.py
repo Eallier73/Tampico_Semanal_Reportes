@@ -125,18 +125,17 @@ FACEBOOK_POSTS_DEFAULT_BATCH_SIZE = 10
 # INSTAGRAM (Apify: apify/instagram-scraper)
 # ============================================================================
 
-INSTAGRAM_PROFILE_URLS: list[str] = []
-"""Perfiles oficiales confirmados. Acepta handles o URLs; vacío evita atribuciones falsas."""
-
-INSTAGRAM_SEARCH_QUERIES = [
-    "Mónica Villarreal Tampico",
-    "Monica Villarreal Tampico",
-    "Mónica Villarreal Anaya",
-    "Gobierno de Tampico",
-    "Ayuntamiento de Tampico",
-    "presidenta municipal de Tampico",
+INSTAGRAM_PROFILE_URLS = [
+    "monicavtampico",
 ]
-"""Términos dirigidos para descubrir cuentas y publicaciones relevantes."""
+"""Perfiles oficiales confirmados en resultados reales del actor."""
+
+INSTAGRAM_SEARCH_QUERIES: list[str] = []
+"""El actor busca perfiles, hashtags o lugares, no texto libre en publicaciones.
+
+La extracción predeterminada usa el perfil oficial, sus menciones y hashtags. Las
+búsquedas de usuarios siguen disponibles mediante ``--query`` para uso manual.
+"""
 
 INSTAGRAM_HASHTAGS = [
     "monicavillarreal",
@@ -154,18 +153,18 @@ INSTAGRAM_DEFAULT_SEARCH_LIMIT = 3
 # TIKTOK (Apify: clockworks/tiktok-scraper)
 # ============================================================================
 
-TIKTOK_PROFILES: list[str] = []
-"""Handles oficiales confirmados; vacío hasta verificarlos en la plataforma."""
+TIKTOK_PROFILES = [
+    "monicavtampico",
+]
+"""Handles oficiales confirmados en resultados reales del actor."""
 
 TIKTOK_SEARCH_QUERIES = [
+    "Mónica Villarreal",
     "Mónica Villarreal Tampico",
-    "Monica Villarreal Tampico",
-    "Mónica Villarreal Anaya",
     "Gobierno de Tampico",
     "Ayuntamiento de Tampico",
-    "presidenta municipal de Tampico",
 ]
-"""Búsquedas de videos para monitorear a la presidenta y al gobierno municipal."""
+"""Búsquedas específicas; un filtro local descarta coincidencias aproximadas ajenas."""
 
 TIKTOK_HASHTAGS = [
     "monicavillarreal",
