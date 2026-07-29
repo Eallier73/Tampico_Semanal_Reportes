@@ -35,6 +35,7 @@ import math
 import re
 import unicodedata
 from collections import Counter, defaultdict
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,7 @@ from sna_guiada_common import (
     DEFAULT_NEGATIVE_DICTIONARY,
     DEFAULT_POSITIVE_DICTIONARY,
     DEFAULT_TOPIC_DICTIONARY,
+    STRATEGIC_GROUP_BY_POLARITY,
     aggregate_words,
     aggregate_stance_texts,
     apply_stance_evidence,
@@ -80,6 +82,11 @@ LEVEL_COLORS = {
     "medio": "#ffcc33",
     "alto": "#ff4d4d",
 }
+STRATEGIC_GROUP_LABELS = {
+    "risk": "Riesgo",
+    "opportunity": "Oportunidad",
+    "consolidation": "Consolidación",
+}
 
 SUPPORT_WORDS = {
     "gracias", "apoyo", "bien", "excelente", "felicidades", "defender",
@@ -98,6 +105,25 @@ NOISE_WORDS = {
     "quot", "amp", "etc", "bla", "http", "https", "www", "com", "nan",
     "rt", "htt", "youtu", "youtube", "facebook", "twitter",
 }
+
+DEFAULT_SPANISH_DICTIONARY = Path("/usr/share/hunspell/es_ES.dic")
+DEFAULT_ENGLISH_DICTIONARY = Path("/usr/share/dict/american-english")
+SPANISH_LOCAL_TERMS = {
+    "altamira", "amlo", "americo", "americovillarreal", "brugada", "cdmx",
+    "ciudadmadero", "conagua", "dif", "edomex", "gobtam", "imss", "inegi",
+    "jaibo", "jaibos", "madero", "mexico", "monica", "monicavillarreal",
+    "morena", "prian", "tamaulipas", "tampico", "tampicogob",
+    "tampicotecuida", "tampicovacontodo", "unam", "villarreal",
+    "zonaconurbada",
+}
+# Formas inglesas que también figuran en algunos diccionarios de español por
+# ser siglas, extranjerismos o coincidir con otra forma válida. En el corpus
+# funcionan como vocabulario inglés, por lo que no deben llegar a la red.
+ENGLISH_FALSE_FRIENDS = {
+    "dean", "end", "home", "ice", "man", "mass", "name", "show", "single",
+    "tell", "tour", "true", "world",
+}
+MAX_TOPIC_ENGLISH_SHARE = 0.50
 
 TOPIC_FRAMES = [
     {
@@ -193,6 +219,16 @@ TOPIC_FRAMES = [
 ]
 
 TOKEN_RE = re.compile(r"[a-záéíóúüñ]{3,}", re.IGNORECASE)
+DISPLAY_TOKEN_RE = re.compile(r"[a-záéíóúüñ0-9]+", re.IGNORECASE)
+DISPLAY_NAME_STOP_WORDS = {
+    "a", "al", "ante", "con", "de", "del", "desde", "e", "el", "en", "entre",
+    "hacia", "la", "las", "los", "para", "por", "sobre", "su", "sus", "un",
+    "una", "unas", "unos", "y",
+}
+GENERIC_POSITION_WORDS = {
+    "conversacion", "enfasis", "grupo", "perspectiva", "posicion", "tema",
+}
+DISPLAY_UPPERCASE_WORDS = {"cdmx", "eeuu", "imss", "inegi", "unam"}
 DEFAULT_BASE = Path(__file__).resolve().parent.parent / "SNA" / "Resultados" / "historico"
 DEFAULT_DATA = Path(__file__).resolve().parent.parent / "SNA" / "Datos" / "tampico_datos_tabulares_consolidados.csv"
 
@@ -204,6 +240,187 @@ def repo_root() -> Path:
 def _topic_key(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value).strip().lower())
     return "".join(char for char in text if not unicodedata.combining(char))
+
+
+@lru_cache(maxsize=4)
+def load_language_vocabulary(dictionary_path: str) -> frozenset[str]:
+    """Carga un diccionario normalizado y descarta banderas de Hunspell."""
+    path = Path(dictionary_path)
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"No existe el diccionario de idioma requerido: {path}"
+        )
+    words: set[str] = set()
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            word = line.strip().split("/", 1)[0]
+            key = _topic_key(word)
+            if key:
+                words.add(key)
+    return frozenset(words)
+
+
+def spanish_root_candidates(key: str) -> set[str]:
+    """Genera bases simples para plurales que el diccionario guarda sin expandir."""
+    candidates = {key}
+    if len(key) > 3 and key.endswith("s"):
+        candidates.add(key[:-1])
+    if len(key) > 4 and key.endswith("es"):
+        candidates.add(key[:-2])
+    if len(key) > 4 and key.endswith("ces"):
+        candidates.add(f"{key[:-3]}z")
+    return candidates
+
+
+def is_spanish_word(
+    value: Any,
+    spanish_vocabulary: frozenset[str],
+    english_vocabulary: frozenset[str],
+) -> bool:
+    """Excluye léxico inglés, dando prioridad a formas válidas en español."""
+    key = _topic_key(value)
+    if (
+        not key
+        or key in NOISE_WORDS
+        or key in ENGLISH_FALSE_FRIENDS
+        or not re.fullmatch(r"[a-zñ]+", key)
+    ):
+        return False
+    if key in SPANISH_LOCAL_TERMS:
+        return True
+    if spanish_root_candidates(key) & spanish_vocabulary:
+        return True
+    return key not in english_vocabulary
+
+
+def filter_spanish_word_rows(
+    rows: pd.DataFrame,
+    spanish_vocabulary: frozenset[str],
+    english_vocabulary: frozenset[str],
+) -> pd.DataFrame:
+    """Retira del vocabulario analítico las filas que no son español."""
+    if "palabra" not in rows.columns:
+        return rows.copy()
+    mask = rows["palabra"].map(
+        lambda value: is_spanish_word(
+            value, spanish_vocabulary, english_vocabulary
+        )
+    )
+    return rows.loc[mask].copy()
+
+
+def english_dominated_topics(
+    rows: pd.DataFrame,
+    spanish_vocabulary: frozenset[str],
+    english_vocabulary: frozenset[str],
+    max_english_share: float = MAX_TOPIC_ENGLISH_SHARE,
+) -> dict[int, float]:
+    """Detecta temas cuyo vocabulario ponderado es mayoritariamente inglés."""
+    if not {"tema", "palabra", "conteo"}.issubset(rows.columns):
+        return {}
+    checked = rows[["tema", "palabra", "conteo"]].copy()
+    checked["es_espanol"] = checked["palabra"].map(
+        lambda value: is_spanish_word(
+            value, spanish_vocabulary, english_vocabulary
+        )
+    )
+    output: dict[int, float] = {}
+    for topic_id, group in checked.groupby("tema"):
+        total = float(group["conteo"].sum())
+        if total <= 0:
+            continue
+        english_weight = float(
+            group.loc[~group["es_espanol"], "conteo"].sum()
+        )
+        share = english_weight / total
+        if share > max_english_share:
+            output[int(topic_id)] = share
+    return output
+
+
+def display_word_case(word: str) -> str:
+    if _topic_key(word) in DISPLAY_UPPERCASE_WORDS:
+        return word.upper()
+    return word[:1].upper() + word[1:]
+
+
+def compact_display_name(
+    label: str,
+    evidence: list[str] | None = None,
+    fallback: str = "Sin nombre",
+) -> str:
+    """Crea una etiqueta semántica, legible y de máximo tres palabras."""
+    evidence = evidence or []
+    label_key = _topic_key(label)
+    use_evidence_first = label_key.startswith(("perspectiva ", "conversacion "))
+    sources = [evidence, DISPLAY_TOKEN_RE.findall(str(label))]
+    if not use_evidence_first:
+        sources.reverse()
+
+    selected: list[str] = []
+    seen: set[str] = set()
+    for source in sources:
+        for raw_word in source:
+            word = str(raw_word).strip()
+            key = _topic_key(word)
+            if (
+                not key
+                or key.isdigit()
+                or key in DISPLAY_NAME_STOP_WORDS
+                or key in GENERIC_POSITION_WORDS
+                or key in seen
+            ):
+                continue
+            selected.append(word)
+            seen.add(key)
+            if len(selected) == 3:
+                break
+        if len(selected) == 3:
+            break
+
+    result_words = selected or DISPLAY_TOKEN_RE.findall(str(fallback))[:3]
+    return " ".join(display_word_case(word) for word in result_words)
+
+
+def compact_topic_display_name(
+    label: str,
+    evidence: list[str] | None = None,
+    fallback: str = "Sin tema",
+) -> str:
+    """Conserva dos palabras del asunto y una palabra distintiva del tema."""
+    evidence = evidence or []
+    parts = str(label).split("·", 1)
+    if len(parts) == 1:
+        return compact_display_name(label, evidence, fallback)
+
+    base_words = DISPLAY_TOKEN_RE.findall(parts[0])
+    distinctive_words = DISPLAY_TOKEN_RE.findall(parts[1])
+    selected: list[str] = []
+    seen: set[str] = set()
+
+    def add_words(words: list[str], limit: int) -> None:
+        for raw_word in words:
+            word = str(raw_word).strip()
+            key = _topic_key(word)
+            if (
+                not key
+                or key.isdigit()
+                or key in DISPLAY_NAME_STOP_WORDS
+                or key in GENERIC_POSITION_WORDS
+                or key in seen
+            ):
+                continue
+            selected.append(word)
+            seen.add(key)
+            if len(selected) >= limit:
+                return
+
+    add_words(base_words, 2)
+    add_words(distinctive_words, 3)
+    add_words(evidence, 3)
+    if not selected:
+        return compact_display_name("", evidence, fallback)
+    return " ".join(display_word_case(word) for word in selected[:3])
 
 
 def build_topic_reading(topic_id: int, words: list[str]) -> dict[str, str]:
@@ -246,7 +463,11 @@ def build_topic_reading(topic_id: int, words: list[str]) -> dict[str, str]:
     return {"title": title, "summary": summary}
 
 
-def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
+def load_topic_info(
+    base: Path,
+    spanish_vocabulary: frozenset[str],
+    english_vocabulary: frozenset[str],
+) -> dict[int, dict[str, Any]]:
     """Reusa las lecturas curadas de 12c cuando estan disponibles."""
     info: dict[int, dict[str, Any]] = {}
     script_path = repo_root() / "Scripts" / "12c_red_completa.py"
@@ -271,7 +492,9 @@ def load_topic_info(base: Path) -> dict[int, dict[str, Any]]:
                 words = []
                 for part in str(row["top_20_terminos"]).split(","):
                     word = part.split("(")[0].strip()
-                    if word:
+                    if word and is_spanish_word(
+                        word, spanish_vocabulary, english_vocabulary
+                    ):
                         words.append(word)
                 reading = build_topic_reading(tid, words)
                 info.setdefault(tid, {"title": reading["title"], "summary": reading["summary"], "words": []})
@@ -628,6 +851,11 @@ def compute_positions(
             )
             title = topic_info.get(tema, {}).get("title", f"T{tema:02d}")
             name = classify_name([w.lower() for w in top_words], title)
+            short_name = compact_display_name(
+                name,
+                top_words,
+                fallback=f"Posición {pos_num}",
+            )
             summary = make_summary(title, name, len(users_set), top_words, level)
             platforms = platform_breakdown(cuentas, users_set)
 
@@ -636,6 +864,7 @@ def compute_positions(
                 "tema_id": tema,
                 "posicion_num": pos_num,
                 "nombre": name,
+                "nombre_corto": short_name,
                 "resumen": summary,
                 "n_cuentas": len(users_set),
                 "n_msgs": msg_stats["n_msgs"],
@@ -736,6 +965,11 @@ def build_network_data(
     position_coords: dict[str, tuple[float, float]] = {}
     for idx, tema in enumerate(sorted(topic_counts.index.astype(int))):
         info = topic_info.get(tema, {})
+        topic_short_name = compact_topic_display_name(
+            str(info.get("title", f"T{tema:02d}")),
+            [str(word) for word in info.get("words", [])],
+            fallback=f"Tema {tema:02d}",
+        )
         color = TEMA_COLORS[tema % len(TEMA_COLORS)]
         angle = idx * angle_step
         tx = round(math.cos(angle) * 300, 2)
@@ -744,14 +978,21 @@ def build_network_data(
         node_id = f"T{tema:02d}"
         node = {
             "id": node_id,
-            "label": f"T{tema:02d}",
+            "label": topic_short_name,
             "title": info.get("title", f"T{tema:02d}"),
+            "short_name": topic_short_name,
             "kind": "tema",
             "tema": tema,
             "topic_quality": info.get("quality", "sin_evaluar"),
             "shape": "dot",
             "color": {"background": color, "border": "#f2f2f2"},
-            "font": {"size": 24, "color": "#ffffff", "face": "arial"},
+            "font": {
+                "size": 64,
+                "color": "#ffffff",
+                "face": "arial",
+                "strokeWidth": 5,
+                "strokeColor": "#111111",
+            },
             "size": scalar_size(float(topic_counts.loc[tema]), min_topic, max_topic, 34, 58),
             "x": tx,
             "y": ty,
@@ -760,6 +1001,7 @@ def build_network_data(
         meta[node_id] = {
             "kind": "tema",
             "title": info.get("title", f"T{tema:02d}"),
+            "short_name": topic_short_name,
             "summary": info.get("summary", ""),
             "words": info.get("words", []),
             "n_cuentas": int(topic_counts.loc[tema]),
@@ -793,8 +1035,9 @@ def build_network_data(
         position_coords[pos_id] = (px, py)
         nodes.append({
             "id": pos_id,
-            "label": f"P{int(row['posicion_num'])}",
+            "label": str(row["nombre_corto"]),
             "title": str(row["nombre"]),
+            "short_name": str(row["nombre_corto"]),
             "kind": "posicion",
             "tema": tema,
             "topic_quality": topic_info.get(tema, {}).get("quality", "sin_evaluar"),
@@ -802,7 +1045,13 @@ def build_network_data(
             "shape": "diamond",
             "color": {"background": color, "border": border, "highlight": {"background": color, "border": "#ffffff"}},
             "borderWidth": 3 if row["ibea_nivel"] == "alto" else 2,
-            "font": {"size": 18, "color": "#ffffff", "face": "arial"},
+            "font": {
+                "size": 42,
+                "color": "#ffffff",
+                "face": "arial",
+                "strokeWidth": 4,
+                "strokeColor": "#111111",
+            },
             "size": scalar_size(float(row["n_cuentas"]), 1, max_pos_accounts, 22, 46),
             "x": px,
             "y": py,
@@ -822,6 +1071,7 @@ def build_network_data(
             "kind": "posicion",
             "tema": tema,
             "nombre": str(row["nombre"]),
+            "short_name": str(row["nombre_corto"]),
             "resumen": str(row["resumen"]),
             "n_cuentas": int(row["n_cuentas"]),
             "n_msgs": int(row["n_msgs"]),
@@ -1022,6 +1272,11 @@ def build_html(
     for tid in topics:
         info = topic_info[tid]
         words = [str(word).strip() for word in info.get("words", []) if str(word).strip()]
+        short_name = compact_topic_display_name(
+            str(info.get("title", f"T{tid:02d}")),
+            words,
+            fallback=f"Tema {tid:02d}",
+        )
         ranked_words = "".join(
             f'<span class="topic-word-row"><b>{rank}.</b> {html.escape(word)}</span>'
             for rank, word in enumerate(words[:15], start=1)
@@ -1033,7 +1288,7 @@ def build_html(
             f'data-connectivity="{topic_metrics[tid]["connectivity"]}">'
             f'<span data-topic-quality="{html.escape(str(info.get("quality", "sin_evaluar")))}"></span>'
             f'<span class="topic-card-title"><i class="sw" style="background:{TEMA_COLORS[tid % len(TEMA_COLORS)]}"></i>'
-            f'<span class="topic-title-text">Tema {tid:02d}</span>'
+            f'<span class="topic-title-text">Tema {tid:02d} · {html.escape(short_name)}</span>'
             f'<span class="topic-disclosure" role="button" tabindex="0" aria-expanded="false" '
             f'aria-label="Mostrar las 15 palabras principales del Tema {tid:02d}">▸</span></span>'
             f'<span class="topic-words" hidden>{ranked_words}</span>'
@@ -1071,7 +1326,7 @@ def build_html(
   .sw {{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }}
   .network-topic-filter {{ display:block; width:100%; margin:5px 0; padding:7px; text-align:left; box-sizing:border-box; }}
   .network-topic-filter.guided-active {{ outline:2px solid #f5f5f5; background:#505050; }}
-  .topic-card-title {{ display:flex; align-items:flex-start; gap:4px; font-size:12px; font-weight:bold; line-height:1.25; }}
+  .topic-card-title {{ display:flex; align-items:flex-start; gap:4px; font-size:15px; font-weight:bold; line-height:1.25; }}
   .topic-title-text {{ flex:1; min-width:0; }}
   .topic-disclosure {{ flex:none; width:18px; height:18px; display:grid; place-items:center; margin:-2px -2px 0 2px; border-radius:3px; color:#ddd; font-size:14px; }}
   .topic-disclosure:hover, .topic-disclosure:focus {{ background:#666; color:#fff; outline:none; }}
@@ -1100,6 +1355,33 @@ def build_html(
   #strategicBar [data-strategy="consolidation"].strategy-active {{ background:#176b42; }}
   #strategyHelp {{ flex:1 1 250px; color:#aaa; line-height:1.3; }}
   #stats {{ margin-left:auto; color:#ddd; white-space:nowrap; }}
+  .layout-actions {{ display:grid; grid-template-columns:1fr; gap:5px; }}
+  .layout-actions button {{ width:100%; }}
+  .layout-actions button.layout-active {{ outline:2px solid #fff; background:#4c4c4c; }}
+  #polarityGuide {{
+    position:fixed; left:calc(320px - 1cm + 18px); right:calc(360px - 1cm + 18px);
+    top:58px; z-index:8; display:grid; grid-template-columns:1fr 1fr 1fr;
+    align-items:center; pointer-events:none; color:#fff; font-size:11px;
+    font-weight:bold; text-transform:uppercase; letter-spacing:.06em;
+    text-shadow:0 1px 3px #000, 0 0 5px #000;
+  }}
+  #polarityGuide[hidden] {{ display:none; }}
+  #polarityGuide span:nth-child(1) {{ color:#63d36f; text-align:left; }}
+  #polarityGuide span:nth-child(2) {{ color:#f2c744; text-align:center; }}
+  #polarityGuide span:nth-child(3) {{ color:#ff6666; text-align:right; }}
+  #governmentGuide {{
+    position:fixed; left:calc(320px - 1cm + 18px); right:calc(360px - 1cm + 18px);
+    top:58px; z-index:8; pointer-events:none; color:#fff; text-align:center;
+    font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:.06em;
+    text-shadow:0 1px 3px #000, 0 0 5px #000;
+  }}
+  #governmentGuide[hidden] {{ display:none; }}
+  #governmentGuide .mayor-label {{ color:#ff6666; }}
+  #governmentGuide .government-label {{ color:#b99adf; }}
+  #right #guidedPanel .guided-target {{
+    font-size:16px !important; font-weight:600; padding:7px 8px !important;
+  }}
+  #right #guidedPanel h4 {{ font-size:12px !important; }}
 </style>
 </head>
 <body>
@@ -1131,10 +1413,21 @@ def build_html(
     <label>Separacion <span id="springV">0</span></label>
     <input id="spring" type="range" min="0" max="100" value="0" step="1">
     <div class="range-scale"><span>0</span><span>100</span></div>
+    <label>Tamaño de nombres <span id="labelScaleV">100%</span></label>
+    <input id="labelScale" type="range" min="50" max="200" value="100" step="5">
+    <div class="range-scale"><span>50%</span><span>200%</span></div>
     <button id="reset">Reorganizar</button>
     <button id="stopPhysics">Detener</button>
     <button id="fitNetwork">Encajar</button>
     <div class="tool-help">Separación aleja los grupos sin cambiar sus relaciones. Reorganizar activa el movimiento, Detener lo congela y Encajar centra toda la red.</div>
+  </div>
+  <div class="grp">
+    <h2>Acomodos</h2>
+    <div class="layout-actions">
+      <button id="polarityLayout">Positivos · mixtos · negativos</button>
+      <button id="governmentLayout">Alcaldesa y gobierno al centro</button>
+    </div>
+    <div class="tool-help">Polaridad separa positivos y negativos, con los mixtos según su balance. Alcaldesa/gobierno crea un núcleo central y distribuye alrededor los temas con sus posiciones, cuentas y palabras.</div>
   </div>
   <div class="grp">
     <h2>Temas de la red</h2>
@@ -1167,6 +1460,15 @@ def build_html(
   <span id="strategyHelp">Elige un ámbito. Los nodos con color cumplen el criterio; los grises muestran sus conexiones inmediatas como contexto.</span>
   <span id="stats"></span>
 </div>
+<div id="polarityGuide" hidden>
+  <span>Positivos</span>
+  <span>Mixtos</span>
+  <span>Negativos</span>
+</div>
+<div id="governmentGuide" hidden>
+  Núcleo: <span class="mayor-label">Alcaldesa</span> y
+  <span class="government-label">Gobierno municipal</span> · temas alrededor
+</div>
 <script>
 const RAW_NODES = {json.dumps(nodes, ensure_ascii=False)};
 const RAW_EDGES = {json.dumps(edges, ensure_ascii=False)};
@@ -1187,9 +1489,9 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
 window.network = network;
 
 const STRATEGIC_PRESETS = {{
-  risk: {{label:'Riesgo', polarity:['negativa'], stance:['critica_oposicion'], combine:'any', help:'Incluye lenguaje negativo o postura crítica/opositora.'}},
-  opportunity: {{label:'Oportunidad', polarity:['mixta'], stance:['mixta_disputa'], combine:'any', help:'Incluye conversaciones con balance léxico entre −0.20 y +0.20: posturas realmente mixtas o en disputa.'}},
-  consolidation: {{label:'Consolidación', polarity:['positiva'], stance:['apoyo_defensa'], combine:'any', help:'Incluye lenguaje positivo o posturas de apoyo/defensa.'}}
+  risk: {{label:'Riesgo', strategic:['risk'], combine:'all', help:'Clasificación exclusiva: temas con polaridad negativa.'}},
+  opportunity: {{label:'Oportunidad', strategic:['opportunity'], combine:'all', help:'Clasificación exclusiva: temas con polaridad mixta o neutral.'}},
+  consolidation: {{label:'Consolidación', strategic:['consolidation'], combine:'all', help:'Clasificación exclusiva: temas con polaridad positiva.'}}
 }};
 function clearStrategicBar() {{
   document.querySelectorAll('.strategy-button').forEach(button => button.classList.remove('strategy-active'));
@@ -1309,6 +1611,8 @@ function render(id) {{
   let h = '';
   if (m.kind === 'tema') {{
     h += `<h1>${{esc(id)}} · ${{esc(m.title)}}</h1><p>${{esc(m.summary)}}</p>`;
+    h += `<div class="metric"><span>polaridad exclusiva</span><b>${{esc(m.polaridad)}}</b></div>`;
+    h += `<div class="metric"><span>ámbito estratégico</span><b>${{esc(m.ambito_estrategico)}}</b></div>`;
     h += `<div class="metric"><span>calidad temática</span><b>${{esc(m.quality)}}</b></div>`;
     if (m.quality === 'baja') h += `<div class="muted quality-note">Se conserva para auditoría, pero puede mezclar conversaciones. Motivo: ${{esc(m.quality_reason)}}.</div>`;
     h += `<div class="metric"><span>cuentas mapeadas</span><b>${{m.n_cuentas}}</b></div>`;
@@ -1316,6 +1620,8 @@ function render(id) {{
   }} else if (m.kind === 'posicion') {{
     h += `<h1>${{esc(id)}} · ${{esc(m.nombre)}}</h1>`;
     h += `<p>${{esc(m.resumen)}}</p>`;
+    h += `<div class="metric"><span>polaridad exclusiva</span><b>${{esc(m.polaridad)}}</b></div>`;
+    h += `<div class="metric"><span>ámbito estratégico</span><b>${{esc(m.ambito_estrategico)}}</b></div>`;
     h += `<div class="metric"><span>postura hacia Mónica/gobierno</span><b>${{esc(m.postura_actor_etiqueta)}}</b></div>`;
     h += `<div class="muted">Se calcula con referencias explícitas al actor y señales de respaldo o crítica; es independiente del tono emocional.</div>`;
     h += `<div class="metric"><span>mensajes con evidencia de postura</span><b>${{m.postura_actor_mensajes}}</b></div>`;
@@ -1350,14 +1656,42 @@ function render(id) {{
   document.getElementById('detail').innerHTML = h || 'Sin detalle.';
 }}
 document.querySelectorAll('input').forEach(el => {{
-  if (el.id !== 'search' && el.id !== 'spring') el.addEventListener('change', rebuild);
+  if (!['search', 'spring', 'labelScale'].includes(el.id)) el.addEventListener('change', rebuild);
 }});
 document.getElementById('spring').addEventListener('input', e => {{
   const next = parseInt(e.target.value, 10);
   document.getElementById('springV').textContent = next;
   applySeparation(next);
 }});
+const BASE_LABEL_FONT_SIZES = Object.fromEntries(
+  RAW_NODES
+    .filter(node => node.kind === 'tema' || node.kind === 'posicion')
+    .map(node => [String(node.id), Number(node.font?.size || (node.kind === 'tema' ? 64 : 42))])
+);
+function applyLabelScale(value) {{
+  const percent = Math.max(50, Math.min(200, Number(value) || 100));
+  const scale = percent / 100;
+  document.getElementById('labelScaleV').textContent = `${{percent}}%`;
+  nodes.update(
+    nodes.get()
+      .filter(node => Object.hasOwn(BASE_LABEL_FONT_SIZES, String(node.id)))
+      .map(node => ({{
+        id:node.id,
+        font:{{
+          ...(node.font || {{}}),
+          size:Math.round(BASE_LABEL_FONT_SIZES[String(node.id)] * scale)
+        }}
+      }}))
+  );
+  document.querySelectorAll('#guidedPanel .guided-target').forEach(button =>
+    button.style.setProperty('font-size', `${{Math.round(16 * scale)}}px`, 'important'));
+  document.querySelectorAll('.topic-card-title').forEach(card =>
+    card.style.fontSize = `${{Math.round(15 * scale)}}px`);
+}}
+document.getElementById('labelScale').addEventListener('input', event =>
+  applyLabelScale(event.target.value));
 document.getElementById('reset').addEventListener('click', () => {{
+  clearActiveLayout();
   network.setOptions({{physics: {{enabled:true, stabilization: {{enabled:false}}}}}});
   network.startSimulation();
 }});
@@ -1368,6 +1702,8 @@ document.getElementById('stopPhysics').addEventListener('click', () => {{
 document.getElementById('fitNetwork').addEventListener('click', () => {{
   network.fit({{animation:{{duration:400}}}});
 }});
+document.getElementById('polarityLayout').addEventListener('click', applyPolarityLayout);
+document.getElementById('governmentLayout').addEventListener('click', applyGovernmentLayout);
 document.getElementById('search').addEventListener('keydown', e => {{
   if (e.key !== 'Enter') return;
   const q = e.target.value.trim().toLowerCase();
@@ -1389,7 +1725,209 @@ rebuild();
 const BASE_POSITIONS = network.getPositions();
 const BASE_IDS = Object.keys(BASE_POSITIONS);
 const BASE_CENTER = BASE_IDS.reduce((center, id) => ({{x:center.x + BASE_POSITIONS[id].x / BASE_IDS.length, y:center.y + BASE_POSITIONS[id].y / BASE_IDS.length}}), {{x:0, y:0}});
+function clearActiveLayout() {{
+  document.querySelectorAll('.layout-actions button').forEach(button => button.classList.remove('layout-active'));
+  document.getElementById('polarityGuide').hidden = true;
+  document.getElementById('governmentGuide').hidden = true;
+  const colorMode = document.getElementById('guidedColorMode');
+  if (colorMode) colorMode.dispatchEvent(new Event('change'));
+}}
+function layoutJitter(id) {{
+  let hash = 0;
+  for (const char of String(id)) hash = ((hash * 31) + char.charCodeAt(0)) >>> 0;
+  return ((hash % 201) - 100) * 1.15;
+}}
+function applyPolarityLayout() {{
+  clearActiveLayout();
+  document.getElementById('polarityLayout').classList.add('layout-active');
+  document.getElementById('polarityGuide').hidden = false;
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false}}}});
+
+  const visibleIds = [];
+  nodes.get().forEach(node => {{
+    const base = BASE_POSITIONS[node.id] || {{x:BASE_CENTER.x, y:BASE_CENTER.y}};
+    const score = Math.max(-1, Math.min(1, Number(node.polarity_score) || 0));
+    const polarity = String(node.polarity || 'neutral');
+    const jitter = layoutJitter(node.id);
+    const neutralOffset = Math.max(-600, Math.min(600, base.x - BASE_CENTER.x));
+    let x = BASE_CENTER.x + neutralOffset * 0.55 + jitter * 0.25;
+    if (polarity === 'positiva') {{
+      const strength = Math.max(0, Math.min(1, (score - 0.20) / 0.80));
+      x = BASE_CENTER.x - 760 - strength * 260 + jitter;
+    }} else if (polarity === 'negativa') {{
+      const strength = Math.max(0, Math.min(1, (-score - 0.20) / 0.80));
+      x = BASE_CENTER.x + 760 + strength * 260 + jitter;
+    }} else if (polarity === 'mixta') {{
+      x = BASE_CENTER.x - Math.max(-1, Math.min(1, score / 0.20)) * 520 + jitter * 0.55;
+    }}
+    const y = BASE_CENTER.y + (base.y - BASE_CENTER.y) * 1.55;
+    network.moveNode(node.id, x, y);
+    if (!node.hidden) visibleIds.push(node.id);
+  }});
+
+  const semanticGroups = new Map();
+  nodes.get()
+    .filter(node => node.kind === 'tema' || node.kind === 'posicion')
+    .forEach(node => {{
+      const key = `${{node.polarity || 'neutral'}}:${{node.kind}}`;
+      if (!semanticGroups.has(key)) semanticGroups.set(key, []);
+      semanticGroups.get(key).push(node);
+    }});
+  semanticGroups.forEach((group, key) => {{
+    const [polarity, kind] = key.split(':');
+    const spacing = kind === 'tema' ? 210 : 110;
+    group.sort((a, b) =>
+      Number(a.tema) - Number(b.tema) || String(a.id).localeCompare(String(b.id)));
+    group.forEach((node, index) => {{
+      const current = network.getPosition(node.id);
+      let x = current.x;
+      if (polarity === 'positiva') {{
+        x = BASE_CENTER.x - (kind === 'tema' ? 610 : 1040);
+      }} else if (polarity === 'negativa') {{
+        x = BASE_CENTER.x + (kind === 'tema' ? 610 : 1040);
+      }}
+      const y = BASE_CENTER.y + (index - (group.length - 1) / 2) * spacing;
+      network.moveNode(node.id, x, y);
+    }});
+  }});
+
+  const colorMode = document.getElementById('guidedColorMode');
+  if (colorMode) {{
+    colorMode.value = 'polarity';
+    colorMode.dispatchEvent(new Event('change'));
+  }}
+  requestAnimationFrame(() => network.fit({{
+    nodes: visibleIds,
+    animation: {{duration:550, easingFunction:'easeInOutQuad'}}
+  }}));
+}}
+function nodeTopics(node) {{
+  const topics = Array.isArray(node.network_topics) ? node.network_topics : [];
+  if (topics.length) return topics.map(Number).filter(Number.isFinite);
+  const fallback = Number(node.tema);
+  return Number.isFinite(fallback) ? [fallback] : [];
+}}
+function nearestBaseTopic(node, topicAnchors) {{
+  const candidates = nodeTopics(node).filter(topic => topicAnchors.has(topic));
+  if (!candidates.length) return null;
+  const base = BASE_POSITIONS[node.id] || BASE_CENTER;
+  return candidates.reduce((best, topic) => {{
+    const topicBase = BASE_POSITIONS[`T${{String(topic).padStart(2, '0')}}`] || BASE_CENTER;
+    const distance = Math.hypot(base.x - topicBase.x, base.y - topicBase.y);
+    return !best || distance < best.distance ? {{topic, distance}} : best;
+  }}, null).topic;
+}}
+function orbitPosition(anchor, index, total, baseRadius, perRing, ringGap, phase=0) {{
+  const ring = Math.floor(index / perRing);
+  const slot = index % perRing;
+  const count = Math.min(perRing, total - ring * perRing);
+  const angle = phase + (2 * Math.PI * slot / Math.max(1, count)) + ring * 0.27;
+  const radius = baseRadius + ring * ringGap;
+  return {{x:anchor.x + Math.cos(angle) * radius, y:anchor.y + Math.sin(angle) * radius}};
+}}
+function applyGovernmentLayout() {{
+  clearActiveLayout();
+  document.getElementById('governmentLayout').classList.add('layout-active');
+  document.getElementById('governmentGuide').hidden = false;
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false}}}});
+
+  const allNodes = nodes.get();
+  const topicNodes = allNodes
+    .filter(node => node.kind === 'tema')
+    .sort((a, b) => Number(a.tema) - Number(b.tema));
+  const topicAnchors = new Map();
+  const topicRingRadius = 1500;
+  topicNodes.forEach((node, index) => {{
+    const angle = -Math.PI / 2 + (2 * Math.PI * index / Math.max(1, topicNodes.length));
+    topicAnchors.set(Number(node.tema), {{
+      x:BASE_CENTER.x + Math.cos(angle) * topicRingRadius,
+      y:BASE_CENTER.y + Math.sin(angle) * topicRingRadius
+    }});
+  }});
+
+  const mayorCategories = new Set(['Mónica Villarreal', 'Alcaldesa']);
+  const centerNodes = allNodes
+    .filter(node => node.kind !== 'tema' &&
+      (node.guided_categories || []).some(category =>
+        mayorCategories.has(category) || category === 'Gobierno municipal'))
+    .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const centerIds = new Set(centerNodes.map(node => String(node.id)));
+  const satellites = new Map();
+  topicAnchors.forEach((_anchor, topic) => satellites.set(topic, {{posicion:[], cuenta:[], palabra:[], other:[]}}));
+
+  allNodes.forEach(node => {{
+    if (node.kind === 'tema' || centerIds.has(String(node.id))) return;
+    const topic = nearestBaseTopic(node, topicAnchors);
+    if (topic === null) return;
+    const groups = satellites.get(topic);
+    const kind = Object.hasOwn(groups, node.kind) ? node.kind : 'other';
+    groups[kind].push(node);
+  }});
+
+  const visibleIds = [];
+  topicNodes.forEach(node => {{
+    const anchor = topicAnchors.get(Number(node.tema));
+    network.moveNode(node.id, anchor.x, anchor.y);
+    if (!node.hidden) visibleIds.push(node.id);
+  }});
+  topicAnchors.forEach((anchor, topic) => {{
+    const groups = satellites.get(topic);
+    const specs = {{
+      posicion:{{radius:105, perRing:10, gap:34, phase:-Math.PI/2}},
+      cuenta:{{radius:205, perRing:22, gap:32, phase:0.18}},
+      palabra:{{radius:315, perRing:30, gap:30, phase:Math.PI}},
+      other:{{radius:405, perRing:34, gap:28, phase:0}}
+    }};
+    Object.entries(groups).forEach(([kind, group]) => {{
+      const spec = specs[kind];
+      group.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+      group.forEach((node, index) => {{
+        const point = orbitPosition(anchor, index, group.length, spec.radius, spec.perRing, spec.gap, spec.phase);
+        network.moveNode(node.id, point.x, point.y);
+        if (!node.hidden) visibleIds.push(node.id);
+      }});
+    }});
+  }});
+
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+  centerNodes.forEach((node, index) => {{
+    const radius = index ? 28 + Math.sqrt(index) * 19 : 0;
+    const angle = index * goldenAngle;
+    network.moveNode(
+      node.id,
+      BASE_CENTER.x + Math.cos(angle) * radius,
+      BASE_CENTER.y + Math.sin(angle) * radius
+    );
+    if (!node.hidden) visibleIds.push(node.id);
+  }});
+
+  const colorMode = document.getElementById('guidedColorMode');
+  if (colorMode) {{
+    colorMode.value = 'original';
+    colorMode.dispatchEvent(new Event('change'));
+  }}
+  nodes.update(centerNodes.map(node => {{
+    const categories = node.guided_categories || [];
+    const mayor = categories.some(category => mayorCategories.has(category));
+    const both = mayor && categories.includes('Gobierno municipal');
+    return {{
+      id:node.id,
+      color:{{
+        background:mayor ? '#c62828' : '#9467bd',
+        border:both ? '#ffd166' : '#ffffff'
+      }},
+      borderWidth:both ? 5 : 3
+    }};
+  }}));
+  requestAnimationFrame(() => network.fit({{
+    nodes: visibleIds,
+    animation: {{duration:650, easingFunction:'easeInOutQuad'}}
+  }}));
+}}
 function applySeparation(value) {{
+  clearActiveLayout();
   const normalized = Math.max(0, Math.min(100, Number(value) || 0)) / 100;
   const scale = 1 + normalized * 1.25;
   network.stopSimulation();
@@ -1430,6 +1968,18 @@ def main() -> None:
     ap.add_argument("--diccionario-temas", type=Path, default=DEFAULT_TOPIC_DICTIONARY)
     ap.add_argument("--diccionario-positivo", type=Path, default=DEFAULT_POSITIVE_DICTIONARY)
     ap.add_argument("--diccionario-negativo", type=Path, default=DEFAULT_NEGATIVE_DICTIONARY)
+    ap.add_argument(
+        "--diccionario-espanol",
+        type=Path,
+        default=DEFAULT_SPANISH_DICTIONARY,
+        help="Diccionario usado para conservar vocabulario español.",
+    )
+    ap.add_argument(
+        "--diccionario-ingles",
+        type=Path,
+        default=DEFAULT_ENGLISH_DICTIONARY,
+        help="Diccionario usado para excluir vocabulario inglés.",
+    )
     ap.add_argument("--output-filename", default="red_tampico_posiciones_guiada.html")
     ap.add_argument("--scope-label", default="Tampico histórico")
     ap.add_argument("--corpus-label", default="histórico consolidado de Tampico")
@@ -1443,7 +1993,30 @@ def main() -> None:
 
     print(f"[1/5] Cargando insumos de {base}")
     mensajes, cuentas, palx, cxt = read_inputs(base, args.input_csv)
-    topic_info = load_topic_info(base)
+    spanish_vocabulary = load_language_vocabulary(str(args.diccionario_espanol))
+    english_vocabulary = load_language_vocabulary(str(args.diccionario_ingles))
+    words_before = len(palx)
+    excluded_topics = english_dominated_topics(
+        palx, spanish_vocabulary, english_vocabulary
+    )
+    palx = filter_spanish_word_rows(
+        palx, spanish_vocabulary, english_vocabulary
+    )
+    if excluded_topics:
+        palx = palx[~palx["tema"].astype(int).isin(excluded_topics)].copy()
+    print(
+        "      filtro de español: "
+        f"{len(palx)} de {words_before} filas de vocabulario conservadas"
+    )
+    if excluded_topics:
+        details = ", ".join(
+            f"T{topic_id:02d} ({share:.0%} inglés)"
+            for topic_id, share in sorted(excluded_topics.items())
+        )
+        print(f"      temas en inglés excluidos: {details}")
+    topic_info = load_topic_info(
+        base, spanish_vocabulary, english_vocabulary
+    )
 
     print("[2/5] Calculando posiciones discursivas por tema")
     positions, memberships, position_words, examples = compute_positions(
@@ -1481,9 +2054,7 @@ def main() -> None:
         accounts_per_position=args.accounts_per_position,
         words_per_position=args.words_per_position,
     )
-    html_out = build_html(nodes, edges, meta, topic_info, base, args.scope_label)
     html_path = out_dir / args.output_filename
-    html_path.write_text(html_out, encoding="utf-8")
 
     print("      aplicando temas rastreados, polaridad y postura")
     lexicons = load_lexicons(
@@ -1571,6 +2142,36 @@ def main() -> None:
             if position.get("tema_id") is not None:
                 network_topics.add(int(position["tema_id"]))
         annotations.setdefault(node_id, {})["network_topics"] = sorted(network_topics)
+
+    # La vista de posiciones usa estos campos para acomodar todos los tipos de
+    # nodo sobre un eje continuo de polaridad. Se conservan también dentro de
+    # la capa guiada para filtros, colores y salidas de auditoría.
+    for node in nodes:
+        annotation = annotations.get(str(node["id"]), {})
+        polarity = str(annotation.get("polarity", "neutral"))
+        strategic_group = STRATEGIC_GROUP_BY_POLARITY.get(
+            polarity, "opportunity"
+        )
+        node["polarity"] = polarity
+        node["polarity_score"] = float(annotation.get("polarity_score", 0.0) or 0.0)
+        node["strategic_group"] = strategic_group
+        node["primary_category"] = str(annotation.get("primary_category", ""))
+        node["guided_categories"] = [
+            str(category.get("name", ""))
+            for category in annotation.get("categories", [])
+            if category.get("name")
+        ]
+        node["network_topics"] = [
+            int(topic) for topic in annotation.get("network_topics", [])
+        ]
+        if str(node.get("kind", "")) in {"tema", "posicion"}:
+            meta[str(node["id"])]["polaridad"] = polarity
+            meta[str(node["id"])]["ambito_estrategico"] = (
+                STRATEGIC_GROUP_LABELS[strategic_group]
+            )
+
+    html_out = build_html(nodes, edges, meta, topic_info, base, args.scope_label)
+    html_path.write_text(html_out, encoding="utf-8")
     inject_guided_layer(
         html_path,
         annotations,
@@ -1578,6 +2179,7 @@ def main() -> None:
         "Filtros por capas",
         mount_id="right",
         layered_filters=True,
+        exclusive_topic_strategies=True,
     )
     write_annotation_outputs(
         out_dir,

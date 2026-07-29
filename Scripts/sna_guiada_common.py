@@ -48,6 +48,12 @@ POLARITY_COLORS = {
     "mixta": "#f2c744",
     "neutral": "#777777",
 }
+STRATEGIC_GROUP_BY_POLARITY = {
+    "negativa": "risk",
+    "mixta": "opportunity",
+    "neutral": "opportunity",
+    "positiva": "consolidation",
+}
 STANCE_COLORS = {
     "apoyo_defensa": "#2b83ba",
     "critica_oposicion": "#d7191c",
@@ -429,10 +435,14 @@ def write_annotation_outputs(
     category_counts: Counter[str] = Counter()
     polarity_counts: Counter[str] = Counter()
     stance_counts: Counter[str] = Counter()
+    strategic_counts: Counter[str] = Counter()
     for node_id, item in annotations.items():
         category_counts.update(cat["name"] for cat in item.get("categories", []))
-        polarity_counts[item.get("polarity", "neutral")] += 1
+        polarity = item.get("polarity", "neutral")
+        strategic_group = STRATEGIC_GROUP_BY_POLARITY.get(polarity, "opportunity")
+        polarity_counts[polarity] += 1
         stance_counts[item.get("stance", "sin_postura")] += 1
+        strategic_counts[strategic_group] += 1
         rows.append({
             "node_id": node_id,
             "tipo_nodo": item.get("kind", ""),
@@ -440,8 +450,9 @@ def write_annotation_outputs(
             "categoria_principal": item.get("primary_category", ""),
             "confianza_categoria": item.get("category_confidence", 0.0),
             "categorias": " | ".join(cat["name"] for cat in item.get("categories", [])),
-            "polaridad": item.get("polarity", "neutral"),
+            "polaridad": polarity,
             "polaridad_score": item.get("polarity_score", 0.0),
+            "ambito_estrategico": strategic_group,
             "postura": item.get("stance", "sin_postura"),
             "postura_etiqueta": item.get("stance_label", STANCE_LABELS["sin_postura"]),
             "postura_score": item.get("stance_score", 0.0),
@@ -460,6 +471,8 @@ def write_annotation_outputs(
         "categorias": dict(category_counts.most_common()),
         "polaridades": dict(polarity_counts.most_common()),
         "posturas": dict(stance_counts.most_common()),
+        "ambitos_estrategicos": dict(strategic_counts.most_common()),
+        "metodo_ambito_estrategico": "clasificacion exclusiva por polaridad: negativa=riesgo, positiva=consolidacion, mixta/neutral=oportunidad",
         "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",
         "fuentes": {key: str(value) for key, value in source_paths.items()},
     }
@@ -485,6 +498,9 @@ def compact_annotations_for_html(annotations: dict[str, dict[str, Any]]) -> dict
             "category_confidence": item.get("category_confidence") or 0.0,
             "polarity": polarity,
             "polarity_score": item.get("polarity_score") or 0.0,
+            "strategic_group": STRATEGIC_GROUP_BY_POLARITY.get(
+                polarity, "opportunity"
+            ),
             "stance": stance,
             "stance_label": item.get("stance_label") or STANCE_LABELS["sin_postura"],
             "stance_score": item.get("stance_score") or 0.0,
@@ -502,6 +518,7 @@ def inject_guided_layer(
     network_topic_labels: dict[int, str] | None = None,
     mount_id: str | None = None,
     layered_filters: bool = False,
+    exclusive_topic_strategies: bool = False,
 ) -> None:
     """Inyecta un panel no destructivo de localizacion y color en una red vis."""
     source = html_path.read_text(encoding="utf-8")
@@ -612,7 +629,8 @@ def inject_guided_layer(
   const STANCE_COLORS = {stance_json};
   const originals = {{}};
   const LAYERED_FILTERS = {str(layered_filters).lower()};
-  const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set()}};
+  const EXCLUSIVE_TOPIC_STRATEGIES = {str(exclusive_topic_strategies).lower()};
+  const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set(), strategic:new Set()}};
   let strategicCombine = null;
   let strategicSeedIds = new Set();
   let strategicContextIds = new Set();
@@ -693,6 +711,7 @@ def inject_guided_layer(
     if (!meta) return false;
     if (activeFilters.topic.size && !(meta.network_topics || []).some(value => activeFilters.topic.has(String(value)))) return false;
     if (activeFilters.category.size && !Array.from(activeFilters.category).some(value => categoryMatch(meta, value))) return false;
+    if (activeFilters.strategic.size && !activeFilters.strategic.has(meta.strategic_group)) return false;
     if (strategicCombine === 'any') {{
       const polarityMatch = activeFilters.polarity.size && activeFilters.polarity.has(meta.polarity);
       const stanceMatch = activeFilters.stance.size && activeFilters.stance.has(meta.stance);
@@ -708,6 +727,7 @@ def inject_guided_layer(
       strategicCombine = null;
       strategicSeedIds.clear();
       strategicContextIds.clear();
+      Object.values(activeFilters).forEach(values => values.clear());
       publishStrategicState();
       window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
     }}
@@ -722,13 +742,18 @@ def inject_guided_layer(
       Object.keys(GUIDED_META).filter(id => guidedNodes.get(id) && matchesLayerFilters(GUIDED_META[id]))
     );
     strategicContextIds = new Set(strategicSeedIds);
+    function addContext(id) {{
+      const node = guidedNodes.get(id);
+      if (EXCLUSIVE_TOPIC_STRATEGIES && node && node.kind === 'tema' && !strategicSeedIds.has(id)) return;
+      strategicContextIds.add(id);
+    }}
     const networkEdges = guidedEdges ? guidedEdges.get() : [];
     networkEdges.forEach(edge => {{
       const from = String(edge.from);
       const to = String(edge.to);
       if (strategicSeedIds.has(from) || strategicSeedIds.has(to)) {{
-        strategicContextIds.add(from);
-        strategicContextIds.add(to);
+        addContext(from);
+        addContext(to);
       }}
     }});
     networkEdges.forEach(edge => {{
@@ -736,8 +761,8 @@ def inject_guided_layer(
       const from = String(edge.from);
       const to = String(edge.to);
       if (strategicContextIds.has(from) || strategicContextIds.has(to)) {{
-        strategicContextIds.add(from);
-        strategicContextIds.add(to);
+        addContext(from);
+        addContext(to);
       }}
     }});
     publishStrategicState();
@@ -806,7 +831,7 @@ def inject_guided_layer(
       let color = original.color || node.color;
       let borderWidth = original.borderWidth || 1;
       let size = original.size;
-      let font = original.font;
+      let font = node.font || original.font;
       const isFocus = matchesFocus(meta, guidedFocus);
       const isStrategicSeed = strategicCombine && strategicSeedIds.has(String(node.id));
       const isStrategicContext = strategicCombine && strategicContextIds.has(String(node.id)) && !isStrategicSeed;
@@ -854,6 +879,7 @@ def inject_guided_layer(
     if (!resolveNetwork()) return;
     guidedFocus = null;
     Object.values(activeFilters).forEach(values => values.clear());
+    (preset.strategic || []).forEach(value => activeFilters.strategic.add(value));
     (preset.polarity || []).forEach(value => activeFilters.polarity.add(value));
     (preset.stance || []).forEach(value => activeFilters.stance.add(value));
     strategicCombine = preset.combine || 'all';
