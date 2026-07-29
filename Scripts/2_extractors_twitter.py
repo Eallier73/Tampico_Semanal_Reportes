@@ -61,7 +61,12 @@ SEARCH_QUERIES = [
     "@MonicaVTampico",
     "monica villarreal",
     "gobierno de tampico",
-    "tampico"
+    "tampico",
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
 ]
 
 # Respuestas
@@ -459,8 +464,7 @@ class TwitterExtractorIAD:
     def save_to_csv(self, all_tweets):
         """Guardar tweets en dos CSV: posts institucionales y comentarios."""
         if not all_tweets:
-            print("⚠️  No hay tweets para guardar")
-            return
+            print("⚠️  No hay tweets; se generarán CSV/TXT vacíos con su estructura.")
         
         # Definir columnas del CSV
         fieldnames = [

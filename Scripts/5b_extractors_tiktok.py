@@ -41,6 +41,22 @@ def normalize_match(value: Any) -> str:
     return re.sub(r"[^a-z0-9]+", " ", plain).strip()
 
 
+def matches_configured_query(haystack: str, queries: list[str]) -> bool:
+    """Acepta términos configurados aun cuando una cuenta una sus palabras."""
+    normalized = normalize_match(haystack)
+    words = set(normalized.split())
+    compact = normalized.replace(" ", "")
+    for query in queries:
+        normalized_query = normalize_match(query)
+        query_words = set(normalized_query.split())
+        if query_words and (
+            query_words <= words
+            or normalized_query.replace(" ", "") in compact
+        ):
+            return True
+    return False
+
+
 def official_item(item: dict[str, Any]) -> bool:
     username = normalize_match(
         first(item, "authorMeta.name", "authorMeta.nickName", "author")
@@ -55,8 +71,16 @@ def relevant_item(plan: ActorRunPlan, item: dict[str, Any]) -> bool:
     """Conserva fuentes oficiales y filtra coincidencias aproximadas ruidosas."""
     if plan.institutional or official_item(item):
         return True
-    text = normalize_match(first(item, "text", "desc"))
-    words = set(text.split())
+    haystack = " ".join(
+        str(value)
+        for value in (
+            first(item, "text", "desc"),
+            first(item, "authorMeta.name", "authorMeta.nickName", "author"),
+        )
+    )
+    if matches_configured_query(haystack, TIKTOK_SEARCH_QUERIES):
+        return True
+    words = set(normalize_match(haystack).split())
     if {"monica", "villarreal"} <= words:
         return True
     government_terms = {
@@ -170,17 +194,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile", dest="profiles", action="append", default=[])
     parser.add_argument("--hashtag", dest="hashtags", action="append", default=[])
     parser.add_argument("--query", dest="queries", action="append", default=[])
+    parser.add_argument(
+        "--only-query",
+        "--solo-consulta",
+        action="store_true",
+        help="Ejecutar únicamente las consultas indicadas, sin perfiles ni hashtags predeterminados",
+    )
     parser.add_argument("--results-limit", type=int, default=50)
     parser.add_argument("--token", default="")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-prompt", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
-    if not args.profiles:
-        args.profiles = list(TIKTOK_PROFILES)
-    if not args.hashtags:
-        args.hashtags = list(TIKTOK_HASHTAGS)
-    if not args.queries:
-        args.queries = list(TIKTOK_SEARCH_QUERIES)
+    if args.only_query:
+        if not args.queries:
+            parser.error("--only-query requiere al menos un --query")
+        args.profiles = []
+        args.hashtags = []
+    else:
+        if not args.profiles:
+            args.profiles = list(TIKTOK_PROFILES)
+        if not args.hashtags:
+            args.hashtags = list(TIKTOK_HASHTAGS)
+        if not args.queries:
+            args.queries = list(TIKTOK_SEARCH_QUERIES)
     return args
 
 
@@ -193,7 +229,9 @@ def main() -> None:
     output_base = Path(args.output_dir)
     if args.dry_run:
         print_dry_run(ACTOR_ID, plans, output_base, report_tag)
-        if not args.profiles:
+        if args.only_query:
+            print("\nℹ️ Modo solo consulta: no se incluirán perfiles ni hashtags predeterminados.")
+        elif not args.profiles:
             print("\n⚠️ Sin perfiles oficiales confirmados; el dry-run usa búsquedas y hashtags.")
         return
     token = require_token(args.token)

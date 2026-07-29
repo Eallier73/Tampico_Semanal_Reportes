@@ -35,7 +35,6 @@ import math
 import re
 import unicodedata
 from collections import Counter, defaultdict
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +57,12 @@ from sna_guiada_common import (
     load_lexicons,
     stance_from_evidence,
     write_annotation_outputs,
+)
+from sna_spanish_filter import (
+    DEFAULT_ENGLISH_DICTIONARY,
+    DEFAULT_SPANISH_DICTIONARY,
+    is_spanish_word,
+    load_language_vocabulary,
 )
 from sna_position_labels import classify_position_name
 
@@ -106,23 +111,6 @@ NOISE_WORDS = {
     "rt", "htt", "youtu", "youtube", "facebook", "twitter",
 }
 
-DEFAULT_SPANISH_DICTIONARY = Path("/usr/share/hunspell/es_ES.dic")
-DEFAULT_ENGLISH_DICTIONARY = Path("/usr/share/dict/american-english")
-SPANISH_LOCAL_TERMS = {
-    "altamira", "amlo", "americo", "americovillarreal", "brugada", "cdmx",
-    "ciudadmadero", "conagua", "dif", "edomex", "gobtam", "imss", "inegi",
-    "jaibo", "jaibos", "madero", "mexico", "monica", "monicavillarreal",
-    "morena", "prian", "tamaulipas", "tampico", "tampicogob",
-    "tampicotecuida", "tampicovacontodo", "unam", "villarreal",
-    "zonaconurbada",
-}
-# Formas inglesas que también figuran en algunos diccionarios de español por
-# ser siglas, extranjerismos o coincidir con otra forma válida. En el corpus
-# funcionan como vocabulario inglés, por lo que no deben llegar a la red.
-ENGLISH_FALSE_FRIENDS = {
-    "dean", "end", "home", "ice", "man", "mass", "name", "show", "single",
-    "tell", "tour", "true", "world",
-}
 MAX_TOPIC_ENGLISH_SHARE = 0.50
 
 TOPIC_FRAMES = [
@@ -220,6 +208,16 @@ TOPIC_FRAMES = [
 
 TOKEN_RE = re.compile(r"[a-záéíóúüñ]{3,}", re.IGNORECASE)
 DISPLAY_TOKEN_RE = re.compile(r"[a-záéíóúüñ0-9]+", re.IGNORECASE)
+NADER_STRONG_RE = re.compile(
+    r"\b(?:chucho\s*nader|diputad[oa]\s+nader|"
+    r"jesus\s+antonio\s+nader\s+nasrallah|nader\s+nasrallah)\b",
+    re.IGNORECASE,
+)
+JESUS_NADER_RE = re.compile(r"\bjesus\s+nader\b", re.IGNORECASE)
+NADER_CONTEXT_RE = re.compile(
+    r"\b(?:tampico|diputad[oa]|alcalde(?:sa)?|pan|nasrallah)\b",
+    re.IGNORECASE,
+)
 DISPLAY_NAME_STOP_WORDS = {
     "a", "al", "ante", "con", "de", "del", "desde", "e", "el", "en", "entre",
     "hacia", "la", "las", "los", "para", "por", "sobre", "su", "sus", "un",
@@ -237,60 +235,268 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
+def stacked_label(value: Any) -> str:
+    """Muestra cada palabra de las etiquetas principales en un renglón."""
+    return "\n".join(str(value).split())
+
+
 def _topic_key(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value).strip().lower())
     return "".join(char for char in text if not unicodedata.combining(char))
 
 
-@lru_cache(maxsize=4)
-def load_language_vocabulary(dictionary_path: str) -> frozenset[str]:
-    """Carga un diccionario normalizado y descarta banderas de Hunspell."""
-    path = Path(dictionary_path)
-    if not path.is_file():
-        raise FileNotFoundError(
-            f"No existe el diccionario de idioma requerido: {path}"
+def matches_jesus_nader(value: Any) -> bool:
+    """Reconoce al actor político sin aceptar el apellido Nader aislado."""
+    normalized = _topic_key(value)
+    if NADER_STRONG_RE.search(normalized):
+        return True
+    return bool(
+        JESUS_NADER_RE.search(normalized)
+        and NADER_CONTEXT_RE.search(normalized)
+    )
+
+
+def row_matches_jesus_nader(row: pd.Series) -> bool:
+    """Reconoce menciones en texto y metadatos trazables de la publicación."""
+    direct_evidence = " ".join(
+        str(row.get(column, "") or "")
+        for column in (
+            "texto_limpio",
+            "usuario",
+            "titulo_contexto",
+            "autor_contexto",
+            "url_contexto",
         )
-    words: set[str] = set()
-    with path.open(encoding="utf-8") as handle:
-        for line in handle:
-            word = line.strip().split("/", 1)[0]
-            key = _topic_key(word)
-            if key:
-                words.add(key)
-    return frozenset(words)
+    )
+    if matches_jesus_nader(direct_evidence):
+        return True
+
+    query = re.sub(
+        r"[^a-z0-9]+",
+        " ",
+        _topic_key(row.get("query_busqueda", "")),
+    ).strip()
+    return query in {
+        "chucho nader",
+        "diputado nader",
+        "jesus nader",
+        "jesus antonio nader",
+        "jesus antonio nader nasrallah",
+        "nader nasrallah",
+    }
 
 
-def spanish_root_candidates(key: str) -> set[str]:
-    """Genera bases simples para plurales que el diccionario guarda sin expandir."""
-    candidates = {key}
-    if len(key) > 3 and key.endswith("s"):
-        candidates.add(key[:-1])
-    if len(key) > 4 and key.endswith("es"):
-        candidates.add(key[:-2])
-    if len(key) > 4 and key.endswith("ces"):
-        candidates.add(f"{key[:-3]}z")
-    return candidates
-
-
-def is_spanish_word(
-    value: Any,
+def add_nader_structural_branch(
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    meta: dict[str, dict[str, Any]],
+    mensajes: pd.DataFrame,
     spanish_vocabulary: frozenset[str],
     english_vocabulary: frozenset[str],
-) -> bool:
-    """Excluye léxico inglés, dando prioridad a formas válidas en español."""
-    key = _topic_key(value)
-    if (
-        not key
-        or key in NOISE_WORDS
-        or key in ENGLISH_FALSE_FRIENDS
-        or not re.fullmatch(r"[a-zñ]+", key)
+    words_limit: int,
+) -> tuple[set[str], set[str]]:
+    """Añade una rama rastreada y reutiliza palabras reales como puentes."""
+    matched = mensajes[mensajes.apply(row_matches_jesus_nader, axis=1)].copy()
+    if matched.empty:
+        return set(), set()
+
+    root_id = "STRUCT_NADER"
+    matched["engagement"] = matched["engagement"].fillna(0).astype(float)
+    examples = (
+        matched.sort_values("engagement", ascending=False)
+        .head(8)[
+            ["usuario", "plataforma", "fecha", "texto_limpio", "engagement"]
+        ]
+        .rename(columns={"texto_limpio": "texto"})
+        .to_dict("records")
+    )
+    nodes.append({
+        "id": root_id,
+        "label": stacked_label("Jesús Nader"),
+        "title": "Conversación rastreada sobre Jesús Nader",
+        "short_name": "Jesús Nader",
+        "kind": "posicion",
+        "ibea": "bajo",
+        "shape": "diamond",
+        "color": {
+            "background": "#0057b8",
+            "border": "#ffffff",
+            "highlight": {"background": "#0057b8", "border": "#ffffff"},
+        },
+        "borderWidth": 3,
+        "font": {
+            "size": 42,
+            "color": "#ffffff",
+            "face": "arial",
+            "strokeWidth": 4,
+            "strokeColor": "#111111",
+        },
+        "size": 30,
+        "x": 0,
+        "y": -460,
+    })
+    meta[root_id] = {
+        "kind": "posicion",
+        "nombre": "Jesús Nader",
+        "short_name": "Jesús Nader",
+        "resumen": (
+            "Mensajes en español que mencionan Chucho Nader, Diputado Nader "
+            "o Jesús Nader con contexto de Tampico, alcaldía, PAN o Nasrallah."
+        ),
+        "n_cuentas": int(matched["usuario"].nunique()),
+        "n_msgs": int(len(matched)),
+        "n_palabras_tema": 0,
+        "top_words": [],
+        "top_subclusters": "",
+        "ibea_score": 0.0,
+        "ibea_nivel": "bajo",
+        "postura_actor": "sin_postura",
+        "postura_actor_etiqueta": "Sin postura",
+        "postura_actor_score": 0.0,
+        "postura_actor_evidencia": 0.0,
+        "postura_actor_mensajes": 0,
+        "metricas": {},
+        "examples": examples,
+    }
+
+    structural_ids = {root_id}
+    bridge_ids: set[str] = set()
+    existing_accounts = {
+        str(item.get("usuario", "")): str(node_id)
+        for node_id, item in meta.items()
+        if item.get("kind") == "cuenta" and item.get("usuario")
+    }
+    for index, (usuario, group) in enumerate(
+        matched.groupby("usuario", sort=True), 1
     ):
-        return False
-    if key in SPANISH_LOCAL_TERMS:
-        return True
-    if spanish_root_candidates(key) & spanish_vocabulary:
-        return True
-    return key not in english_vocabulary
+        node_id = existing_accounts.get(str(usuario))
+        if node_id is None:
+            node_id = f"STRUCT_NADER_A{index}"
+            platform = str(group["plataforma"].iloc[0])
+            color = PLATFORM_COLORS.get(platform, "#777777")
+            angle = 2 * math.pi * (index - 1) / max(
+                1, matched["usuario"].nunique()
+            )
+            nodes.append({
+                "id": node_id,
+                "label": "",
+                "search": str(usuario),
+                "kind": "cuenta",
+                "shape": "dot",
+                "color": {"background": color, "border": "#222222"},
+                "font": {"size": 0, "color": "#ffffff", "face": "arial"},
+                "size": 10,
+                "x": round(math.cos(angle) * 95, 2),
+                "y": round(-460 + math.sin(angle) * 95, 2),
+            })
+            meta[node_id] = {
+                "kind": "cuenta",
+                "usuario": str(usuario),
+                "plataformas": [platform],
+                "n_msgs": int(len(group)),
+                "n_palabras": 0,
+                "tema_dominante": "Jesús Nader",
+                "sub_dominante": "",
+                "posiciones": [
+                    {
+                        "posicion_id": root_id,
+                        "tema_id": None,
+                        "conteo_tema": int(len(group)),
+                        "pct_usuario_en_tema": 100.0,
+                    }
+                ],
+            }
+        structural_ids.add(node_id)
+        edges.append({
+            "id": f"struct_nader_account_{index}",
+            "from": root_id,
+            "to": node_id,
+            "value": max(1, int(len(group))),
+            "kind": "posicion_cuenta",
+            "color": {"color": "#0057b8", "opacity": 0.65},
+            "dashes": True,
+        })
+
+    word_counts: Counter[str] = Counter()
+    for value in matched["lemas"].fillna("").astype(str):
+        for word in value.split():
+            if (
+                word.lower() not in NOISE_WORDS
+                and is_spanish_word(
+                    word, spanish_vocabulary, english_vocabulary
+                )
+            ):
+                word_counts[word.lower()] += 1
+    selected_words = word_counts.most_common(max(1, words_limit))
+    meta[root_id]["top_words"] = [word for word, _ in selected_words]
+    meta[root_id]["n_palabras_tema"] = int(sum(word_counts.values()))
+    max_count = max((count for _, count in selected_words), default=1)
+    existing_word_nodes = {
+        _topic_key(item.get("palabra", "")): str(node_id)
+        for node_id, item in meta.items()
+        if item.get("kind") == "palabra" and item.get("palabra")
+    }
+    for index, (word, count) in enumerate(selected_words, 1):
+        node_id = existing_word_nodes.get(_topic_key(word))
+        if node_id is not None:
+            positions = meta[node_id].setdefault("posiciones", [])
+            if not any(
+                position.get("posicion_id") == root_id
+                for position in positions
+            ):
+                positions.append({
+                    "posicion_id": root_id,
+                    "tema_id": None,
+                    "conteo": int(count),
+                    "rank": index,
+                })
+            bridge_ids.add(node_id)
+            edges.append({
+                "id": f"struct_nader_word_bridge_{index}",
+                "from": root_id,
+                "to": node_id,
+                "value": max(1, int(count)),
+                "kind": "posicion_palabra",
+                "color": {"color": "#0057b8", "opacity": 0.75},
+            })
+            continue
+
+        node_id = f"STRUCT_NADER_W{index}"
+        angle = 2 * math.pi * (index - 1) / max(1, len(selected_words))
+        radius = 145 + 24 * ((index - 1) // 24)
+        nodes.append({
+            "id": node_id,
+            "label": word,
+            "kind": "palabra",
+            "shape": "dot",
+            "color": {"background": "#222222", "border": "#0057b8"},
+            "font": {"size": 16, "color": "#f7f7f7", "face": "arial"},
+            "size": scalar_size(float(count), 1, max_count, 8, 22),
+            "x": round(math.cos(angle) * radius, 2),
+            "y": round(-460 + math.sin(angle) * radius, 2),
+        })
+        meta[node_id] = {
+            "kind": "palabra",
+            "palabra": word,
+            "posiciones": [
+                {
+                    "posicion_id": root_id,
+                    "tema_id": None,
+                    "conteo": int(count),
+                    "rank": index,
+                }
+            ],
+        }
+        structural_ids.add(node_id)
+        edges.append({
+            "id": f"struct_nader_word_{index}",
+            "from": root_id,
+            "to": node_id,
+            "value": max(1, int(count)),
+            "kind": "posicion_palabra",
+            "color": {"color": "#0057b8", "opacity": 0.55},
+        })
+    return structural_ids, bridge_ids
 
 
 def filter_spanish_word_rows(
@@ -542,7 +748,11 @@ def read_inputs(
 
     lemas_path = base / "clusters" / "documentos_lematizados.csv"
     lemas = pd.read_csv(lemas_path, usecols=["documento_id", "lemas"])
-    mensajes = mensajes.merge(lemas, left_on="id", right_on="documento_id", how="left")
+    # La fase LDA conserva aquí solo los documentos validados como español.
+    # El inner join evita reincorporar mensajes descartados desde el CSV crudo.
+    mensajes = mensajes.merge(
+        lemas, left_on="id", right_on="documento_id", how="inner"
+    )
     mensajes["usuario"] = (
         mensajes["plataforma"].fillna("").astype(str).str.strip()
         + "::"
@@ -978,7 +1188,7 @@ def build_network_data(
         node_id = f"T{tema:02d}"
         node = {
             "id": node_id,
-            "label": topic_short_name,
+            "label": stacked_label(topic_short_name),
             "title": info.get("title", f"T{tema:02d}"),
             "short_name": topic_short_name,
             "kind": "tema",
@@ -1035,7 +1245,7 @@ def build_network_data(
         position_coords[pos_id] = (px, py)
         nodes.append({
             "id": pos_id,
-            "label": str(row["nombre_corto"]),
+            "label": stacked_label(row["nombre_corto"]),
             "title": str(row["nombre"]),
             "short_name": str(row["nombre_corto"]),
             "kind": "posicion",
@@ -1237,7 +1447,8 @@ def build_html(
     topics = sorted(topic_info)
     position_topics = {
         str(node["id"]): int(node["tema"])
-        for node in nodes if node.get("kind") == "posicion"
+        for node in nodes
+        if node.get("kind") == "posicion" and node.get("tema") is not None
     }
     topic_neighbors: defaultdict[int, set[str]] = defaultdict(set)
     neighbor_topics: defaultdict[str, set[int]] = defaultdict(set)
@@ -1306,7 +1517,17 @@ def build_html(
 <style>
   :root {{ color-scheme: dark; }}
   body {{ margin:0; background:#121212; color:#eee; font-family:Arial, sans-serif; overflow:hidden; }}
-  #network {{ position:fixed; inset:0 calc(360px - 1cm) 0 calc(320px - 1cm); background:#1d1d1d; }}
+  #networkStage {{
+    position:fixed; inset:0 calc(360px - 1cm) 0 calc(320px - 1cm);
+    background:#1d1d1d; overflow:hidden;
+  }}
+  #network {{ position:absolute; inset:0; background:#1d1d1d; }}
+  #networkStage:fullscreen, #networkStage.network-expanded {{
+    position:fixed; inset:0; width:100vw; height:100vh; z-index:1000;
+  }}
+  #networkStage:-webkit-full-screen {{
+    position:fixed; inset:0; width:100vw; height:100vh;
+  }}
   #left, #right {{
     position:fixed; top:0; bottom:0; overflow:auto; z-index:5;
     background:#151515; border-color:#333; padding:12px; box-sizing:border-box;
@@ -1343,7 +1564,7 @@ def build_html(
   .level-bajo {{ color:#cfcfcf; }}
   .level-medio {{ color:#ffcc33; }}
   .level-alto {{ color:#ff6b6b; }}
-  #strategicBar {{ position:fixed; left:calc(320px - 1cm + 10px); right:calc(360px - 1cm + 10px); top:10px; z-index:9;
+  #strategicBar {{ position:absolute; left:10px; right:10px; top:10px; z-index:9;
     display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:7px 9px; box-sizing:border-box;
     background:rgba(17,17,17,.96); border:1px solid #555; border-radius:5px; box-shadow:0 3px 12px #0008; font-size:11px; }}
   #strategicBar .strategic-title {{ color:#fff; font-weight:bold; white-space:nowrap; }}
@@ -1355,11 +1576,17 @@ def build_html(
   #strategicBar [data-strategy="consolidation"].strategy-active {{ background:#176b42; }}
   #strategyHelp {{ flex:1 1 250px; color:#aaa; line-height:1.3; }}
   #stats {{ margin-left:auto; color:#ddd; white-space:nowrap; }}
+  #fullscreenNetwork {{
+    flex:none; display:inline-flex; align-items:center; gap:6px; padding:5px 9px;
+    background:#214d27; border-color:#43b64f; font-weight:bold; white-space:nowrap;
+  }}
+  #fullscreenNetwork:hover, #fullscreenNetwork:focus {{ background:#2d6b35; outline:2px solid #8bea91; }}
+  #fullscreenNetwork .fullscreen-icon {{ font-size:17px; line-height:12px; }}
   .layout-actions {{ display:grid; grid-template-columns:1fr; gap:5px; }}
   .layout-actions button {{ width:100%; }}
   .layout-actions button.layout-active {{ outline:2px solid #fff; background:#4c4c4c; }}
   #polarityGuide {{
-    position:fixed; left:calc(320px - 1cm + 18px); right:calc(360px - 1cm + 18px);
+    position:absolute; left:18px; right:18px;
     top:58px; z-index:8; display:grid; grid-template-columns:1fr 1fr 1fr;
     align-items:center; pointer-events:none; color:#fff; font-size:11px;
     font-weight:bold; text-transform:uppercase; letter-spacing:.06em;
@@ -1370,7 +1597,7 @@ def build_html(
   #polarityGuide span:nth-child(2) {{ color:#f2c744; text-align:center; }}
   #polarityGuide span:nth-child(3) {{ color:#ff6666; text-align:right; }}
   #governmentGuide {{
-    position:fixed; left:calc(320px - 1cm + 18px); right:calc(360px - 1cm + 18px);
+    position:absolute; left:18px; right:18px;
     top:58px; z-index:8; pointer-events:none; color:#fff; text-align:center;
     font-size:11px; font-weight:bold; text-transform:uppercase; letter-spacing:.06em;
     text-shadow:0 1px 3px #000, 0 0 5px #000;
@@ -1414,12 +1641,13 @@ def build_html(
     <input id="spring" type="range" min="0" max="100" value="0" step="1">
     <div class="range-scale"><span>0</span><span>100</span></div>
     <label>Tamaño de nombres <span id="labelScaleV">100%</span></label>
-    <input id="labelScale" type="range" min="50" max="200" value="100" step="5">
-    <div class="range-scale"><span>50%</span><span>200%</span></div>
+    <input id="labelScale" type="range" min="10" max="200" value="100" step="5">
+    <div class="range-scale"><span>10%</span><span>200%</span></div>
     <button id="reset">Reorganizar</button>
     <button id="stopPhysics">Detener</button>
     <button id="fitNetwork">Encajar</button>
-    <div class="tool-help">Separación aleja los grupos sin cambiar sus relaciones. Reorganizar activa el movimiento, Detener lo congela y Encajar centra toda la red.</div>
+    <button id="separateLabels">Separar etiquetas</button>
+    <div class="tool-help">Separación aleja los grupos sin cambiar sus relaciones. Reorganizar activa el movimiento, Detener lo congela, Encajar centra toda la red y Separar etiquetas redistribuye los nombres de temas y posiciones para evitar empalmes.</div>
   </div>
   <div class="grp">
     <h2>Acomodos</h2>
@@ -1445,11 +1673,8 @@ def build_html(
     <div id="topicList">{topic_cards_html}</div>
   </div>
 </aside>
+<section id="networkStage">
 <main id="network"></main>
-<aside id="right">
-  <h1>Lectura</h1>
-  <div id="detail" class="muted">Haz clic en cualquier elemento de la red. Aquí aparecerá una explicación de qué representa, sus cifras y las palabras o ejemplos que ayudan a interpretarlo.</div>
-</aside>
 <div id="strategicBar">
   <span class="strategic-title">Lectura estratégica</span>
   <div class="strategic-actions">
@@ -1459,6 +1684,10 @@ def build_html(
   </div>
   <span id="strategyHelp">Elige un ámbito. Los nodos con color cumplen el criterio; los grises muestran sus conexiones inmediatas como contexto.</span>
   <span id="stats"></span>
+  <button id="fullscreenNetwork" type="button" aria-label="Expandir solamente la red a pantalla completa" aria-pressed="false" title="Expandir solamente la red">
+    <span class="fullscreen-icon" aria-hidden="true">⛶</span>
+    <span class="fullscreen-label">Pantalla completa</span>
+  </button>
 </div>
 <div id="polarityGuide" hidden>
   <span>Positivos</span>
@@ -1469,6 +1698,11 @@ def build_html(
   Núcleo: <span class="mayor-label">Alcaldesa</span> y
   <span class="government-label">Gobierno municipal</span> · temas alrededor
 </div>
+</section>
+<aside id="right">
+  <h1>Lectura</h1>
+  <div id="detail" class="muted">Haz clic en cualquier elemento de la red. Aquí aparecerá una explicación de qué representa, sus cifras y las palabras o ejemplos que ayudan a interpretarlo.</div>
+</aside>
 <script>
 const RAW_NODES = {json.dumps(nodes, ensure_ascii=False)};
 const RAW_EDGES = {json.dumps(edges, ensure_ascii=False)};
@@ -1487,6 +1721,75 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
   interaction: {{ hover:true, tooltipDelay:100, navigationButtons:true, keyboard:true }}
 }});
 window.network = network;
+
+const networkStage = document.getElementById('networkStage');
+const fullscreenNetwork = document.getElementById('fullscreenNetwork');
+function isNetworkFullscreen() {{
+  return document.fullscreenElement === networkStage ||
+    document.webkitFullscreenElement === networkStage ||
+    networkStage.classList.contains('network-expanded');
+}}
+function refreshNetworkViewport() {{
+  window.setTimeout(() => {{
+    network.setSize('100%', '100%');
+    network.redraw();
+    const visibleIds = nodes.get()
+      .filter(node => !node.hidden)
+      .map(node => node.id);
+    network.fit({{
+      nodes: visibleIds,
+      animation: {{duration:350, easingFunction:'easeInOutQuad'}}
+    }});
+  }}, 80);
+}}
+function updateFullscreenButton() {{
+  const active = isNetworkFullscreen();
+  fullscreenNetwork.setAttribute('aria-pressed', String(active));
+  fullscreenNetwork.setAttribute(
+    'aria-label',
+    active ? 'Salir de pantalla completa' : 'Expandir solamente la red a pantalla completa'
+  );
+  fullscreenNetwork.title = active ? 'Salir de pantalla completa (Esc)' : 'Expandir solamente la red';
+  fullscreenNetwork.querySelector('.fullscreen-icon').textContent = active ? '⛶' : '⛶';
+  fullscreenNetwork.querySelector('.fullscreen-label').textContent =
+    active ? 'Salir de pantalla completa' : 'Pantalla completa';
+  refreshNetworkViewport();
+}}
+async function toggleNetworkFullscreen() {{
+  if (document.fullscreenElement === networkStage || document.webkitFullscreenElement === networkStage) {{
+    const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exitFullscreen) await exitFullscreen.call(document);
+    return;
+  }}
+  if (networkStage.classList.contains('network-expanded')) {{
+    networkStage.classList.remove('network-expanded');
+    document.body.classList.remove('network-fallback-active');
+    updateFullscreenButton();
+    return;
+  }}
+  const requestFullscreen = networkStage.requestFullscreen || networkStage.webkitRequestFullscreen;
+  if (requestFullscreen) {{
+    try {{
+      await requestFullscreen.call(networkStage);
+      return;
+    }} catch (error) {{
+      console.warn('El navegador no permitió pantalla completa nativa; se usa el modo expandido.', error);
+    }}
+  }}
+  networkStage.classList.add('network-expanded');
+  document.body.classList.add('network-fallback-active');
+  updateFullscreenButton();
+}}
+fullscreenNetwork.addEventListener('click', toggleNetworkFullscreen);
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+document.addEventListener('keydown', event => {{
+  if (event.key === 'Escape' && networkStage.classList.contains('network-expanded')) {{
+    networkStage.classList.remove('network-expanded');
+    document.body.classList.remove('network-fallback-active');
+    updateFullscreenButton();
+  }}
+}});
 
 const STRATEGIC_PRESETS = {{
   risk: {{label:'Riesgo', strategic:['risk'], combine:'all', help:'Clasificación exclusiva: temas con polaridad negativa.'}},
@@ -1669,7 +1972,7 @@ const BASE_LABEL_FONT_SIZES = Object.fromEntries(
     .map(node => [String(node.id), Number(node.font?.size || (node.kind === 'tema' ? 64 : 42))])
 );
 function applyLabelScale(value) {{
-  const percent = Math.max(50, Math.min(200, Number(value) || 100));
+  const percent = Math.max(10, Math.min(200, Number(value) || 100));
   const scale = percent / 100;
   document.getElementById('labelScaleV').textContent = `${{percent}}%`;
   nodes.update(
@@ -1683,10 +1986,6 @@ function applyLabelScale(value) {{
         }}
       }}))
   );
-  document.querySelectorAll('#guidedPanel .guided-target').forEach(button =>
-    button.style.setProperty('font-size', `${{Math.round(16 * scale)}}px`, 'important'));
-  document.querySelectorAll('.topic-card-title').forEach(card =>
-    card.style.fontSize = `${{Math.round(15 * scale)}}px`);
 }}
 document.getElementById('labelScale').addEventListener('input', event =>
   applyLabelScale(event.target.value));
@@ -1702,6 +2001,94 @@ document.getElementById('stopPhysics').addEventListener('click', () => {{
 document.getElementById('fitNetwork').addEventListener('click', () => {{
   network.fit({{animation:{{duration:400}}}});
 }});
+function separateVisibleLabels() {{
+  clearActiveLayout();
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false}}}});
+  const button = document.getElementById('separateLabels');
+  button.disabled = true;
+  button.textContent = 'Separando…';
+  button.classList.remove('layout-active');
+
+  window.setTimeout(() => {{
+    const labeled = nodes.get()
+      .filter(node =>
+        !node.hidden &&
+        (node.kind === 'tema' || node.kind === 'posicion') &&
+        String(node.label || '').trim() &&
+        Number(node.font?.size || 0) > 0
+      )
+      .sort((a, b) => {{
+        const priority = {{tema:2, posicion:1}};
+        return (priority[b.kind] || 0) - (priority[a.kind] || 0) ||
+          String(a.id).localeCompare(String(b.id));
+      }});
+    const priority = {{tema:2, posicion:1}};
+    const padding = 10;
+    let totalMoves = 0;
+
+    for (let pass = 0; pass < 18; pass += 1) {{
+      let passMoves = 0;
+      const boxes = new Map(
+        labeled.map(node => [String(node.id), network.getBoundingBox(node.id)])
+      );
+      for (let leftIndex = 0; leftIndex < labeled.length; leftIndex += 1) {{
+        const leftNode = labeled[leftIndex];
+        const leftBox = boxes.get(String(leftNode.id));
+        if (!leftBox) continue;
+        for (let rightIndex = leftIndex + 1; rightIndex < labeled.length; rightIndex += 1) {{
+          const rightNode = labeled[rightIndex];
+          const rightBox = boxes.get(String(rightNode.id));
+          if (!rightBox) continue;
+          const overlapX = Math.min(leftBox.right, rightBox.right) -
+            Math.max(leftBox.left, rightBox.left) + padding;
+          const overlapY = Math.min(leftBox.bottom, rightBox.bottom) -
+            Math.max(leftBox.top, rightBox.top) + padding;
+          if (overlapX <= 0 || overlapY <= 0) continue;
+
+          const leftPosition = network.getPosition(leftNode.id);
+          const rightPosition = network.getPosition(rightNode.id);
+          const moveHorizontally = overlapX <= overlapY;
+          let direction = moveHorizontally
+            ? Math.sign(rightPosition.x - leftPosition.x)
+            : Math.sign(rightPosition.y - leftPosition.y);
+          if (!direction) {{
+            direction = String(leftNode.id).localeCompare(String(rightNode.id)) <= 0 ? 1 : -1;
+          }}
+          const displacement = Math.min(
+            90,
+            (moveHorizontally ? overlapX : overlapY) + padding
+          );
+          const leftPriority = priority[leftNode.kind] || 0;
+          const rightPriority = priority[rightNode.kind] || 0;
+          const leftShare = leftPriority > rightPriority ? 0 : (leftPriority < rightPriority ? 1 : 0.5);
+          const rightShare = rightPriority > leftPriority ? 0 : (rightPriority < leftPriority ? 1 : 0.5);
+
+          network.moveNode(
+            leftNode.id,
+            leftPosition.x - (moveHorizontally ? direction * displacement * leftShare : 0),
+            leftPosition.y - (moveHorizontally ? 0 : direction * displacement * leftShare)
+          );
+          network.moveNode(
+            rightNode.id,
+            rightPosition.x + (moveHorizontally ? direction * displacement * rightShare : 0),
+            rightPosition.y + (moveHorizontally ? 0 : direction * displacement * rightShare)
+          );
+          passMoves += 1;
+        }}
+      }}
+      totalMoves += passMoves;
+      if (!passMoves) break;
+    }}
+
+    network.redraw();
+    network.fit({{animation:{{duration:500, easingFunction:'easeInOutQuad'}}}});
+    button.disabled = false;
+    button.textContent = totalMoves ? 'Etiquetas separadas' : 'Sin empalmes';
+    button.classList.add('layout-active');
+  }}, 30);
+}}
+document.getElementById('separateLabels').addEventListener('click', separateVisibleLabels);
 document.getElementById('polarityLayout').addEventListener('click', applyPolarityLayout);
 document.getElementById('governmentLayout').addEventListener('click', applyGovernmentLayout);
 document.getElementById('search').addEventListener('keydown', e => {{
@@ -1962,8 +2349,8 @@ def main() -> None:
     ap.add_argument(
         "--words-per-position",
         type=int,
-        default=35,
-        help="Máximo de palabras distintivas por posición (default: 35).",
+        default=60,
+        help="Máximo de palabras distintivas por posición (default: 60).",
     )
     ap.add_argument("--diccionario-temas", type=Path, default=DEFAULT_TOPIC_DICTIONARY)
     ap.add_argument("--diccionario-positivo", type=Path, default=DEFAULT_POSITIVE_DICTIONARY)
@@ -2054,6 +2441,15 @@ def main() -> None:
         accounts_per_position=args.accounts_per_position,
         words_per_position=args.words_per_position,
     )
+    nader_structural_ids, nader_bridge_ids = add_nader_structural_branch(
+        nodes,
+        edges,
+        meta,
+        mensajes,
+        spanish_vocabulary,
+        english_vocabulary,
+        args.words_per_position,
+    )
     html_path = out_dir / args.output_filename
 
     print("      aplicando temas rastreados, polaridad y postura")
@@ -2142,6 +2538,46 @@ def main() -> None:
             if position.get("tema_id") is not None:
                 network_topics.add(int(position["tema_id"]))
         annotations.setdefault(node_id, {})["network_topics"] = sorted(network_topics)
+
+    for node_id in nader_structural_ids:
+        item = annotations.setdefault(node_id, {})
+        other_categories = [
+            category
+            for category in item.get("categories", [])
+            if category.get("name") != "Jesús Nader"
+        ]
+        item["categories"] = [
+            {
+                "name": "Jesús Nader",
+                "score": 1.0,
+                "share": 1.0,
+                "confidence": 1.0,
+            },
+            *other_categories,
+        ]
+        item["primary_category"] = "Jesús Nader"
+        item["category_confidence"] = 1.0
+        item["matched_weight"] = max(
+            1.0, float(item.get("matched_weight", 0.0) or 0.0)
+        )
+
+    for node_id in nader_bridge_ids:
+        item = annotations.setdefault(node_id, {})
+        categories = [
+            category
+            for category in item.get("categories", [])
+            if category.get("name") != "Jesús Nader"
+        ]
+        categories.append({
+            "name": "Jesús Nader",
+            "score": 1.0,
+            "share": 0.0,
+            "confidence": 1.0,
+        })
+        item["categories"] = categories
+        item["matched_weight"] = max(
+            1.0, float(item.get("matched_weight", 0.0) or 0.0)
+        )
 
     # La vista de posiciones usa estos campos para acomodar todos los tipos de
     # nodo sobre un eje continuo de polaridad. Se conservan también dentro de

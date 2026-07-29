@@ -36,11 +36,27 @@ CATEGORY_COLORS = {
     "Corrupcion": "#d62728",
     "Delitos": "#8c564b",
     "Gobierno municipal": "#6a51a3",
+    "Jesús Nader": "#0057b8",
     "Mónica Villarreal": "#c62828",
     "Morena": "#e377c2",
     "Obras": "#ff7f0e",
     "Prevencion": "#17becf",
     "Vialidad": "#7f7f7f",
+}
+CATEGORY_DESCRIPTIONS = {
+    "Jesús Nader": (
+        "Exalcalde de Tampico y diputado federal; monitoreo de una posible "
+        "aspiración a la alcaldía en 2027, todavía no confirmada."
+    ),
+}
+CATEGORY_KEY_EXCLUSIONS = {
+    # Evita clasificar cualquier mención aislada a nombres de pila comunes.
+    "Jesús Nader": {"jesus", "antonio", "chucho"},
+}
+CONTEXTUAL_CATEGORIES = {"Jesús Nader"}
+NADER_COMPACT_ALIASES = {"chuchonader", "jesusnader"}
+NADER_CONTEXT_KEYS = {
+    "alcalde", "chucho", "diputado", "nasrallah", "pan", "tampico",
 }
 POLARITY_COLORS = {
     "positiva": "#2ca02c",
@@ -270,6 +286,12 @@ def load_lexicons(
     category_index: dict[str, dict[str, dict[str, Any]]] = defaultdict(dict)
     for row, keys in zip(topics.itertuples(index=False), topic_keys, strict=True):
         category = str(row.Categoria).strip()
+        # Un actor homónimo no puede clasificarse por lemas aislados. "Nader",
+        # por ejemplo, también es una palabra válida en afrikáans. La entidad
+        # se resuelve con alias y contexto dentro de aggregate_words().
+        if category in CONTEXTUAL_CATEGORIES:
+            continue
+        excluded_keys = CATEGORY_KEY_EXCLUSIONS.get(category, set())
         entry = {
             "name": category,
             "confidence": float(row.Confianza),
@@ -277,6 +299,8 @@ def load_lexicons(
             "source_word": str(row.Palabra),
         }
         for key in keys:
+            if key in excluded_keys:
+                continue
             previous = category_index[key].get(category)
             if previous is None or entry["confidence"] > previous["confidence"]:
                 category_index[key][category] = entry
@@ -305,6 +329,15 @@ def load_lexicons(
 def annotate_word(word: str, lexicons: GuidedLexicons) -> dict[str, Any]:
     key = normalize(word)
     categories = lexicons.categories.get(key, [])
+    if key in NADER_COMPACT_ALIASES:
+        categories = [
+            {
+                "name": "Jesús Nader",
+                "confidence": 1.0,
+                "delta_pmi": 0.0,
+                "source_word": word,
+            }
+        ]
     in_positive = key in lexicons.positive
     in_negative = key in lexicons.negative
     if in_positive and in_negative:
@@ -354,12 +387,15 @@ def aggregate_words(
     negative_hits = 0.0
     matched_weight = 0.0
     stance_word_weights: Counter[str] = Counter()
+    normalized_weights: Counter[str] = Counter()
     for word, raw_weight in weighted_words:
         weight = max(0.0, float(raw_weight))
         if weight <= 0:
             continue
+        normalized_word = normalize(word)
+        normalized_weights[normalized_word] += weight
         annotation = annotate_word(str(word), lexicons)
-        stance_word_weights[normalize(word)] += weight
+        stance_word_weights[normalized_word] += weight
         matched = False
         for category in annotation["categories"]:
             score = weight * float(category["confidence"])
@@ -376,6 +412,27 @@ def aggregate_words(
             matched = True
         if matched:
             matched_weight += weight
+
+    compact_alias_score = sum(
+        normalized_weights[key] for key in NADER_COMPACT_ALIASES
+    )
+    nader_weight = normalized_weights["nader"]
+    context_weight = sum(
+        normalized_weights[key] for key in NADER_CONTEXT_KEYS
+    )
+    # Reglas de entidad:
+    # - ChuchoNader / JesusNader;
+    # - Chucho Nader;
+    # - Diputado Nader;
+    # - Jesús Nader acompañado por Tampico, alcalde, PAN o Nasrallah.
+    # La palabra aislada "Nader" nunca es suficiente.
+    nader_score = compact_alias_score
+    if nader_weight > 0 and context_weight > 0:
+        nader_score += min(nader_weight, context_weight)
+    if nader_score > 0:
+        category_scores["Jesús Nader"] += nader_score
+        category_confidence["Jesús Nader"] = 1.0
+        matched_weight += nader_score
 
     total_category = sum(category_scores.values())
     categories = [
@@ -527,7 +584,8 @@ def inject_guided_layer(
     polarity_json = json.dumps(POLARITY_COLORS, ensure_ascii=False)
     stance_json = json.dumps(STANCE_COLORS, ensure_ascii=False)
     category_buttons = "".join(
-        f'<button class="guided-target" data-category="{html.escape(category)}">'
+        f'<button class="guided-target" data-category="{html.escape(category)}" '
+        f'title="{html.escape(CATEGORY_DESCRIPTIONS.get(category, category))}">'
         f'<span style="background:{color}"></span>{html.escape(category)}</button>'
         for category, color in category_colors.items()
     )

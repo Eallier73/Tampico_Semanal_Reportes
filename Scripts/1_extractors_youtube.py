@@ -20,6 +20,7 @@ import re
 import string
 import sys
 import time
+import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Sequence
@@ -65,6 +66,11 @@ DEFAULT_SEARCH_QUERIES = [
     "Presidenta municipal de Tampico",
     "Gobierno de Tampico",
     "gobierno de Tampico",
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
 ]
 
 DEFAULT_CHANNEL_HANDLES = ["monicavtampico"]
@@ -141,7 +147,8 @@ def resolver_rango_fechas(since: str | None, before: str | None) -> tuple[dateti
         end_date = datetime.now()
         start_date = end_date - timedelta(days=DEFAULT_RANGE_DAYS)
 
-    end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=0)
+    # ``--before`` mantiene el contrato del resto del pipeline: límite exclusivo.
+    end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
     return start_date, end_date
 
 
@@ -209,12 +216,31 @@ def get_video_details(youtube, video_ids: Sequence[str]) -> Dict[str, Dict[str, 
                 continue
             details[video_id] = {
                 "title": snippet.get("title", ""),
+                "description": snippet.get("description", ""),
                 "channel_title": snippet.get("channelTitle", ""),
                 "channel_id": snippet.get("channelId", ""),
                 "published_at": snippet.get("publishedAt", ""),
             }
 
     return details
+
+
+def video_coincide_con_query(info: Dict[str, str], query: str) -> bool:
+    """Descarta resultados aproximados de YouTube ajenos a la consulta."""
+    def normalizar(value: str) -> str:
+        plain = unicodedata.normalize("NFKD", str(value or ""))
+        plain = "".join(ch for ch in plain if not unicodedata.combining(ch))
+        return re.sub(r"[^a-z0-9]+", " ", plain.lower()).strip()
+
+    consulta = normalizar(query)
+    if not consulta:
+        return False
+    contenido = normalizar(" ".join([
+        info.get("title", ""),
+        info.get("description", ""),
+        info.get("channel_title", ""),
+    ]))
+    return consulta in contenido or consulta.replace(" ", "") in contenido.replace(" ", "")
 
 
 def get_video_comments(youtube, video_id: str, query: str,
@@ -634,6 +660,15 @@ def extraer_comentarios_busquedas(youtube, queries: Sequence[str], start_date: d
             continue
 
         details = get_video_details(youtube, video_ids)
+        video_ids_pertinentes = [
+            video_id
+            for video_id in video_ids
+            if video_coincide_con_query(details.get(video_id, {}), query)
+        ]
+        descartados = len(video_ids) - len(video_ids_pertinentes)
+        if descartados:
+            print(f"   🧹 Videos descartados por coincidencia laxa: {descartados}")
+        video_ids = video_ids_pertinentes
         total_videos += len(video_ids)
 
         query_comments = 0
@@ -658,6 +693,14 @@ def extraer_comentarios_busquedas(youtube, queries: Sequence[str], start_date: d
 
     if all_comments:
         df = pd.DataFrame(all_comments)
+        fechas = pd.to_datetime(df["published_at"], errors="coerce", utc=True)
+        inicio_utc = pd.Timestamp(start_date, tz="UTC")
+        fin_utc = pd.Timestamp(end_date, tz="UTC")
+        dentro = fechas.ge(inicio_utc) & fechas.lt(fin_utc)
+        descartados_fecha = int((~dentro).sum())
+        if descartados_fecha:
+            print(f"🧹 Comentarios fuera de [{start_date.date()}, {end_date.date()}): {descartados_fecha}")
+        df = df.loc[dentro].copy()
         df["fecha_extraccion"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     else:
         df = pd.DataFrame(columns=columnas)

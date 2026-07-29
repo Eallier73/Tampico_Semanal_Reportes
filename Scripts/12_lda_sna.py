@@ -43,6 +43,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from sna_spanish_filter import (
+    DEFAULT_ENGLISH_DICTIONARY,
+    DEFAULT_MIN_SPANISH_SHARE,
+    DEFAULT_SPANISH_DICTIONARY,
+    is_spanish_message,
+    load_language_vocabulary,
+)
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_INPUT = REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_consolidados.csv"
 DEFAULT_OUTPUT = REPO_ROOT / "SNA" / "Resultados" / "historico" / "clusters"
@@ -897,6 +905,24 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--no-below", type=int, default=5)
     parser.add_argument("--no-above", type=float, default=0.6)
+    parser.add_argument(
+        "--diccionario-espanol",
+        type=Path,
+        default=DEFAULT_SPANISH_DICTIONARY,
+        help="Diccionario Hunspell usado para conservar documentos en español.",
+    )
+    parser.add_argument(
+        "--diccionario-ingles",
+        type=Path,
+        default=DEFAULT_ENGLISH_DICTIONARY,
+        help="Diccionario inglés usado para detectar documentos no españoles.",
+    )
+    parser.add_argument(
+        "--min-spanish-share",
+        type=float,
+        default=DEFAULT_MIN_SPANISH_SHARE,
+        help="Proporción mínima de lemas españoles por documento.",
+    )
     parser.add_argument("--ventana-intra", type=int, default=3)
     parser.add_argument("--ventana-extra", type=int, default=12)
     parser.add_argument(
@@ -929,6 +955,8 @@ def main() -> None:
         parser.error("El rango K debe cumplir 2 <= k-min <= k-max")
     if not 0.0 < args.coherence_ratio <= 1.0:
         parser.error("--coherence-ratio debe estar en (0, 1]")
+    if not 0.0 < args.min_spanish_share <= 1.0:
+        parser.error("--min-spanish-share debe estar en (0, 1]")
 
     out_dir = args.output_dir if args.input == "csv" else args.output_dir.parent / "clusters_txt"
 
@@ -963,6 +991,44 @@ def main() -> None:
     )
     docs_vacios = sum(1 for d in lemas_mensajes if not d)
     print(f"         Documentos sin lemas: {docs_vacios}/{len(lemas_mensajes)}")
+
+    if args.input == "csv":
+        spanish_vocabulary = load_language_vocabulary(
+            str(args.diccionario_espanol)
+        )
+        english_vocabulary = load_language_vocabulary(
+            str(args.diccionario_ingles)
+        )
+        language_hints = (
+            df["idioma_detectado"].fillna("").astype(str).tolist()
+            if "idioma_detectado" in df.columns
+            else [""] * len(df)
+        )
+        language_mask = [
+            is_spanish_message(
+                lemmas,
+                spanish_vocabulary,
+                english_vocabulary,
+                language_hint=hint,
+                min_spanish_share=args.min_spanish_share,
+            )
+            for lemmas, hint in zip(
+                lemas_mensajes, language_hints, strict=True
+            )
+        ]
+        docs_before_language = len(df)
+        df = df.loc[language_mask].reset_index(drop=True)
+        lemas_mensajes = [
+            lemmas
+            for lemmas, keep in zip(
+                lemas_mensajes, language_mask, strict=True
+            )
+            if keep
+        ]
+        print(
+            "         Filtro de español: "
+            f"{len(df)}/{docs_before_language} documentos conservados"
+        )
 
     corpus_modelado_df: pd.DataFrame | None = None
     if args.input == "csv":

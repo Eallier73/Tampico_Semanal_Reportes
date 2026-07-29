@@ -34,6 +34,11 @@ YOUTUBE_SEARCH_QUERIES = [
     "Presidenta municipal de Tampico",
     "Gobierno de Tampico",
     "gobierno de Tampico",
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
 ]
 """Consultas para buscar videos en YouTube"""
 
@@ -58,6 +63,11 @@ TWITTER_SEARCH_QUERIES = [
     "monica villarreal",
     "gobierno de tampico",
     "tampico",
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
 ]
 """Queries para buscar tweets en Twitter/X"""
 
@@ -85,6 +95,11 @@ MEDIOS_SEARCH_TERMS = [
     '"Monica Villarreal"',
     '"gobierno de tampico"',
     '"tampico"',
+    '"Jesus Nader"',
+    '"Chucho Nader"',
+    '"Diputado Nader"',
+    '"Americo Villarreal"',
+    '"Morena Tampico"',
 ]
 """Términos de búsqueda para noticias"""
 
@@ -105,6 +120,7 @@ MEDIOS_DEFAULT_PAUSE_BETWEEN_RSS_QUERIES = 3.0
 FACEBOOK_PAGES = [
     "TampicoGob",
     "monicavtampico",
+    "ChuchoNader",
 ]
 """Páginas de Facebook a monitorear (handles o URLs)"""
 
@@ -127,14 +143,21 @@ FACEBOOK_POSTS_DEFAULT_BATCH_SIZE = 10
 
 INSTAGRAM_PROFILE_URLS = [
     "monicavtampico",
+    "chuchonader",
 ]
 """Perfiles oficiales confirmados en resultados reales del actor."""
 
-INSTAGRAM_SEARCH_QUERIES: list[str] = []
+INSTAGRAM_SEARCH_QUERIES = [
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
+]
 """El actor busca perfiles, hashtags o lugares, no texto libre en publicaciones.
 
-La extracción predeterminada usa el perfil oficial, sus menciones y hashtags. Las
-búsquedas de usuarios siguen disponibles mediante ``--query`` para uso manual.
+La extracción predeterminada combina el perfil oficial, sus menciones, hashtags
+y estas búsquedas de usuarios.
 """
 
 INSTAGRAM_HASHTAGS = [
@@ -163,6 +186,11 @@ TIKTOK_SEARCH_QUERIES = [
     "Mónica Villarreal Tampico",
     "Gobierno de Tampico",
     "Ayuntamiento de Tampico",
+    "Jesus Nader",
+    "Chucho Nader",
+    "Diputado Nader",
+    "Americo Villarreal",
+    "Morena Tampico",
 ]
 """Búsquedas específicas; un filtro local descarta coincidencias aproximadas ajenas."""
 

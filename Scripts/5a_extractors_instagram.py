@@ -44,6 +44,22 @@ def normalize_match(value: Any) -> str:
     return re.sub(r"[^a-z0-9]+", " ", plain).strip()
 
 
+def matches_configured_query(haystack: str, queries: list[str]) -> bool:
+    """Acepta términos configurados aun cuando un perfil una sus palabras."""
+    normalized = normalize_match(haystack)
+    words = set(normalized.split())
+    compact = normalized.replace(" ", "")
+    for query in queries:
+        normalized_query = normalize_match(query)
+        query_words = set(normalized_query.split())
+        if query_words and (
+            query_words <= words
+            or normalized_query.replace(" ", "") in compact
+        ):
+            return True
+    return False
+
+
 def relevant_discovery_item(plan: ActorRunPlan, item: dict[str, Any]) -> bool:
     """Evita conservar cuentas aproximadas ajenas a Tampico en búsqueda de usuarios."""
     if plan.institutional or plan.name.startswith(("Hashtags", "Etiquetas @")):
@@ -57,6 +73,8 @@ def relevant_discovery_item(plan: ActorRunPlan, item: dict[str, Any]) -> bool:
             )
         )
     )
+    if matches_configured_query(haystack, INSTAGRAM_SEARCH_QUERIES):
+        return True
     if "monicavtampico" in haystack:
         return True
     if "monica" in haystack and "villarreal" in haystack:
@@ -226,18 +244,30 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile", dest="profiles", action="append", default=[])
     parser.add_argument("--hashtag", dest="hashtags", action="append", default=[])
     parser.add_argument("--query", dest="queries", action="append", default=[])
+    parser.add_argument(
+        "--only-query",
+        "--solo-consulta",
+        action="store_true",
+        help="Ejecutar únicamente las consultas indicadas, sin perfiles ni hashtags predeterminados",
+    )
     parser.add_argument("--results-limit", type=int, default=50)
     parser.add_argument("--search-limit", type=int, default=3)
     parser.add_argument("--token", default="")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-prompt", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
-    if not args.profiles:
-        args.profiles = list(INSTAGRAM_PROFILE_URLS)
-    if not args.hashtags:
-        args.hashtags = list(INSTAGRAM_HASHTAGS)
-    if not args.queries:
-        args.queries = list(INSTAGRAM_SEARCH_QUERIES)
+    if args.only_query:
+        if not args.queries:
+            parser.error("--only-query requiere al menos un --query")
+        args.profiles = []
+        args.hashtags = []
+    else:
+        if not args.profiles:
+            args.profiles = list(INSTAGRAM_PROFILE_URLS)
+        if not args.hashtags:
+            args.hashtags = list(INSTAGRAM_HASHTAGS)
+        if not args.queries:
+            args.queries = list(INSTAGRAM_SEARCH_QUERIES)
     return args
 
 
@@ -250,7 +280,9 @@ def main() -> None:
     output_base = Path(args.output_dir)
     if args.dry_run:
         print_dry_run(ACTOR_ID, plans, output_base, report_tag)
-        if not args.profiles:
+        if args.only_query:
+            print("\nℹ️ Modo solo consulta: no se incluirán perfiles ni hashtags predeterminados.")
+        elif not args.profiles:
             print("\n⚠️ Sin perfiles oficiales confirmados; el dry-run usa búsqueda y hashtags.")
         return
     token = require_token(args.token)

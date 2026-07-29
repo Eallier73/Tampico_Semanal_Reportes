@@ -597,8 +597,10 @@ def consolidate(
             inventory.append({"familia": family, "archivo": str(path.relative_to(REPO_ROOT)), "filas": len(frame)})
             for _, row in frame.iterrows():
                 record = adapter(row, path)
-                if selected_weeks and text(record.get("semana")) not in selected_weeks:
-                    continue
+                # El alcance por últimas semanas ya se resolvió mediante la carpeta
+                # fuente. No vuelvas a filtrar por la semana ISO de cada registro:
+                # un lote semanal puede cruzar de lunes (por ejemplo, 22–29) y
+                # todos sus registros pertenecen al mismo archivo seleccionado.
                 if text(record.get("texto_original")):
                     records.append(record)
 

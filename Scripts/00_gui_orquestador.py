@@ -223,7 +223,7 @@ def build_sna_run(scope: str) -> dict[str, object]:
                 "--scope-label", network_scope,
                 "--corpus-label", corpus_label,
                 "--positions-per-topic", "5",
-                "--words-per-position", "35",
+                "--words-per-position", "60",
             ],
         ),
     ]

@@ -1,4 +1,5 @@
 Categoria,Palabra,Delta_PMI,Confianza
+Agua,agua,0.0,1.00
 Gobierno municipal,gobierno,0.0,0.90
 Gobierno municipal,municipal,0.0,0.90
 Gobierno municipal,gobierno municipal,0.0,0.95
@@ -19,3 +20,14 @@ Mónica Villarreal,MonicaVillarrealAnaya,0.0,0.98
 Mónica Villarreal,VillarrealAnaya,0.0,0.95
 Mónica Villarreal,alcaldesa,0.0,0.90
 Mónica Villarreal,presidenta municipal,0.0,0.90
+Jesús Nader,Jesús Nader,0.0,1.00
+Jesús Nader,Jesus Nader,0.0,1.00
+Jesús Nader,Diputado Nader,0.0,1.00
+Jesús Nader,Jesús Antonio Nader,0.0,1.00
+Jesús Nader,Jesus Antonio Nader,0.0,1.00
+Jesús Nader,Jesús Antonio Nader Nasrallah,0.0,1.00
+Jesús Nader,Jesus Antonio Nader Nasrallah,0.0,1.00
+Jesús Nader,Nader Nasrallah,0.0,1.00
+Jesús Nader,Chucho Nader,0.0,1.00
+Jesús Nader,ChuchoNader,0.0,0.98
+Jesús Nader,JesusNader,0.0,0.98

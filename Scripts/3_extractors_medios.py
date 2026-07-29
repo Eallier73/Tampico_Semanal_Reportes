@@ -32,6 +32,11 @@ TERMINOS = [
     '"Monica Villarreal"',
     '"gobierno de tampico"',
     '"tampico"',
+    '"Jesus Nader"',
+    '"Chucho Nader"',
+    '"Diputado Nader"',
+    '"Americo Villarreal"',
+    '"Morena Tampico"',
 ]
 
 ANIO_INICIO = 2025
@@ -624,7 +629,7 @@ def deduplicar(lista):
 
 def filtrar_por_fecha(noticias, fecha_ini, fecha_fin):
     ini = datetime.strptime(fecha_ini, "%Y-%m-%d")
-    fin = datetime.strptime(fecha_fin, "%Y-%m-%d") + timedelta(days=1)
+    fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
 
     filtradas = []
     sin_fecha = []
@@ -642,6 +647,42 @@ def filtrar_por_fecha(noticias, fecha_ini, fecha_fin):
 
     print(f"  Dentro del rango: {len(filtradas)} | Sin fecha parseable: {len(sin_fecha)}")
     return filtradas + sin_fecha
+
+
+def filtrar_por_terminos(noticias, terminos):
+    """Conserva noticias cuyo título o texto descargado contiene el término exacto."""
+    frases = []
+    for termino in terminos:
+        limpio = str(termino or "").strip().strip("\"'")
+        normalizado = limpiar_texto_para_txt(limpio)
+        if normalizado:
+            frases.append(normalizado)
+
+    if not frases:
+        return noticias
+
+    filtradas = []
+    for noticia in noticias:
+        url = str(noticia.get("url") or noticia.get("url_google") or "").lower()
+        path = urlparse(url).path.lower()
+        if (
+            "/tags/" in path
+            or "/tag/" in path
+            or "/archive" in path
+            or path.endswith(".json")
+        ):
+            continue
+        contenido = limpiar_texto_para_txt(
+            f"{noticia.get('titulo', '')} {noticia.get('texto', '')}"
+        )
+        if any(frase in contenido for frase in frases):
+            filtradas.append(noticia)
+
+    print(
+        f"  Pertinentes por término exacto: {len(filtradas)}"
+        f" | Descartadas por ruido RSS: {len(noticias) - len(filtradas)}"
+    )
+    return filtradas
 
 
 # ============================================================
@@ -1091,6 +1132,7 @@ def procesar_semana(fecha_inicio_semana, fecha_fin_semana):
     print(f"  TOTAL tras resolver URLs: {len(todos)} noticias")
 
     todos = descargar_textos(todos)
+    todos = filtrar_por_terminos(todos, TERMINOS)
 
     df = pd.DataFrame(todos, columns=[
         "titulo", "fecha", "iso_date", "fuente",

@@ -45,7 +45,7 @@ from output_naming import build_report_tag
 ACTOR_POSTS = "apify/facebook-posts-scraper"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_BASE_DIR = str(REPO_ROOT / "Facebook")
-DEFAULT_PAGES = ["monicavtampico", "TampicoGob"]
+DEFAULT_PAGES = ["monicavtampico", "TampicoGob", "ChuchoNader"]
 DEFAULT_RESULTS_LIMIT_PER_PAGE = 100
 DEFAULT_BATCH_SIZE = 10
 
