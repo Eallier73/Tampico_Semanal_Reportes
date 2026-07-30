@@ -656,7 +656,7 @@ def inject_guided_layer(
   <div class="guided-option-help">Elige cómo se colorean los puntos. Esto cambia la lectura visual, no los datos ni las conexiones.</div>{topic_filter_markup}
   <h4>Temas estructurales</h4>
   {category_buttons}
-  <div class="guided-option-help">Pulsa uno o varios asuntos para ver únicamente los nodos cuyo vocabulario coincide con ellos.</div>
+  <div class="guided-option-help">Pulsa uno o varios asuntos para ver únicamente los nodos cuyo vocabulario coincide con ellos. Con dos o más asuntos activos, solo se dibujan conexiones cruzadas entre temas seleccionados y se resaltan en amarillo.</div>
   <label>Confianza minima: <b id="guidedConfidenceValue">0.00</b></label>
   <input id="guidedConfidence" type="range" min="0" max="100" value="0">
   <div class="guided-option-help">Súbela para exigir coincidencias más claras; bájala para incluir asociaciones más amplias.</div>
@@ -686,6 +686,7 @@ def inject_guided_layer(
   const POLARITY_COLORS = {polarity_json};
   const STANCE_COLORS = {stance_json};
   const originals = {{}};
+  const originalEdges = {{}};
   const LAYERED_FILTERS = {str(layered_filters).lower()};
   const EXCLUSIVE_TOPIC_STRATEGIES = {str(exclusive_topic_strategies).lower()};
   const activeFilters = {{topic:new Set(), category:new Set(), polarity:new Set(), stance:new Set(), strategic:new Set()}};
@@ -731,6 +732,16 @@ def inject_guided_layer(
         font: node.font
       }};
     }});
+    if (guidedEdges) {{
+      guidedEdges.get().forEach(function(edge) {{
+        originalEdges[edge.id] = {{
+          color: edge.color,
+          width: Number(edge.width || 1),
+          dashes: edge.dashes || false,
+          shadow: edge.shadow || false
+        }};
+      }});
+    }}
     document.querySelectorAll('[data-network-topic]').forEach(btn =>
       btn.addEventListener('click', () => toggleFilter('topic', btn.dataset.networkTopic, btn)));
     document.querySelectorAll('#guidedPanel [data-category]').forEach(btn =>
@@ -780,6 +791,20 @@ def inject_guided_layer(
     }}
     return true;
   }}
+  function selectedCategories(meta) {{
+    if (!meta) return [];
+    return Array.from(activeFilters.category).filter(category =>
+      categoryMatch(meta, category)
+    );
+  }}
+  function connectsDifferentSelectedCategories(edge) {{
+    if (activeFilters.category.size < 2) return true;
+    const fromCategories = selectedCategories(GUIDED_META[String(edge.from)]);
+    const toCategories = selectedCategories(GUIDED_META[String(edge.to)]);
+    return fromCategories.some(fromCategory =>
+      toCategories.some(toCategory => fromCategory !== toCategory)
+    );
+  }}
   function toggleFilter(kind, value, button) {{
     if (strategicCombine) {{
       strategicCombine = null;
@@ -825,26 +850,68 @@ def inject_guided_layer(
     }});
     publishStrategicState();
   }}
+  function styleFilteredEdges() {{
+    if (!guidedEdges) return;
+    const comparingCategories = !strategicCombine &&
+      activeFilters.category.size >= 2;
+    guidedEdges.update(guidedEdges.get().map(edge => {{
+      const original = originalEdges[edge.id] || {{}};
+      if (comparingCategories && !edge.hidden) {{
+        return {{
+          id: edge.id,
+          color: {{
+            color: '#ffd54a',
+            highlight: '#ffffff',
+            hover: '#fff3a0',
+            opacity: 1
+          }},
+          width: Math.max(5, Number(original.width || 1)),
+          dashes: false,
+          shadow: {{enabled:true, color:'rgba(255,213,74,.75)', size:8, x:0, y:0}}
+        }};
+      }}
+      return {{
+        id: edge.id,
+        color: original.color,
+        width: Number(original.width || 1),
+        dashes: original.dashes || false,
+        shadow: original.shadow || false
+      }};
+    }}));
+  }}
   function applyLayerFilters() {{
     if (strategicCombine) buildStrategicNeighborhood();
     window.guidedNodeAllowed = node => strategicCombine
       ? strategicContextIds.has(String(node.id))
       : matchesLayerFilters(GUIDED_META[String(node.id)]);
+    window.guidedEdgeAllowed = edge => strategicCombine ||
+      connectsDifferentSelectedCategories(edge);
     if (typeof rebuild === 'function') rebuild();
     else guidedNodes.update(guidedNodes.get().map(node => ({{id:node.id, hidden:!window.guidedNodeAllowed(node)}})));
+    styleFilteredEdges();
     recolor();
     const matching = Object.keys(GUIDED_META).filter(id => matchesLayerFilters(GUIDED_META[id]) && guidedNodes.get(id) && !guidedNodes.get(id).hidden);
     const visible = guidedNodes.get().filter(node => !node.hidden);
     guidedNetwork.unselectAll();
-    guidedNetwork.selectNodes(matching.slice(0, 1000));
+    if (activeFilters.category.size < 2) {{
+      guidedNetwork.selectNodes(matching.slice(0, 1000));
+    }}
     if (strategicCombine) {{
       document.getElementById('guidedStats').innerHTML = '<b>' + matching.length +
         '</b> coincidencias · <b>' + Math.max(0, visible.length - matching.length) +
         '</b> nodos de contexto · <b>' + visible.length + '</b> visibles';
     }} else {{
-      document.getElementById('guidedStats').innerHTML = hasActiveFilters()
-        ? '<b>' + matching.length + '</b> nodos en el subconjunto activo'
-        : 'Sin filtros de capa activos';
+      const visibleConnections = guidedEdges
+        ? guidedEdges.get().filter(edge => !edge.hidden).length
+        : 0;
+      document.getElementById('guidedStats').innerHTML =
+        activeFilters.category.size >= 2
+          ? '<b>' + matching.length + '</b> nodos · <b>' + visibleConnections +
+            '</b> ' + (visibleConnections === 1 ? 'conexión' : 'conexiones') +
+            ' entre temas seleccionados'
+          : (hasActiveFilters()
+            ? '<b>' + matching.length + '</b> nodos en el subconjunto activo'
+            : 'Sin filtros de capa activos');
     }}
   }}
   function setActiveButton(kind, value) {{
@@ -925,12 +992,14 @@ def inject_guided_layer(
     strategicContextIds.clear();
     publishStrategicState();
     window.guidedNodeAllowed = null;
+    window.guidedEdgeAllowed = null;
     window.dispatchEvent(new CustomEvent('guided-strategy-cleared'));
     document.querySelectorAll('[data-network-topic], #guidedPanel button').forEach(btn => btn.classList.remove('guided-active'));
     document.getElementById('guidedColorMode').value = 'original';
     document.getElementById('guidedConfidence').value = '0';
     document.getElementById('guidedConfidenceValue').textContent = '0.00';
     if (typeof rebuild === 'function') rebuild();
+    styleFilteredEdges();
     guidedNetwork.unselectAll(); recolor(); guidedNetwork.fit({{animation:true}});
   }}
   window.guidedApplyStrategicPreset = function(preset) {{

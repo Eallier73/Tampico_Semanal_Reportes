@@ -1506,6 +1506,8 @@ def build_html(
             f'<small class="topic-score"></small></button>'
         )
     topic_cards_html = "\n".join(topic_cards)
+    image_slug = re.sub(r"[^a-z0-9]+", "_", _topic_key(semana)).strip("_")
+    image_filename = f"red_{image_slug}_posiciones.png"
 
     return f"""<!DOCTYPE html>
 <html>
@@ -1582,6 +1584,11 @@ def build_html(
   }}
   #fullscreenNetwork:hover, #fullscreenNetwork:focus {{ background:#2d6b35; outline:2px solid #8bea91; }}
   #fullscreenNetwork .fullscreen-icon {{ font-size:17px; line-height:12px; }}
+  #downloadNetworkImage {{
+    flex:none; display:inline-flex; align-items:center; gap:6px; padding:5px 9px;
+    background:#243f5b; border-color:#4d9bd4; font-weight:bold; white-space:nowrap;
+  }}
+  #downloadNetworkImage:hover, #downloadNetworkImage:focus {{ background:#315778; outline:2px solid #8ac9f2; }}
   .layout-actions {{ display:grid; grid-template-columns:1fr; gap:5px; }}
   .layout-actions button {{ width:100%; }}
   .layout-actions button.layout-active {{ outline:2px solid #fff; background:#4c4c4c; }}
@@ -1615,6 +1622,7 @@ def build_html(
 <aside id="left">
   <h1>Red {semana}: posiciones discursivas</h1>
   <div class="muted">Temas, posiciones, cuentas y palabras. El borde de cada posicion indica senal indiciaria: gris baja, amarillo media, rojo alta.</div>
+  <div class="tool-help"><b>Selección múltiple:</b> mantén Ctrl y haz clic en cada nodo que quieras agregar o quitar del resaltado. Al arrastrar uno o varios temas seleccionados, se moverán con ellos sus posiciones, cuentas y palabras.</div>
   <div class="grp">
     <h2>Buscar</h2>
     <input id="search" type="text" placeholder="cuenta, palabra, posicion o tema...">
@@ -1684,6 +1692,10 @@ def build_html(
   </div>
   <span id="strategyHelp">Elige un ámbito. Los nodos con color cumplen el criterio; los grises muestran sus conexiones inmediatas como contexto.</span>
   <span id="stats"></span>
+  <button id="downloadNetworkImage" type="button" aria-label="Guardar la vista actual de la red como imagen PNG" title="Guardar la pantalla central como imagen PNG">
+    <span aria-hidden="true">▣</span>
+    <span>Guardar imagen</span>
+  </button>
   <button id="fullscreenNetwork" type="button" aria-label="Expandir solamente la red a pantalla completa" aria-pressed="false" title="Expandir solamente la red">
     <span class="fullscreen-icon" aria-hidden="true">⛶</span>
     <span class="fullscreen-label">Pantalla completa</span>
@@ -1710,7 +1722,7 @@ const META = {json.dumps(meta, ensure_ascii=False)};
 const nodes = new vis.DataSet(RAW_NODES);
 const edges = new vis.DataSet(RAW_EDGES);
 const network = new vis.Network(document.getElementById('network'), {{nodes, edges}}, {{
-  nodes: {{ borderWidth: 1, shadow: false }},
+  nodes: {{ borderWidth: 1, borderWidthSelected: 5, shadow: false }},
   edges: {{ smooth: {{type:'continuous'}}, font: {{size:0}} }},
   physics: {{
     enabled: false,
@@ -1718,12 +1730,115 @@ const network = new vis.Network(document.getElementById('network'), {{nodes, edg
     forceAtlas2Based: {{ gravitationalConstant: -95, centralGravity: 0.012, springLength: 170, springConstant: 0.06, damping: 0.45 }},
     stabilization: {{ enabled: false }}
   }},
-  interaction: {{ hover:true, tooltipDelay:100, navigationButtons:true, keyboard:true }}
+  interaction: {{
+    hover:true,
+    tooltipDelay:100,
+    navigationButtons:true,
+    keyboard:true,
+    multiselect:true
+  }}
 }});
 window.network = network;
 
+const NODE_KIND_BY_ID = new Map(
+  RAW_NODES.map(node => [String(node.id), String(node.kind || '')])
+);
+const THEME_POSITIONS = new Map();
+const POSITION_FOLLOWERS = new Map();
+RAW_EDGES.forEach(edge => {{
+  const from = String(edge.from);
+  const to = String(edge.to);
+  if (edge.kind === 'tema_posicion') {{
+    const themeId = NODE_KIND_BY_ID.get(from) === 'tema' ? from : to;
+    const positionId = themeId === from ? to : from;
+    if (!THEME_POSITIONS.has(themeId)) THEME_POSITIONS.set(themeId, new Set());
+    THEME_POSITIONS.get(themeId).add(positionId);
+  }}
+  if (edge.kind === 'posicion_cuenta' || edge.kind === 'posicion_palabra') {{
+    const positionId = NODE_KIND_BY_ID.get(from) === 'posicion' ? from : to;
+    const followerId = positionId === from ? to : from;
+    if (!POSITION_FOLLOWERS.has(positionId)) POSITION_FOLLOWERS.set(positionId, new Set());
+    POSITION_FOLLOWERS.get(positionId).add(followerId);
+  }}
+}});
+function collectThemeCluster(themeIds) {{
+  const clusterIds = new Set(themeIds);
+  themeIds.forEach(themeId => {{
+    const positionIds = THEME_POSITIONS.get(themeId) || new Set();
+    positionIds.forEach(positionId => {{
+      clusterIds.add(positionId);
+      (POSITION_FOLLOWERS.get(positionId) || new Set()).forEach(
+        followerId => clusterIds.add(followerId)
+      );
+    }});
+  }});
+  return clusterIds;
+}}
+let activeThemeDrag = null;
+function moveThemeFollowers() {{
+  if (!activeThemeDrag) return;
+  const currentAnchor = network.getPosition(activeThemeDrag.anchorId);
+  const dx = currentAnchor.x - activeThemeDrag.anchorStart.x;
+  const dy = currentAnchor.y - activeThemeDrag.anchorStart.y;
+  activeThemeDrag.followerIds.forEach(nodeId => {{
+    const start = activeThemeDrag.startPositions[nodeId];
+    if (start) network.moveNode(nodeId, start.x + dx, start.y + dy);
+  }});
+}}
+network.on('dragStart', params => {{
+  const pointerNode = network.getNodeAt(params.pointer.DOM);
+  const anchorId = pointerNode == null ? '' : String(pointerNode);
+  if (NODE_KIND_BY_ID.get(anchorId) !== 'tema') {{
+    activeThemeDrag = null;
+    return;
+  }}
+  const selectedThemeIds = network.getSelectedNodes()
+    .map(String)
+    .filter(nodeId => NODE_KIND_BY_ID.get(nodeId) === 'tema');
+  if (!selectedThemeIds.includes(anchorId)) selectedThemeIds.push(anchorId);
+  const clusterIds = collectThemeCluster(selectedThemeIds);
+  const startPositions = network.getPositions(Array.from(clusterIds));
+  activeThemeDrag = {{
+    anchorId,
+    anchorStart: startPositions[anchorId],
+    followerIds: Array.from(clusterIds).filter(
+      nodeId => !selectedThemeIds.includes(nodeId)
+    ),
+    startPositions
+  }};
+  network.stopSimulation();
+  network.setOptions({{physics: {{enabled:false}}}});
+}});
+network.on('dragging', moveThemeFollowers);
+network.on('dragEnd', () => {{
+  moveThemeFollowers();
+  activeThemeDrag = null;
+}});
+
 const networkStage = document.getElementById('networkStage');
 const fullscreenNetwork = document.getElementById('fullscreenNetwork');
+const downloadNetworkImage = document.getElementById('downloadNetworkImage');
+function saveNetworkImage() {{
+  network.redraw();
+  window.requestAnimationFrame(() => {{
+    const sourceCanvas = document.querySelector('#network canvas');
+    if (!sourceCanvas) return;
+    const outputCanvas = document.createElement('canvas');
+    outputCanvas.width = sourceCanvas.width;
+    outputCanvas.height = sourceCanvas.height;
+    const context = outputCanvas.getContext('2d');
+    context.fillStyle = '#1d1d1d';
+    context.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+    context.drawImage(sourceCanvas, 0, 0);
+    const link = document.createElement('a');
+    link.download = {json.dumps(image_filename, ensure_ascii=False)};
+    link.href = outputCanvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }});
+}}
+downloadNetworkImage.addEventListener('click', saveNetworkImage);
 function isNetworkFullscreen() {{
   return document.fullscreenElement === networkStage ||
     document.webkitFullscreenElement === networkStage ||
@@ -1896,7 +2011,8 @@ function rebuild() {{
     nodeUpdates.push({{id:n.id, hidden:!v}});
   }});
   edges.forEach(e => {{
-    const v = !!finalVisible[e.from] && !!finalVisible[e.to];
+    const v = !!finalVisible[e.from] && !!finalVisible[e.to] &&
+      (typeof window.guidedEdgeAllowed !== 'function' || window.guidedEdgeAllowed(e));
     if (v) counts.edges++;
     edgeUpdates.push({{id:e.id, hidden:!v}});
   }});
