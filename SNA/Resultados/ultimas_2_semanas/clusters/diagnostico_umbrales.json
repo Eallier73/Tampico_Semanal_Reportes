@@ -1,0 +1,56 @@
+{
+  "corpus": "historico consolidado de Tampico",
+  "clusters_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters",
+  "capas": {
+    "intra_cluster": {
+      "n_aristas": 15971,
+      "min": 1.0,
+      "media": 2.233172625383508,
+      "max": 131.0,
+      "p50": 1.0,
+      "p75": 2.0,
+      "p90": 4.0,
+      "p95": 6.0,
+      "p99": 14.0
+    },
+    "intra_sub": {
+      "n_aristas": 4962,
+      "min": 1.0,
+      "media": 3.6211205159209996,
+      "max": 147.0,
+      "p50": 2.0,
+      "p75": 4.0,
+      "p90": 7.0,
+      "p95": 11.0,
+      "p99": 24.0
+    },
+    "sin_subcluster": {
+      "n_aristas": 284,
+      "min": 1.0,
+      "media": 2.186619718309859,
+      "max": 22.0,
+      "p50": 1.0,
+      "p75": 2.0,
+      "p90": 4.0,
+      "p95": 6.0,
+      "p99": 12.170000000000016
+    },
+    "extra": {
+      "n_aristas": 5000,
+      "min": 4.0,
+      "media": 11.3094,
+      "max": 147.0,
+      "p50": 9.0,
+      "p75": 13.0,
+      "p90": 19.0,
+      "p95": 25.050000000000182,
+      "p99": 49.0
+    }
+  },
+  "umbrales_sugeridos": {
+    "umbral_intra_sub": 4.0,
+    "umbral_intra_cluster": 2.0,
+    "umbral_extra": 13.0,
+    "criterio": "percentil 75 de cada capa"
+  }
+}

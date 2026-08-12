@@ -1,0 +1,12 @@
+{
+  "k": 26,
+  "coherencia_c_v": 0.44258670496402114,
+  "perplexity": -6.352117635290556,
+  "alpha": "auto",
+  "eta": "auto",
+  "passes": 10,
+  "iterations": 100,
+  "criterio_seleccion": "maxima coherencia c_v",
+  "coherencia_maxima_barrido": 0.44258670496402114,
+  "k_maxima_coherencia": 26
+}

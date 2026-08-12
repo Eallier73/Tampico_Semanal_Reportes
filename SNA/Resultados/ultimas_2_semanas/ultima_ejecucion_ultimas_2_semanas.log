@@ -1,0 +1,449 @@
+Inicio: 2026-07-29T11:07:05
+Intérprete: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3
+Alcance: últimas 2 semanas (solo fuentes locales)
+
+--- Ejecutando SNA: Consolidar corpus SNA ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/11_consolidar_historico_sna.py --last-weeks 2 --output /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv
+[ALCANCE] Últimas 2 semanas locales: 2026_W29, 2026_W30
+Archivo: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv
+Alcance: 2026_W29 | 2026_W30 (solo fuentes locales)
+Archivos fuente: 18
+Filas fuente: 10393
+Filas consolidadas: 5733
+Por plataforma:
+  YouTube: 4695
+  Medios: 375
+  Facebook: 346
+  Twitter: 197
+  Instagram: 100
+  TikTok: 20
+Por tipo:
+  comentario: 5217
+  articulo: 375
+  publicacion_institucional: 85
+  mencion: 56
+Consolidar corpus SNA finalizado con éxito.
+
+--- Ejecutando SNA: Modelar temas LDA ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12_lda_sna.py --input-csv /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv --output-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters --k-min 25 --k-max 35 --selection-mode coherence
+======================================================================
+[SNA Fase 2 - LDA] historico de Tampico
+  Entrada: csv -> /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv
+  Salida:  /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters
+======================================================================
+[1/8] Cargando corpus: tampico_datos_tabulares_ultimas_2_semanas.csv
+         Documentos: 5733
+         Stopwords: 758 terminos (stoplist del repo tal cual + 0 extra)
+[2/8] Cargando modelo spaCy es_core_news_md...
+[2/8] Lematizando 5733 documentos (batch=256)...
+         5000/5733...
+         Lemas descartados por pronombre pegado: 818
+         Documentos sin lemas: 149/5733
+[2b/8] Preparando corpus por conversacion...
+         Mensajes genericos/vacios descartados: 194
+         Duplicados exactos descartados: 267
+         Conversaciones modeladas: 669
+[3/8] Construyendo diccionario gensim (no_below=5, no_above=0.6)...
+         Vocabulario despues de filtrar extremos: 1627 terminos
+         Documentos con contenido: 658/669
+[4/8] Barrido LDA: K en [25..35], passes=10, iterations=100...
+         Entrenando LDA con K=25...
+         K=25: c_v=0.4581, perplexity=-7.17
+         Entrenando LDA con K=26...
+         K=26: c_v=0.4569, perplexity=-7.22
+         Entrenando LDA con K=27...
+         K=27: c_v=0.4780, perplexity=-7.22
+         Entrenando LDA con K=28...
+         K=28: c_v=0.4383, perplexity=-7.22
+         Entrenando LDA con K=29...
+         K=29: c_v=0.4808, perplexity=-7.22
+         Entrenando LDA con K=30...
+         K=30: c_v=0.5207, perplexity=-7.25
+         Entrenando LDA con K=31...
+         K=31: c_v=0.4863, perplexity=-7.28
+         Entrenando LDA con K=32...
+         K=32: c_v=0.4756, perplexity=-7.28
+         Entrenando LDA con K=33...
+         K=33: c_v=0.4765, perplexity=-7.29
+         Entrenando LDA con K=34...
+         K=34: c_v=0.4633, perplexity=-7.28
+         Entrenando LDA con K=35...
+         K=35: c_v=0.4701, perplexity=-7.29
+         K seleccionado: 30 (c_v=0.5207; maxima coherencia c_v)
+[5/8] Asignando terminos a temas (hard assignment por P(term|tema) max)...
+         Terminos descartados por peso < 0.001: 3
+         Distribucion de terminos por tema:
+           Tema 0: 57 terminos
+           Tema 1: 47 terminos
+           Tema 2: 54 terminos
+           Tema 3: 75 terminos
+           Tema 4: 65 terminos
+           Tema 5: 47 terminos
+           Tema 6: 71 terminos
+           Tema 7: 43 terminos
+           Tema 8: 69 terminos
+           Tema 9: 60 terminos
+           Tema 10: 27 terminos
+           Tema 11: 54 terminos
+           Tema 12: 52 terminos
+           Tema 13: 74 terminos
+           Tema 14: 56 terminos
+           Tema 15: 31 terminos
+           Tema 16: 54 terminos
+           Tema 17: 48 terminos
+           Tema 18: 29 terminos
+           Tema 19: 52 terminos
+           Tema 20: 76 terminos
+           Tema 21: 58 terminos
+           Tema 22: 73 terminos
+           Tema 23: 61 terminos
+           Tema 24: 41 terminos
+           Tema 25: 40 terminos
+           Tema 26: 57 terminos
+           Tema 27: 43 terminos
+           Tema 28: 58 terminos
+           Tema 29: 52 terminos
+[6/8] Cohesion intracluster (ventana=3)...
+         Tema 9: 559 aristas internas
+         Tema 19: 718 aristas internas
+         Tema 14: 475 aristas internas
+         Tema 10: 131 aristas internas
+         Tema 0: 528 aristas internas
+         Tema 24: 313 aristas internas
+         Tema 13: 764 aristas internas
+         Tema 28: 634 aristas internas
+         Tema 20: 756 aristas internas
+         Tema 3: 832 aristas internas
+         Tema 23: 558 aristas internas
+         Tema 8: 772 aristas internas
+         Tema 16: 317 aristas internas
+         Tema 5: 400 aristas internas
+         Tema 25: 272 aristas internas
+         Tema 4: 414 aristas internas
+         Tema 6: 607 aristas internas
+         Tema 26: 476 aristas internas
+         Tema 1: 514 aristas internas
+         Tema 29: 618 aristas internas
+         Tema 21: 641 aristas internas
+         Tema 12: 378 aristas internas
+         Tema 17: 358 aristas internas
+         Tema 11: 366 aristas internas
+         Tema 22: 1077 aristas internas
+         Tema 18: 251 aristas internas
+         Tema 2: 402 aristas internas
+         Tema 7: 361 aristas internas
+         Tema 27: 270 aristas internas
+         Tema 15: 157 aristas internas
+[7/8] Vinculos extracluster (ventana=12, top_por_tema=200)...
+         Tema 9: 200 vinculos externos (deduplicados)
+         Tema 19: 200 vinculos externos (deduplicados)
+         Tema 14: 200 vinculos externos (deduplicados)
+         Tema 10: 200 vinculos externos (deduplicados)
+         Tema 0: 200 vinculos externos (deduplicados)
+         Tema 24: 200 vinculos externos (deduplicados)
+         Tema 13: 200 vinculos externos (deduplicados)
+         Tema 28: 200 vinculos externos (deduplicados)
+         Tema 20: 200 vinculos externos (deduplicados)
+         Tema 3: 200 vinculos externos (deduplicados)
+         Tema 23: 200 vinculos externos (deduplicados)
+         Tema 8: 200 vinculos externos (deduplicados)
+         Tema 16: 200 vinculos externos (deduplicados)
+         Tema 5: 200 vinculos externos (deduplicados)
+         Tema 25: 200 vinculos externos (deduplicados)
+         Tema 4: 200 vinculos externos (deduplicados)
+         Tema 6: 200 vinculos externos (deduplicados)
+         Tema 26: 200 vinculos externos (deduplicados)
+         Tema 1: 200 vinculos externos (deduplicados)
+         Tema 29: 200 vinculos externos (deduplicados)
+         Tema 21: 200 vinculos externos (deduplicados)
+         Tema 12: 200 vinculos externos (deduplicados)
+         Tema 17: 200 vinculos externos (deduplicados)
+         Tema 11: 200 vinculos externos (deduplicados)
+         Tema 22: 200 vinculos externos (deduplicados)
+         Tema 18: 200 vinculos externos (deduplicados)
+         Tema 2: 200 vinculos externos (deduplicados)
+         Tema 7: 200 vinculos externos (deduplicados)
+         Tema 27: 200 vinculos externos (deduplicados)
+         Tema 15: 200 vinculos externos (deduplicados)
+         Matriz entre temas (30x30) calculada
+======================================================================
+[SNA Fase 2 - LDA] OK resultados en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters
+           reporte: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/reporte_fase2_lda.md
+======================================================================
+Modelar temas LDA finalizado con éxito.
+
+--- Ejecutando SNA: Evaluar calidad temática ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/sna_topic_quality.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters
+Calidad temática: {'alta': 16, 'media': 12, 'baja': 2}
+Temas ocultos por defecto: 2
+Evaluar calidad temática finalizado con éxito.
+
+--- Ejecutando SNA: Calcular subclusters Louvain ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12b_subclusters_louvain.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters --resolution 1.4 --min-sub-size 3
+[subclusters] 30 temas en lda_asignacion.csv
+[subclusters] resolution=1.4 min_sub_size=3
+  Tema 0: 57 nodos, 528 aristas -> 6 sub-clusters
+  Tema 1: 47 nodos, 514 aristas -> 7 sub-clusters
+  Tema 2: 54 nodos, 402 aristas -> 8 sub-clusters
+  Tema 3: 75 nodos, 832 aristas -> 10 sub-clusters
+  Tema 4: 65 nodos, 414 aristas -> 7 sub-clusters
+  Tema 5: 47 nodos, 400 aristas -> 7 sub-clusters
+  Tema 6: 71 nodos, 607 aristas -> 10 sub-clusters
+  Tema 7: 43 nodos, 361 aristas -> 6 sub-clusters
+  Tema 8: 69 nodos, 772 aristas -> 9 sub-clusters
+  Tema 9: 60 nodos, 559 aristas -> 6 sub-clusters
+  Tema 10: 27 nodos, 131 aristas -> 6 sub-clusters
+  Tema 11: 54 nodos, 366 aristas -> 6 sub-clusters
+  Tema 12: 52 nodos, 378 aristas -> 8 sub-clusters
+  Tema 13: 74 nodos, 764 aristas -> 8 sub-clusters
+  Tema 14: 56 nodos, 475 aristas -> 9 sub-clusters
+  Tema 15: 31 nodos, 157 aristas -> 5 sub-clusters
+  Tema 16: 54 nodos, 317 aristas -> 5 sub-clusters
+  Tema 17: 48 nodos, 358 aristas -> 6 sub-clusters
+  Tema 18: 29 nodos, 251 aristas -> 6 sub-clusters
+  Tema 19: 52 nodos, 718 aristas -> 8 sub-clusters
+  Tema 20: 76 nodos, 756 aristas -> 10 sub-clusters
+  Tema 21: 58 nodos, 641 aristas -> 9 sub-clusters
+  Tema 22: 73 nodos, 1077 aristas -> 6 sub-clusters
+  Tema 23: 61 nodos, 558 aristas -> 9 sub-clusters
+  Tema 24: 41 nodos, 313 aristas -> 6 sub-clusters
+  Tema 25: 40 nodos, 272 aristas -> 8 sub-clusters
+  Tema 26: 57 nodos, 476 aristas -> 7 sub-clusters
+  Tema 27: 43 nodos, 270 aristas -> 5 sub-clusters
+  Tema 28: 58 nodos, 634 aristas -> 8 sub-clusters
+  Tema 29: 52 nodos, 618 aristas -> 8 sub-clusters
+
+[subclusters] guardado en: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/subclusters
+Calcular subclusters Louvain finalizado con éxito.
+
+--- Ejecutando SNA: Diagnosticar umbrales ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12c_diagnostico_umbrales.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters
+{
+  "corpus": "historico consolidado de Tampico",
+  "clusters_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters",
+  "capas": {
+    "intra_cluster": {
+      "n_aristas": 10552,
+      "min": 1.0,
+      "media": 2.254169825625474,
+      "max": 118.0,
+      "p50": 1.0,
+      "p75": 2.0,
+      "p90": 4.0,
+      "p95": 6.0,
+      "p99": 14.0
+    },
+    "intra_sub": {
+      "n_aristas": 4158,
+      "min": 1.0,
+      "media": 3.6293891293891294,
+      "max": 110.0,
+      "p50": 2.0,
+      "p75": 4.0,
+      "p90": 7.0,
+      "p95": 10.0,
+      "p99": 22.0
+    },
+    "sin_subcluster": {
+      "n_aristas": 209,
+      "min": 1.0,
+      "media": 4.425837320574162,
+      "max": 31.0,
+      "p50": 3.0,
+      "p75": 5.0,
+      "p90": 10.0,
+      "p95": 16.599999999999994,
+      "p99": 27.67999999999995
+    },
+    "extra": {
+      "n_aristas": 6000,
+      "min": 4.0,
+      "media": 9.017833333333334,
+      "max": 122.0,
+      "p50": 7.0,
+      "p75": 10.0,
+      "p90": 15.0,
+      "p95": 20.0,
+      "p99": 43.02000000000044
+    }
+  },
+  "umbrales_sugeridos": {
+    "umbral_intra_sub": 4.0,
+    "umbral_intra_cluster": 2.0,
+    "umbral_extra": 10.0,
+    "criterio": "percentil 75 de cada capa"
+  }
+}
+Diagnostico guardado en: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/diagnostico_umbrales.json
+Diagnosticar umbrales finalizado con éxito.
+
+--- Ejecutando SNA: Generar red completa ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12c_red_completa.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters --output-filename red_tampico_ultimas_2_semanas.html --scope-label 'de las últimas 2 semanas'
+[red_completa] corpus de las últimas 2 semanas de Tampico
+[red_completa] umbrales: intra_sub=4.0, intra_cluster=2.0, extra=10.0
+[red_completa] cargando datos...
+  Palabras LDA: 1624, con sub_id: 1614
+[red_completa] construyendo grafo...
+  aristas intra_sub:      1325
+  aristas intra_cluster:  6278
+  aristas extra:          1537
+  Nodos: 1602, Aristas: 8429
+[red_completa] calculando metricas...
+  Calculando metricas para 1602 nodos y 8429 aristas...
+  Comunidades (subclusters presentes): 224
+  [SKIP] betweenness: demasiados nodos
+  Calculando participation coefficient y z-within-degree...
+/home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/lib/python3.12/site-packages/networkx/algorithms/assortativity/correlation.py:302: RuntimeWarning: invalid value encountered in scalar divide
+  return float((xy * (M - ab)).sum() / np.sqrt(vara * varb))
+/home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/lib/python3.12/site-packages/networkx/algorithms/assortativity/mixing.py:217: RuntimeWarning: invalid value encountered in divide
+  a = a / a.sum()
+  Calculando metricas globales...
+  Generando HTML pyvis...
+  HTML escrito en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/red_tampico_ultimas_2_semanas.html (CSS + panel + tablas inyectadas)
+
+[red_completa] OK
+  Nodos: 1602
+  Aristas: 8429
+  Moduralidad: 0.2859
+  Clustering global: 0.4961
+  Componentes conexas: 3
+  Salidas en: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa
+Generar red completa finalizado con éxito.
+
+--- Ejecutando SNA: Mapear cuentas a clusters ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/18_cuentas_clusters.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters --output-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters
+[1/5] Cargando LDA desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/lda_asignacion.csv
+      vocabulario LDA: 1624 terminos, temas: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+[2/5] Cargando subclusters desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/subclusters/subclusters_palabras.csv
+      subclusters_palabras: 1614 terminos
+      subclusters: 219 (T00_S0..T29_S9)
+[3/5] Cargando mensajes desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/documentos_lematizados.csv
+      mensajes con usuario: 5733
+[4/5] Acumulando palabras por usuario...
+      usuarios unicos: 4530
+      sin palabras clasificadas: 430
+[5/5] Escribiendo salidas en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters/
+      - cuentas_x_tema.csv  (1037927 bytes)
+      - cuentas_x_subcluster.csv  (6190856 bytes)
+      - cuentas_resumen.csv  (292754 bytes)
+      - palabras_x_cuenta.csv  (1380937 bytes)  (27976 filas)
+      - cuentas_sin_tema.csv  (13294 bytes)
+      - reporte_fase4_cuentas.md  (159495 bytes)
+OK.
+Mapear cuentas a clusters finalizado con éxito.
+
+--- Ejecutando SNA: Generar red de cuentas ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12d_red_cuentas.py --base-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas --output-filename red_tampico_cuentas_ultimas_2_semanas.html --scope-label 'de las últimas 2 semanas' --corpus-label 'últimas 2 semanas locales disponibles de Tampico'
+[1/5] Cargando nodos (palabras) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/nodos_metricas.csv
+      1602 palabras
+[2/5] Cargando aristas (palabra-palabra) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/aristas_clasificadas.csv (peso>=4.0)
+      3648 aristas tras filtro
+[3/5] Cargando cuentas (>= 5 msgs) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters/cuentas_resumen.csv
+      40 cuentas pasan el filtro de msgs
+[4/5] Cargando palabras_x_cuenta desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters/palabras_x_cuenta.csv
+[4b] Seleccionando top 500 cuentas por msgs, top 5 palabras
+      1602 palabras validas en el grafo
+      40 cuentas, 159 aristas cuenta->palabra
+      plataformas presentes: ['Facebook', 'Instagram', 'Medios', 'Twitter', 'YouTube']
+[5/5] Generando HTML en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/red_tampico_cuentas_ultimas_2_semanas.html
+      tamano: 1698085 bytes
+      metricas en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/metricas_cuentas.json
+OK.
+Generar red de cuentas finalizado con éxito.
+
+--- Ejecutando SNA: Generar red de posiciones discursivas ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/19_red_posiciones_discursivas.py --base-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas --input-csv /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv --output-filename red_tampico_posiciones_ultimas_2_semanas.html --scope-label 'Tampico · últimas 2 semanas' --corpus-label 'últimas 2 semanas locales disponibles de Tampico'
+[1/5] Cargando insumos de /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas
+[2/5] Calculando posiciones discursivas por tema
+      posiciones: 40
+      cuentas-posicion: 1549
+[3/5] Escribiendo CSVs
+[4/5] Construyendo red HTML autocontenida
+[5/5] OK
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/red_tampico_posiciones_ultimas_2_semanas.html (1441026 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/posiciones_discursivas.csv (25747 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/cuentas_posiciones.csv (108996 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/palabras_posiciones.csv (10076 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/ejemplos_posiciones.csv (58134 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_posiciones/metricas_posiciones.json (925 bytes)
+Generar red de posiciones discursivas finalizado con éxito.
+
+--- Ejecutando SNA: Generar red completa guiada ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12c_red_completa_guiada.py --clusters-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters --output-filename red_tampico_ultimas_2_semanas_guiada.html --scope-label 'de las últimas 2 semanas'
+[red_completa] corpus de las últimas 2 semanas de Tampico
+[red_completa] umbrales: intra_sub=4.0, intra_cluster=2.0, extra=10.0
+[red_completa] cargando datos...
+  Palabras LDA: 1624, con sub_id: 1614
+[red_completa] construyendo grafo...
+  aristas intra_sub:      1325
+  aristas intra_cluster:  6278
+  aristas extra:          1537
+  Nodos: 1602, Aristas: 8429
+[red_completa] calculando metricas...
+  Calculando metricas para 1602 nodos y 8429 aristas...
+  Comunidades (subclusters presentes): 224
+  [SKIP] betweenness: demasiados nodos
+  Calculando participation coefficient y z-within-degree...
+/home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/lib/python3.12/site-packages/networkx/algorithms/assortativity/correlation.py:302: RuntimeWarning: invalid value encountered in scalar divide
+  return float((xy * (M - ab)).sum() / np.sqrt(vara * varb))
+/home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/lib/python3.12/site-packages/networkx/algorithms/assortativity/mixing.py:217: RuntimeWarning: invalid value encountered in divide
+  a = a / a.sum()
+  Calculando metricas globales...
+  Generando HTML pyvis...
+  HTML escrito en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_ultimas_2_semanas_guiada.html (CSS + panel + tablas inyectadas)
+  Aplicando temas rastreados y polaridad...
+
+[red_completa] OK
+  Nodos: 1602
+  Aristas: 8429
+  Moduralidad: 0.2859
+  Clustering global: 0.4961
+  Componentes conexas: 3
+  Salidas en: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada
+Generar red completa guiada finalizado con éxito.
+
+--- Ejecutando SNA: Generar red de cuentas guiada ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/12d_red_cuentas_guiada.py --base-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas --output-filename red_tampico_cuentas_ultimas_2_semanas_guiada.html --scope-label 'de las últimas 2 semanas' --corpus-label 'últimas 2 semanas locales disponibles de Tampico'
+[1/5] Cargando nodos (palabras) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/nodos_metricas.csv
+      1602 palabras
+[2/5] Cargando aristas (palabra-palabra) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_completa/aristas_clasificadas.csv (peso>=4.0)
+      3648 aristas tras filtro
+[3/5] Cargando cuentas (>= 5 msgs) desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters/cuentas_resumen.csv
+      40 cuentas pasan el filtro de msgs
+[4/5] Cargando palabras_x_cuenta desde /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/cuentas_clusters/palabras_x_cuenta.csv
+[4b] Seleccionando top 500 cuentas por msgs, top 5 palabras
+      1602 palabras validas en el grafo
+      40 cuentas, 159 aristas cuenta->palabra
+      plataformas presentes: ['Facebook', 'Instagram', 'Medios', 'Twitter', 'YouTube']
+[5/5] Generando HTML en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_cuentas_ultimas_2_semanas_guiada.html
+      aplicando temas rastreados, polaridad y postura
+      tamano: 1881173 bytes
+      metricas en /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/metricas_cuentas_guiada.json
+OK.
+Generar red de cuentas guiada finalizado con éxito.
+
+--- Ejecutando SNA: Generar red de posiciones guiada ---
+Comando: /home/emilio/Documentos/Tampico_Semanal_Reportes/.venv/bin/python3 /home/emilio/Documentos/Tampico_Semanal_Reportes/Scripts/19_red_posiciones_guiada.py --base-dir /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas --input-csv /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv --output-filename red_tampico_posiciones_ultimas_2_semanas_guiada.html --scope-label 'Tampico · últimas 2 semanas' --corpus-label 'últimas 2 semanas locales disponibles de Tampico' --positions-per-topic 5 --words-per-position 35
+[1/5] Cargando insumos de /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas
+      filtro de español: 27717 de 27976 filas de vocabulario conservadas
+[2/5] Calculando posiciones discursivas por tema
+      posiciones: 40
+      cuentas-posicion: 1528
+[3/5] Escribiendo CSVs
+[4/5] Construyendo red HTML autocontenida
+      aplicando temas rastreados, polaridad y postura
+[5/5] OK
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_posiciones_ultimas_2_semanas_guiada.html (2538418 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/posiciones_discursivas_guiada.csv (32451 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/cuentas_posiciones_guiada.csv (107536 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/palabras_posiciones_guiada.csv (21233 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/ejemplos_posiciones_guiada.csv (57784 bytes)
+      - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/metricas_posiciones_guiada.json (1454 bytes)
+Generar red de posiciones guiada finalizado con éxito.
+Resultados SNA generados:
+  - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_ultimas_2_semanas_guiada.html
+  - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_cuentas_ultimas_2_semanas_guiada.html
+  - /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/clusters/red_guiada/red_tampico_posiciones_ultimas_2_semanas_guiada.html
+
+SNA finalizado correctamente.
+Bitácora: /home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas/ultima_ejecucion_ultimas_2_semanas.log

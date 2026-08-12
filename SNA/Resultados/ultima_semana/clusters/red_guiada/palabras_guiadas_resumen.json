@@ -1,0 +1,39 @@
+{
+  "n_nodos": 461,
+  "n_nodos_con_categoria": 57,
+  "n_nodos_con_polaridad": 109,
+  "n_nodos_con_postura": 0,
+  "categorias": {
+    "Obras": 12,
+    "Delitos": 10,
+    "Prevencion": 10,
+    "Gobierno municipal": 6,
+    "Mónica Villarreal": 5,
+    "Corrupcion": 5,
+    "Vialidad": 4,
+    "Morena": 4,
+    "Americo": 2,
+    "Agua": 1,
+    "Basura": 1
+  },
+  "polaridades": {
+    "neutral": 352,
+    "positiva": 58,
+    "negativa": 51
+  },
+  "posturas": {
+    "sin_postura": 461
+  },
+  "ambitos_estrategicos": {
+    "opportunity": 352,
+    "consolidation": 58,
+    "risk": 51
+  },
+  "metodo_ambito_estrategico": "clasificacion exclusiva por polaridad: negativa=riesgo, positiva=consolidacion, mixta/neutral=oportunidad",
+  "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",
+  "fuentes": {
+    "temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",
+    "positivas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_positivas.txt",
+    "negativas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_negativas.txt"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "corpus": "última semana local disponible de Tampico",
+  "n_palabras": 461,
+  "n_aristas_palabra": 1633,
+  "n_cuentas_sel": 7,
+  "n_aristas_cuenta": 33,
+  "plataformas": [
+    "Facebook",
+    "Instagram",
+    "Medios",
+    "YouTube"
+  ],
+  "params": {
+    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultima_semana",
+    "top_n": 500,
+    "min_msgs": 5,
+    "top_k": 5,
+    "peso_min": 1,
+    "peso_arista": 4.0,
+    "output_filename": "red_tampico_cuentas_ultima_semana.html",
+    "scope_label": "de la última semana disponible",
+    "corpus_label": "última semana local disponible de Tampico"
+  }
+}

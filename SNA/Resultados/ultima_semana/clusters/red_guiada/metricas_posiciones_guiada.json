@@ -1,0 +1,33 @@
+{
+  "corpus": "última semana local disponible de Tampico",
+  "n_mensajes": 1154,
+  "n_cuentas_total": 872,
+  "n_posiciones": 25,
+  "n_cuentas_posicion": 155,
+  "n_nodes_html": 432,
+  "n_edges_html": 484,
+  "params": {
+    "base_dir": "SNA/Resultados/ultima_semana",
+    "input_csv": "SNA/Datos/tampico_datos_tabulares_ultima_semana.csv",
+    "positions_per_topic": 5,
+    "min_account_words": 5,
+    "min_topic_words": 3,
+    "min_topic_pct": 12.0,
+    "max_vocab": 90,
+    "accounts_per_position": 18,
+    "words_per_position": 35,
+    "diccionario_temas": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_pmi_confianza_v10.xlsx",
+    "diccionario_positivo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_positivas.txt",
+    "diccionario_negativo": "/home/emilio/Documentos/RAdAR/Diccionarios_NLP/Diccionarios_Finales/diccionario_palabras_negativas.txt",
+    "diccionario_espanol": "/usr/share/hunspell/es_ES.dic",
+    "diccionario_ingles": "/usr/share/dict/american-english",
+    "output_filename": "red_tampico_posiciones_ultima_semana_guiada.html",
+    "scope_label": "Tampico · última semana",
+    "corpus_label": "última semana local disponible de Tampico"
+  },
+  "ibea_por_nivel": {
+    "medio": 16,
+    "bajo": 8,
+    "alto": 1
+  }
+}

@@ -1,0 +1,433 @@
+node_id,tipo_nodo,etiqueta,categoria_principal,confianza_categoria,categorias,polaridad,polaridad_score,ambito_estrategico,postura,postura_etiqueta,postura_score,evidencia_postura,mensajes_con_postura,coincidencias_positivas,coincidencias_negativas,peso_coincidente
+T00,tema,México y asuntos nacionales · nina,Delitos,0.8049,Delitos,negativa,-0.6,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,4.0,18.0
+T01,tema,"Identidad local, cultura y entretenimiento · unico",,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T02,tema,Gestión municipal y servicios públicos · julio,Gobierno municipal,0.82,Gobierno municipal | Prevencion,negativa,-1.0,risk,apoyo_defensa,Apoyo/defensa,0.3333,6.0,6,0.0,1.0,89.0
+T03,tema,México y asuntos nacionales · pesos,Delitos,0.8986,Delitos | Obras,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,3.0
+T04,tema,Gobierno y disputa política · tamaulipas,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T05,tema,Gestión municipal y servicios públicos · desarrollar,Obras,0.9944,Obras | Gobierno municipal | Mónica Villarreal,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,1.0,0.0,7.0
+T07,tema,"Seguridad, violencia y justicia · hija",Morena,0.9435,Morena | Delitos,mixta,0.1152,opportunity,sin_postura,Sin postura,0.0,0.0,0,92.0,73.0,169.0
+T09,tema,México y asuntos nacionales · cuerpo,,0.0,,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,5.0
+T10,tema,"Bienestar, salud y educación · violencia",Delitos,1.0,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,5.0
+T11,tema,"Identidad local, cultura y entretenimiento · economico",,0.0,,negativa,-0.2727,risk,apoyo_defensa,Apoyo/defensa,1.0,4.0,3,8.0,14.0,22.0
+T12,tema,"Ciudad, dafne, antonio",,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+T13,tema,"Agua, territorio y medio ambiente · pendiente",Gobierno municipal,0.95,Gobierno municipal | Obras,positiva,0.5385,consolidation,sin_postura,Sin postura,0.0,0.0,0,10.0,3.0,14.0
+T14,tema,México y asuntos nacionales · grupo,Obras,1.0,Obras,neutral,0.0,opportunity,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,0.0,0.0,2.0
+T15,tema,"Seguridad, violencia y justicia · caso",Prevencion,0.7719,Prevencion | Corrupcion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,4.0,5.0
+T16,tema,Gestión municipal y servicios públicos · prevencion,Mónica Villarreal,1.0,Mónica Villarreal | Americo | Prevencion | Morena,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,5.0,4,9.0,0.0,43.0
+T17,tema,Gestión municipal y servicios públicos · investigacion,Mónica Villarreal,0.9,Mónica Villarreal | Delitos,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,3.0,3.0,9.0
+T18,tema,Apoyo y aprobación pública · situacion,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T20,tema,"Bienestar, salud y educación · metro",Mónica Villarreal,0.9,Mónica Villarreal | Americo,positiva,0.4545,consolidation,apoyo_defensa,Apoyo/defensa,1.0,3.0,2,8.0,3.0,16.0
+T21,tema,"Escolar, realidad, convertir",Prevencion,0.9181,Prevencion | Corrupcion,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,2.0,2,7.0,0.0,9.0
+T22,tema,"Comunidad, familia y vida cotidiana · nivel",,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+T23,tema,"Comunidad, familia y vida cotidiana · exposicion",,0.0,,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,2.0,1,7.0,0.0,7.0
+T24,tema,"Seguridad, violencia y justicia · academia",Prevencion,1.0,Prevencion | Corrupcion | Gobierno municipal,negativa,-1.0,risk,critica_oposicion,Crítica/oposición,-0.3333,3.0,3,0.0,65.0,85.0
+T25,tema,Opiniones generales y contenido compartido,,0.0,,negativa,-0.7778,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,8.0,9.0
+T00_P1,posicion,"Familia, cuidados y vida comunitaria",Delitos,0.8049,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,10.0
+T00_P2,posicion,"Familia, cuidados y vida comunitaria",Delitos,0.8049,Delitos,negativa,-0.5,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,3.0,8.0
+T01_P1,posicion,"Perspectiva sobre identidad local, cultura y entretenimiento · unico, con énfasis en tampicotecuida",,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T02_P1,posicion,"Perspectiva sobre gestión municipal y servicios públicos · julio, con énfasis en tampico",Gobierno municipal,0.82,Gobierno municipal | Prevencion,negativa,-1.0,risk,apoyo_defensa,Apoyo/defensa,0.3333,6.0,6,0.0,1.0,89.0
+T03_P1,posicion,"Perspectiva sobre méxico y asuntos nacionales · pesos, con énfasis en amigo",Delitos,0.8986,Delitos | Obras,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,3.0
+T04_P1,posicion,"Perspectiva sobre gobierno y disputa política · tamaulipas, con énfasis en tamaulipas",,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T05_P1,posicion,"Perspectiva sobre gestión municipal y servicios públicos · desarrollar, con énfasis en concluir",Obras,0.9944,Obras | Gobierno municipal | Mónica Villarreal,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,1.0,0.0,7.0
+T07_P1,posicion,Reclamos de seguridad y justicia,Morena,0.9435,Morena | Delitos,mixta,0.1278,opportunity,sin_postura,Sin postura,0.0,0.0,0,75.0,58.0,137.0
+T07_P2,posicion,"Familia, cuidados y vida comunitaria",Morena,0.9435,Morena,mixta,0.0625,opportunity,sin_postura,Sin postura,0.0,0.0,0,17.0,15.0,32.0
+T09_P1,posicion,"Perspectiva sobre méxico y asuntos nacionales · cuerpo, con énfasis en hora",,0.0,,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,5.0
+T10_P1,posicion,Reclamos de seguridad y justicia,Delitos,1.0,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,5.0
+T11_P1,posicion,"Perspectiva sobre identidad local, cultura y entretenimiento · economico, con énfasis en ano",,0.0,,negativa,-0.2727,risk,apoyo_defensa,Apoyo/defensa,1.0,4.0,3,8.0,14.0,22.0
+T12_P1,posicion,"Perspectiva sobre ciudad, dafne, antonio, con énfasis en militarizado",,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+T13_P1,posicion,Respaldo y defensa de la gestión,Gobierno municipal,0.95,Gobierno municipal | Obras,positiva,0.5385,consolidation,sin_postura,Sin postura,0.0,0.0,0,10.0,3.0,14.0
+T14_P1,posicion,"Obras, vivienda y desarrollo urbano",Obras,1.0,Obras,neutral,0.0,opportunity,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,0.0,0.0,2.0
+T15_P1,posicion,"Familia, cuidados y vida comunitaria",Prevencion,0.7719,Prevencion | Corrupcion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,4.0,5.0
+T16_P1,posicion,"Perspectiva sobre gestión municipal y servicios públicos · prevencion, con énfasis en villarreal",Mónica Villarreal,1.0,Mónica Villarreal | Americo | Prevencion | Morena,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,5.0,4,9.0,0.0,43.0
+T17_P1,posicion,Respaldo y defensa de la gestión,Mónica Villarreal,0.9,Mónica Villarreal | Delitos,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,3.0,3.0,9.0
+T18_P1,posicion,"Perspectiva sobre apoyo y aprobación pública · situacion, con énfasis en seguir",,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+T20_P1,posicion,"Perspectiva sobre bienestar, salud y educación · metro, con énfasis en escuela",Mónica Villarreal,0.9,Mónica Villarreal | Americo,positiva,0.4545,consolidation,apoyo_defensa,Apoyo/defensa,1.0,3.0,2,8.0,3.0,16.0
+T21_P1,posicion,Respaldo y defensa de la gestión,Prevencion,0.9181,Prevencion | Corrupcion,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,2.0,2,7.0,0.0,9.0
+T22_P1,posicion,"Perspectiva sobre comunidad, familia y vida cotidiana · nivel, con énfasis en vida",,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+T23_P1,posicion,Actividades culturales y eventos públicos,,0.0,,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,2.0,1,7.0,0.0,7.0
+T24_P1,posicion,"Perspectiva sobre seguridad, violencia y justicia · academia, con énfasis en academia",Prevencion,1.0,Prevencion | Corrupcion | Gobierno municipal,negativa,-1.0,risk,critica_oposicion,Crítica/oposición,-0.3333,3.0,3,0.0,65.0,85.0
+T25_P1,posicion,"Perspectiva sobre opiniones generales y contenido compartido, con énfasis en casa",,0.0,,negativa,-0.7778,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,8.0,9.0
+A1,cuenta,YouTube::@marianamontalvo7530,Delitos,0.9338,Delitos | Obras | Corrupcion | Agua,negativa,-0.2222,risk,sin_postura,Sin postura,0.0,0.0,0,7.0,11.0,22.0
+A2,cuenta,YouTube::@JaninaVanessa1000,,0.0,,positiva,0.5,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,1.0,4.0
+A3,cuenta,YouTube::@myriamjannethtapiaamezcua2141,Delitos,1.0,Delitos | Prevencion | Vialidad | Corrupcion,mixta,0.1111,opportunity,sin_postura,Sin postura,0.0,0.0,0,5.0,4.0,13.0
+A4,cuenta,YouTube::@AngieAngiedeMexico,Morena,0.9435,Morena | Delitos,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,6.0
+A5,cuenta,YouTube::@RddStar-y2v4z,Prevencion,0.7719,Prevencion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,5.0,5.0
+A6,cuenta,YouTube::@fer3725,Prevencion,0.8894,Prevencion,positiva,0.25,consolidation,sin_postura,Sin postura,0.0,0.0,0,5.0,3.0,8.0
+A7,cuenta,YouTube::@crescenciajarquinelorza4271,,0.0,,positiva,0.5,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,1.0,4.0
+A8,cuenta,YouTube::@VeronicaMendez-t8o,Delitos,0.8049,Delitos | Gobierno municipal | Obras,negativa,-0.6667,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,5.0,9.0
+A9,cuenta,YouTube::@mariateresarosas3268,Delitos,0.8049,Delitos,mixta,-0.1111,opportunity,sin_postura,Sin postura,0.0,0.0,0,4.0,5.0,10.0
+A10,cuenta,YouTube::@lizzieguez,,0.0,,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,4.0,6.0,10.0
+A11,cuenta,YouTube::@biolvsr1046,Corrupcion,0.8919,Corrupcion | Prevencion,negativa,-0.4286,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,5.0,7.0
+A12,cuenta,YouTube::@RosalvaOsorio-q6h,,0.0,,positiva,0.2,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,2.0,5.0
+A13,cuenta,YouTube::@Julio-l7r4e,Delitos,0.8049,Delitos,positiva,0.6667,consolidation,sin_postura,Sin postura,0.0,0.0,0,5.0,1.0,8.0
+A14,cuenta,YouTube::@JavierNunez-up5kj,Delitos,0.8049,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,2.0
+A15,cuenta,YouTube::@apolinarsanchezmorales621,Delitos,0.8049,Delitos,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,2.0
+A16,cuenta,YouTube::@h5jy,Delitos,1.0,Delitos,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,6.0
+A17,cuenta,YouTube::@marthaverduzco8467,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A18,cuenta,YouTube::@enriqueymarisol1,Delitos,0.9338,Delitos,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,6.0
+A19,cuenta,YouTube::@eiguajardo,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A20,cuenta,YouTube::@DeAndra750,Delitos,0.8049,Delitos | Gobierno municipal,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,7.0
+A21,cuenta,YouTube::@lucialeguizamon590,Morena,0.9435,Morena | Delitos,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,0.0,3.0
+A22,cuenta,YouTube::@CaroDiaz-m3g,Morena,0.9435,Morena,negativa,-0.25,risk,sin_postura,Sin postura,0.0,0.0,0,3.0,5.0,8.0
+A23,cuenta,YouTube::@CarlosEduardo-ul9rt,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A24,cuenta,YouTube::@LuisTorres-kl1zv,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+A25,cuenta,YouTube::@ChololokoPorro,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+A26,cuenta,YouTube::@CristianJonathanRodríguezR-d4v,,0.0,,negativa,-0.3333,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,4.0,6.0
+A27,cuenta,YouTube::@CristinaTorres-fw1kw,Gobierno municipal,0.95,Gobierno municipal | Morena,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,2.0,7.0
+A28,cuenta,YouTube::@LourdesJovitaSolisCruz-g5h3v,Gobierno municipal,0.95,Gobierno municipal,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,6.0
+A29,cuenta,YouTube::@Liliana-ut6ir,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+A30,cuenta,YouTube::@JesusAlejandrobg1,Delitos,0.8049,Delitos,negativa,-0.2,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,3.0,6.0
+A31,cuenta,YouTube::@DulceCorazónLealSosa,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A32,cuenta,YouTube::@candelariarosascastro8516,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,0.0,2.0
+A33,cuenta,YouTube::@RinconesdeMexico3027,,0.0,,negativa,-0.5,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,3.0,4.0
+A34,cuenta,YouTube::@karenchic4860,Obras,0.782,Obras,negativa,-0.7143,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,6.0,7.0
+A35,cuenta,YouTube::@mariluroman5709,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A36,cuenta,Instagram::monicavtampico,Gobierno municipal,0.95,Gobierno municipal | Obras | Prevencion | Morena | Mónica Villarreal,positiva,0.7143,consolidation,sin_postura,Sin postura,0.0,0.0,0,24.0,4.0,51.0
+A37,cuenta,Instagram::turismotampico,Gobierno municipal,0.82,Gobierno municipal,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,3.0,3.0,11.0
+A38,cuenta,Facebook::Ana Laura E P,Mónica Villarreal,0.9,Mónica Villarreal,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,0.0,4.0
+A39,cuenta,TikTok::monicavtampico,Gobierno municipal,0.95,Gobierno municipal | Obras | Mónica Villarreal,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,6.0,0.0,17.0
+A40,cuenta,Facebook::Francisco Adrian Pallares Martinez,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+A41,cuenta,Medios::El Sol de México,Gobierno municipal,0.95,Gobierno municipal | Prevencion | Delitos | Mónica Villarreal | Obras | Morena | Corrupcion | Vialidad | Americo | Basura,mixta,-0.1531,opportunity,critica_oposicion,Crítica/oposición,-0.3333,3.0,3,83.0,113.0,317.0
+A42,cuenta,Facebook::Tampico Gob,Gobierno municipal,0.95,Gobierno municipal | Mónica Villarreal | Prevencion | Americo | Obras | Corrupcion,positiva,0.6667,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,10.0,2.0,32.0
+A43,cuenta,Twitter::@VoxPopuliNoti,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Americo | Basura | Prevencion,positiva,0.4286,consolidation,sin_postura,Sin postura,0.0,0.0,0,5.0,2.0,23.0
+A44,cuenta,Instagram::juanpizanamtz,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Obras | Morena | Americo,positiva,0.5,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,3.0,1.0,13.0
+A45,cuenta,YouTube::@RobertValenciaPIrob,Prevencion,0.8136,Prevencion,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,0.0,7.0
+A46,cuenta,TikTok::prevenciondelitotampico,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Americo | Morena | Prevencion,positiva,0.4286,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,5.0,2.0,15.0
+A47,cuenta,Instagram::prevencion.delito_tampico,Gobierno municipal,0.95,Gobierno municipal | Mónica Villarreal | Prevencion | Americo | Obras,positiva,0.6,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,1.0,16.0
+A48,cuenta,TikTok::info7tamps,Obras,0.9454,Obras | Gobierno municipal | Vialidad | Prevencion,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,10.0
+A49,cuenta,Twitter::@RevistaDebateMX,Gobierno municipal,0.82,Gobierno municipal | Obras | Basura,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,7.0
+A50,cuenta,YouTube::@GerardoReyna-zq6ho,Delitos,0.8986,Delitos | Mónica Villarreal | Obras | Prevencion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,4.0
+A51,cuenta,YouTube::@AlfonsopreciadoPreciadoGonzale,Prevencion,0.9157,Prevencion | Morena,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,6.0
+A52,cuenta,YouTube::@GrandRNomada,Prevencion,0.7719,Prevencion | Corrupcion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,3.0
+A53,cuenta,Instagram::desecotampico,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Obras | Americo | Prevencion,positiva,0.6,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,4.0,1.0,12.0
+A54,cuenta,YouTube::@CarlaMo-qb5cq,Morena,0.9435,Morena | Prevencion | Delitos,positiva,0.6364,consolidation,sin_postura,Sin postura,0.0,0.0,0,9.0,2.0,13.0
+A55,cuenta,YouTube::@KevinSantos-so9lm,,0.0,,negativa,-0.6667,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,5.0,6.0
+A56,cuenta,YouTube::@rebecaLM4318,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,4.0
+A57,cuenta,YouTube::@TribunaVecinal,Morena,0.9435,Morena | Delitos,positiva,0.7143,consolidation,sin_postura,Sin postura,0.0,0.0,0,6.0,1.0,8.0
+A58,cuenta,YouTube::@aracelifigueroa7751,,0.0,,negativa,-0.6667,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,5.0,6.0
+A59,cuenta,YouTube::@EduvigesServin-w3s,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A60,cuenta,YouTube::@RPD-DD,Morena,0.9435,Morena,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,5.0,0.0,5.0
+A61,cuenta,YouTube::@misaelalonso2382,Delitos,0.8049,Delitos | Obras,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,5.0
+A62,cuenta,YouTube::@rojoazul1687,Prevencion,0.7719,Prevencion,negativa,-0.3333,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,4.0,6.0
+A63,cuenta,YouTube::@paolac.7266,Morena,0.9435,Morena,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,4.0
+A64,cuenta,YouTube::@SebasPadilla-s4o,,0.0,,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,3.0
+A65,cuenta,YouTube::@MARTHA.Patito,Morena,0.9435,Morena,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,3.0
+A66,cuenta,YouTube::@MariaCoreyLoyaReyes,Prevencion,0.8136,Prevencion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,4.0,5.0
+A67,cuenta,YouTube::@familiabellezafitnes,Prevencion,0.8894,Prevencion,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,2.0,6.0
+A68,cuenta,YouTube::@chimichurri260,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A69,cuenta,YouTube::@acs3452,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,4.0
+A70,cuenta,YouTube::@RileyBeppler69,Vialidad,0.9494,Vialidad,mixta,0.1429,opportunity,sin_postura,Sin postura,0.0,0.0,0,4.0,3.0,7.0
+A71,cuenta,YouTube::@miriammartinez4530,,0.0,,negativa,-0.3333,risk,sin_postura,Sin postura,0.0,0.0,0,2.0,4.0,6.0
+A72,cuenta,YouTube::@aca639,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,4.0
+A73,cuenta,YouTube::@aleromero33,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+A74,cuenta,YouTube::@arizuokusawa6953,Vialidad,0.9494,Vialidad,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A75,cuenta,YouTube::@Nerisse-q5v2n,Prevencion,0.8136,Prevencion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+A76,cuenta,YouTube::@FromAnytown,Prevencion,1.0,Prevencion | Corrupcion | Obras,negativa,-0.5,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,3.0,7.0
+A77,cuenta,YouTube::@veronicacopal8166,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A78,cuenta,YouTube::@eduardoE5252,Corrupcion,0.8919,Corrupcion | Obras | Prevencion,positiva,0.2727,consolidation,sin_postura,Sin postura,0.0,0.0,0,7.0,4.0,12.0
+A79,cuenta,YouTube::@ootilootil9062,Morena,0.9435,Morena | Prevencion,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,4.0
+A80,cuenta,YouTube::@danubys1,Gobierno municipal,0.95,Gobierno municipal | Morena | Prevencion,positiva,0.5,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,1.0,5.0
+A81,cuenta,Twitter::@EleeseNoticias,Mónica Villarreal,1.0,Mónica Villarreal | Americo | Prevencion | Basura | Gobierno municipal,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,1.0,1,5.0,0.0,11.0
+A82,cuenta,YouTube::@rosalbacastellanos3845,Prevencion,0.8136,Prevencion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,4.0
+A83,cuenta,YouTube::@Arigari21,Delitos,1.0,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,4.0
+A84,cuenta,YouTube::@nicoSaucedoEsparza,,0.0,,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,4.0
+A85,cuenta,YouTube::@DylanFernando-t4g,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,3.0
+A86,cuenta,YouTube::@ramirezpcmusica,Prevencion,0.7719,Prevencion,negativa,-0.6,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,4.0,5.0
+A87,cuenta,YouTube::@GeorginafajardoIII,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A88,cuenta,YouTube::@josecarreno7780,,0.0,,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,3.0
+A89,cuenta,Instagram::metrotampico,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Obras | Americo,mixta,0.0,opportunity,apoyo_defensa,Apoyo/defensa,1.0,3.0,2,12.0,12.0,42.0
+A90,cuenta,YouTube::@josedejesuagonzalez7271,Delitos,0.9338,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,4.0
+A91,cuenta,Instagram::tampico.noticias,Gobierno municipal,0.82,Gobierno municipal | Morena,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,4.0
+A92,cuenta,YouTube::@VeronicaRodriguezcervant-l6g2l,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+A93,cuenta,Twitter::@MonicaVTampico,Obras,1.0,Obras | Gobierno municipal | Corrupcion | Prevencion,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,0.0,12.0
+A94,cuenta,YouTube::@lourdessilvaruiz8642,Prevencion,0.9474,Prevencion | Corrupcion,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,2.0,2.0,5.0
+A95,cuenta,YouTube::@Atlas3ISam,Prevencion,0.7719,Prevencion,positiva,0.2,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,2.0,5.0
+A96,cuenta,YouTube::@JuanAmaral-g8w,,0.0,,negativa,-0.3333,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,2.0,3.0
+A97,cuenta,YouTube::@eltiowodi,Prevencion,0.7719,Prevencion,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A98,cuenta,YouTube::@luciamontealegre3859,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,4.0,4.0
+A99,cuenta,Twitter::@gruponoticiaspc,Mónica Villarreal,1.0,Mónica Villarreal | Gobierno municipal | Americo | Obras | Basura | Prevencion,positiva,1.0,consolidation,apoyo_defensa,Apoyo/defensa,1.0,2.0,1,5.0,0.0,23.0
+A100,cuenta,TikTok::israelponceporstreaming,Mónica Villarreal,1.0,Mónica Villarreal | Americo | Gobierno municipal | Obras | Basura,positiva,0.2,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,2.0,13.0
+A101,cuenta,YouTube::@Chuy_-qd8yd,,0.0,,positiva,0.5,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,1.0,4.0
+A102,cuenta,YouTube::@OmarR-v8u,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+A103,cuenta,YouTube::@cristinasalinas5132,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+A104,cuenta,YouTube::@marianacabrera1486,Obras,0.8917,Obras | Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,3.0
+A105,cuenta,YouTube::@toctocgreen,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+A106,cuenta,YouTube::@SalvadorOlmospulido,,0.0,,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,2.0,6.0
+A107,cuenta,YouTube::@LetyCharls,Americo,1.0,Americo,positiva,0.5,consolidation,sin_postura,Sin postura,0.0,0.0,0,3.0,1.0,5.0
+A108,cuenta,YouTube::@irmacolorina,Mónica Villarreal,0.9,Mónica Villarreal,positiva,0.6,consolidation,sin_postura,Sin postura,0.0,0.0,0,4.0,1.0,6.0
+A109,cuenta,YouTube::@jorgealbertoherrera3778,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A110,cuenta,YouTube::@ElizaLeon-q2z,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,0.0,2.0
+A111,cuenta,YouTube::@Santiago65-c4b,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+A112,cuenta,YouTube::@jessicanavit,Morena,0.9435,Morena,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,2.0
+A113,cuenta,YouTube::@esthermaganatorres9709,Morena,0.9435,Morena,positiva,0.3333,consolidation,sin_postura,Sin postura,0.0,0.0,0,2.0,1.0,3.0
+A114,cuenta,YouTube::@lourdespenaloza3885,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,3.0,3.0
+A115,cuenta,YouTube::@ssoyluz20,Prevencion,1.0,Prevencion | Vialidad,mixta,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,1.0,1.0,3.0
+A116,cuenta,Facebook::Francisco Gomez,Obras,0.8324,Obras | Gobierno municipal,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,3.0
+A117,cuenta,YouTube::@latuna8395,,0.0,,negativa,-0.3333,risk,sin_postura,Sin postura,0.0,0.0,0,1.0,2.0,3.0
+A118,cuenta,YouTube::@cecilianikkenmexico,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,2.0,2.0
+A119,cuenta,YouTube::@SoledadPeralts,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+A120,cuenta,YouTube::@laylatov3941,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W1,palabra,hijo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W2,palabra,nino,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W3,palabra,investigar,Delitos,0.8049,Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W4,palabra,cosa,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W5,palabra,cualquiera,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W6,palabra,pais,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W7,palabra,empezar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W8,palabra,nina,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W9,palabra,control,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W10,palabra,muerto,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W11,palabra,mujer,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W12,palabra,nino,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W13,palabra,nina,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W14,palabra,hijo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W15,palabra,mujer,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W16,palabra,investigar,Delitos,0.8049,Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W17,palabra,muerto,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W18,palabra,cosa,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W19,palabra,derecho,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W20,palabra,cualquiera,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W21,palabra,empezar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W22,palabra,pais,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W23,palabra,tampicotecuida,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W24,palabra,experiencia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W25,palabra,vivir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W26,palabra,historia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W27,palabra,contar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W28,palabra,tampicovacontodo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W29,palabra,jaiba,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W30,palabra,social,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W31,palabra,cultura,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W32,palabra,unico,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W33,palabra,domingo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W34,palabra,agosto,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W35,palabra,arte,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W36,palabra,tampico,Gobierno municipal,0.82,Gobierno municipal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W37,palabra,julio,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W38,palabra,sol,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W39,palabra,buscar,Prevencion,0.8136,Prevencion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W40,palabra,editorial,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W41,palabra,altamira,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W42,palabra,integrante,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W43,palabra,localjueves,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W44,palabra,espacio,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W45,palabra,martes,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W46,palabra,jueves,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W47,palabra,encuentro,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W48,palabra,semana,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W49,palabra,regresar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W50,palabra,recordar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W51,palabra,parecer,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W52,palabra,amigo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W53,palabra,pesos,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W54,palabra,delincuencia,Delitos,0.8986,Delitos,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W55,palabra,detener,Delitos,0.7964,Delitos | Obras,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W56,palabra,organizado,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W57,palabra,paz,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W58,palabra,tamaulipas,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W59,palabra,sur,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W60,palabra,nacional,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W61,palabra,cerrar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W62,palabra,norte,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W63,palabra,concluir,Obras,0.759,Obras,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W64,palabra,formar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W65,palabra,desarrollo,Obras,0.9944,Obras,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W66,palabra,municipal,Gobierno municipal,0.95,Gobierno municipal | Mónica Villarreal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W67,palabra,crecimiento,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W68,palabra,deporte,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W69,palabra,gracias,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W70,palabra,habitante,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W71,palabra,manana,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W72,palabra,puerta,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W73,palabra,visitante,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W74,palabra,justicia,Morena,0.9435,Morena,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W75,palabra,pasar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W76,palabra,mama,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W77,palabra,caer,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W78,palabra,hija,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W79,palabra,culpa,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W80,palabra,responsable,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W81,palabra,mal,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W82,palabra,querer,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W83,palabra,morir,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W84,palabra,mano,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W85,palabra,pagar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W86,palabra,edad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W87,palabra,culpable,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W88,palabra,suceder,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W89,palabra,institucion,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W90,palabra,adolescente,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W91,palabra,fiscalia,Delitos,0.9184,Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W92,palabra,golpe,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W93,palabra,ojala,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W94,palabra,campamento,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W95,palabra,alguien,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W96,palabra,fisico,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W97,palabra,curso,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W98,palabra,tratar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W99,palabra,resultar,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W100,palabra,campamento,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W101,palabra,curso,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W102,palabra,meter,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W103,palabra,mama,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W104,palabra,pasar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W105,palabra,hija,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W106,palabra,querer,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W107,palabra,caer,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W108,palabra,alguien,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W109,palabra,culpa,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W110,palabra,pagar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W111,palabra,adolescente,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W112,palabra,justicia,Morena,0.9435,Morena,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W113,palabra,edad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W114,palabra,tratar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W115,palabra,resultar,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W116,palabra,institucion,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W117,palabra,mano,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W118,palabra,morir,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W119,palabra,ojala,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W120,palabra,golpe,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W121,palabra,responsable,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W122,palabra,hora,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W123,palabra,dejar,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W124,palabra,cuerpo,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W125,palabra,humano,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W126,palabra,mundo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W127,palabra,militar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W128,palabra,madre,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W129,palabra,menor,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W130,palabra,sufrir,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W131,palabra,violencia,Delitos,1.0,Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W132,palabra,actividad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W133,palabra,victima,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W134,palabra,video,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W135,palabra,ano,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W136,palabra,escenario,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W137,palabra,impulsar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W138,palabra,oportunidad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W139,palabra,ofrecer,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W140,palabra,importante,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W141,palabra,pequeno,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W142,palabra,consecuencia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W143,palabra,economico,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W144,palabra,entender,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W145,palabra,militarizado,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W146,palabra,ciudad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W147,palabra,dafne,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W148,palabra,fallecimiento,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W149,palabra,luis,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W150,palabra,deber,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W151,palabra,hombre,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W152,palabra,problema,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W153,palabra,cercano,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W154,palabra,ejercito,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W155,palabra,agua,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W156,palabra,escuchar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W157,palabra,apoyar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W158,palabra,jorge,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W159,palabra,gobierno,Gobierno municipal,0.95,Gobierno municipal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W160,palabra,ley,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W161,palabra,obra,Obras,0.9393,Obras,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W162,palabra,responder,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W163,palabra,utilizar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W164,palabra,comunidad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W165,palabra,construir,Obras,0.8324,Obras,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W166,palabra,proyecto,Obras,1.0,Obras,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W167,palabra,caso,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W168,palabra,joven,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W169,palabra,abuso,Prevencion,0.7719,Prevencion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W170,palabra,familia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W171,palabra,existir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W172,palabra,declarar,Corrupcion,0.6145,Corrupcion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W173,palabra,mes,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W174,palabra,ocurrir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W175,palabra,villarreal,Mónica Villarreal,1.0,Mónica Villarreal | Americo,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W176,palabra,monica,Mónica Villarreal,1.0,Mónica Villarreal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W177,palabra,prevencion,Prevencion,0.8034,Prevencion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W178,palabra,jornada,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W179,palabra,oferta,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W180,palabra,saludable,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W181,palabra,fortalecer,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W182,palabra,bienestar,Morena,0.9112,Morena,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W183,palabra,extraordinario,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W184,palabra,programa,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W185,palabra,padre,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W186,palabra,persona,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W187,palabra,excelente,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W188,palabra,alcaldesa,Mónica Villarreal,0.9,Mónica Villarreal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W189,palabra,atender,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W190,palabra,autoridad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W191,palabra,colonia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W192,palabra,diverso,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W193,palabra,criminal,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W194,palabra,investigacion,Delitos,0.9338,Delitos,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W195,palabra,perder,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W196,palabra,seguir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W197,palabra,afiliado,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W198,palabra,calidad,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W199,palabra,publica,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W200,palabra,escuela,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W201,palabra,alumno,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W202,palabra,maestro,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W203,palabra,verano,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W204,palabra,metro,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W205,palabra,presidenta,Mónica Villarreal,0.9,Mónica Villarreal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W206,palabra,ninos,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W207,palabra,disciplina,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W208,palabra,iniciar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W209,palabra,estatal,Americo,1.0,Americo,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W210,palabra,fuerza,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W211,palabra,escolar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W212,palabra,vacacion,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W213,palabra,secretaria,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W214,palabra,compromiso,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W215,palabra,direccion,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W216,palabra,plantel,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W217,palabra,exito,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W218,palabra,sector,Prevencion,0.9181,Prevencion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W219,palabra,proteger,Corrupcion,0.8919,Corrupcion | Prevencion,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W220,palabra,vida,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W221,palabra,encontrar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W222,palabra,nivel,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W223,palabra,similar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W224,palabra,exposicion,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W225,palabra,cultural,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W226,palabra,turistico,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W227,palabra,gratuito,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W228,palabra,metropolitano,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W229,palabra,entrada,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W230,palabra,dia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W231,palabra,descubrir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W232,palabra,llegar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W233,palabra,compartir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W234,palabra,disfrutar,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W235,palabra,jardin,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W236,palabra,especial,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W237,palabra,forma,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W238,palabra,profundo,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W239,palabra,academia,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W240,palabra,muerte,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W241,palabra,madero,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W242,palabra,director,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W243,palabra,doenitz,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W244,palabra,militarizada,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W245,palabra,seguridad,Prevencion,1.0,Prevencion,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W246,palabra,amenazar,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W247,palabra,temer,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W248,palabra,septiembre,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W249,palabra,dano,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W250,palabra,nombre,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W251,palabra,revelar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W252,palabra,sexo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W253,palabra,fecha,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W254,palabra,marzo,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W255,palabra,informe,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W256,palabra,denunciar,Corrupcion,0.8746,Corrupcion,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W257,palabra,cobrar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W258,palabra,administracion,Gobierno municipal,0.9,Gobierno municipal,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,1.0
+W259,palabra,casa,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W260,palabra,mandar,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0
+W261,palabra,salir,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W262,palabra,quedar,,0.0,,neutral,0.0,opportunity,sin_postura,Sin postura,0.0,0.0,0,0.0,0.0,0.0
+W263,palabra,fuerte,,0.0,,positiva,1.0,consolidation,sin_postura,Sin postura,0.0,0.0,0,1.0,0.0,1.0
+W264,palabra,responsabilidad,,0.0,,negativa,-1.0,risk,sin_postura,Sin postura,0.0,0.0,0,0.0,1.0,1.0

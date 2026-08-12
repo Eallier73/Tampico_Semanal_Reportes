@@ -1,0 +1,108 @@
+id_global,tema_id,sub_id,nombre_subtema,resumen_subtema,top_terminos,n_palabras,n_aristas,densidad,peso_total
+T00_S01,0,1,"Hijo, investigar, cosa","Subtema T00.S01 centrado en hijo, investigar, cosa.","hijo, investigar, cosa",3,3,1.0,23.0
+T00_S02,0,2,"Camara, mujer, derecho, cumplir","Subtema T00.S02 centrado en camara, mujer, derecho, cumplir, delegacion, condicion.","camara, mujer, derecho, cumplir, delegacion, condicion",6,10,0.667,19.0
+T00_S03,0,3,"Muerto, cualquiera, cabo","Subtema T00.S03 centrado en muerto, cualquiera, cabo.","muerto, cualquiera, cabo",3,3,1.0,8.0
+T00_S04,0,4,"Pais, empezar, control","Subtema T00.S04 centrado en pais, empezar, control.","pais, empezar, control",3,3,1.0,7.0
+T01_S00,1,0,"Tampicotecuida, agosto, arte, tampicovacontodo","Subtema T01.S00 centrado en tampicotecuida, agosto, arte, tampicovacontodo, cultura.","tampicotecuida, agosto, arte, tampicovacontodo, cultura",5,9,0.9,32.0
+T01_S01,1,1,"Experiencia, vivir, historia","Subtema T01.S01 centrado en experiencia, vivir, historia.","experiencia, vivir, historia",3,3,1.0,26.0
+T01_S02,1,2,"Contar, social, privado, afirmar","Subtema T01.S02 centrado en contar, social, privado, afirmar.","contar, social, privado, afirmar",4,5,0.833,15.0
+T01_S03,1,3,"Unico, jaiba, domingo","Subtema T01.S03 centrado en unico, jaiba, domingo.","unico, jaiba, domingo",3,3,1.0,13.0
+T02_S00,2,0,"Tampico, buscar, recordar, encuentro","Subtema T02.S00 centrado en tampico, buscar, recordar, encuentro, integrante, parecer.","tampico, buscar, recordar, encuentro, integrante, parecer",6,14,0.933,65.0
+T02_S01,2,1,"Espacio, martes, jueves","Subtema T02.S01 centrado en espacio, martes, jueves.","espacio, martes, jueves",3,3,1.0,14.0
+T02_S02,2,2,"Sol, regresar, editorial","Subtema T02.S02 centrado en sol, regresar, editorial.","sol, regresar, editorial",3,3,1.0,10.0
+T03_S00,3,0,"Organizado, detener, delincuencia, obtener","Subtema T03.S00 centrado en organizado, detener, delincuencia, obtener.","organizado, detener, delincuencia, obtener",4,6,1.0,28.0
+T03_S01,3,1,"Mexico, paz, pan, noticia","Subtema T03.S01 centrado en mexico, paz, pan, noticia.","mexico, paz, pan, noticia",4,6,1.0,27.0
+T03_S02,3,2,"Ciento, promedio, perdida, directamente","Subtema T03.S02 centrado en ciento, promedio, perdida, directamente, manifestar.","ciento, promedio, perdida, directamente, manifestar",5,9,0.9,26.0
+T03_S03,3,3,"Acuerdo, senalar, amigo, oficial","Subtema T03.S03 centrado en acuerdo, senalar, amigo, oficial.","acuerdo, senalar, amigo, oficial",4,5,0.833,19.0
+T03_S04,3,4,"Pesos, costo, cuyo, cierre","Subtema T03.S04 centrado en pesos, costo, cuyo, cierre.","pesos, costo, cuyo, cierre",4,4,0.667,14.0
+T04_S00,4,0,"Tamaulipas, sur, norte","Subtema T04.S00 centrado en tamaulipas, sur, norte.","tamaulipas, sur, norte",3,3,1.0,54.0
+T04_S01,4,1,"Partido, final, morena, electoral","Subtema T04.S01 centrado en partido, final, morena, electoral.","partido, final, morena, electoral",4,6,1.0,21.0
+T04_S02,4,2,"Nacional, civil, medida, litro","Subtema T04.S02 centrado en nacional, civil, medida, litro.","nacional, civil, medida, litro",4,6,1.0,19.0
+T04_S03,4,3,"Empresario, mayo, junio","Subtema T04.S03 centrado en empresario, mayo, junio.","empresario, mayo, junio",3,3,1.0,10.0
+T04_S04,4,4,"Cerrar, anunciar, mensaje","Subtema T04.S04 centrado en cerrar, anunciar, mensaje.","cerrar, anunciar, mensaje",3,3,1.0,7.0
+T05_S00,5,0,"Municipal, formar, desarrollo, desarrollar","Subtema T05.S00 centrado en municipal, formar, desarrollo, desarrollar, crecimiento, limpieza; conecta tambien concluir, alcalde.","municipal, formar, desarrollo, desarrollar, crecimiento, limpieza, concluir, alcalde",8,20,0.714,72.0
+T05_S01,5,1,"Carmen, gracias, rio, panuco","Subtema T05.S01 centrado en carmen, gracias, rio, panuco, destino, habitante; conecta tambien previo.","carmen, gracias, rio, panuco, destino, habitante, previo",7,18,0.857,44.0
+T05_S02,5,2,"Cuidar, claudia, puerta, visitante","Subtema T05.S02 centrado en cuidar, claudia, puerta, visitante, carpeta, deporte.","cuidar, claudia, puerta, visitante, carpeta, deporte",6,13,0.867,23.0
+T05_S03,5,3,"Manana, viernes, permanecer, posteriormente","Subtema T05.S03 centrado en manana, viernes, permanecer, posteriormente.","manana, viernes, permanecer, posteriormente",4,6,1.0,13.0
+T06_S00,6,0,"Ruffo, california, baja, ernesto","Subtema T06.S00 centrado en ruffo, california, baja, ernesto, appel, exgobernador; conecta tambien ensenada, republica.","ruffo, california, baja, ernesto, appel, exgobernador, ensenada, republica",8,27,0.964,164.0
+T06_S01,6,1,"Empresa, operacion, combustible, grande","Subtema T06.S01 centrado en empresa, operacion, combustible, grande, alto, red; conecta tambien comenzar, industria, supuesto, identificar.","empresa, operacion, combustible, grande, alto, red, comenzar, industria, supuesto, identificar",10,35,0.778,94.0
+T06_S02,6,2,"Huachicol, relacionado, fiscal, firma","Subtema T06.S02 centrado en huachicol, relacionado, fiscal, firma.","huachicol, relacionado, fiscal, firma",4,6,1.0,23.0
+T06_S03,6,3,"Orden, aprehension, solicitar, titular","Subtema T06.S03 centrado en orden, aprehension, solicitar, titular.","orden, aprehension, solicitar, titular",4,5,0.833,13.0
+T07_S00,7,0,"Institucion, fiscalia, edad","Subtema T07.S00 centrado en institucion, fiscalia, edad.","institucion, fiscalia, edad",3,3,1.0,21.0
+T07_S01,7,1,"Justicia, querer, pagar","Subtema T07.S01 centrado en justicia, querer, pagar.","justicia, querer, pagar",3,3,1.0,19.0
+T07_S02,7,2,"Mal, morir, culpa, fisico","Subtema T07.S02 centrado en mal, morir, culpa, fisico.","mal, morir, culpa, fisico",4,6,1.0,17.0
+T07_S03,7,3,"Hija, mama, golpe","Subtema T07.S03 centrado en hija, mama, golpe.","hija, mama, golpe",3,3,1.0,16.0
+T07_S04,7,4,"Ojala, suceder, resultar, mano","Subtema T07.S04 centrado en ojala, suceder, resultar, mano.","ojala, suceder, resultar, mano",4,6,1.0,16.0
+T07_S05,7,5,"Curso, campamento, meter","Subtema T07.S05 centrado en curso, campamento, meter.","curso, campamento, meter",3,3,1.0,15.0
+T07_S06,7,6,"Responsable, caer, alguien, adolescente","Subtema T07.S06 centrado en responsable, caer, alguien, adolescente.","responsable, caer, alguien, adolescente",4,6,1.0,10.0
+T07_S07,7,7,"Pasar, culpable, tratar","Subtema T07.S07 centrado en pasar, culpable, tratar.","pasar, culpable, tratar",3,2,0.667,9.0
+T08_S00,8,0,"Maximo, temperatura, grado, ambiente","Subtema T08.S00 centrado en maximo, temperatura, grado, ambiente.","maximo, temperatura, grado, ambiente",4,6,1.0,55.0
+T08_S01,8,1,"Atencion, politico, falta, apoyo","Subtema T08.S01 centrado en atencion, politico, falta, apoyo, proceso.","atencion, politico, falta, apoyo, proceso",5,9,0.9,29.0
+T08_S02,8,2,"Zona, municipio, ayuntamiento, peligroso","Subtema T08.S02 centrado en zona, municipio, ayuntamiento, peligroso.","zona, municipio, ayuntamiento, peligroso",4,5,0.833,23.0
+T09_S00,9,0,"Mundo, invitar, recorrer, calle","Subtema T09.S00 centrado en mundo, invitar, recorrer, calle, reflejar, viajar.","mundo, invitar, recorrer, calle, reflejar, viajar",6,11,0.733,21.0
+T09_S01,9,1,"Dejar, marina, participacion","Subtema T09.S01 centrado en dejar, marina, participacion.","dejar, marina, participacion",3,3,1.0,20.0
+T09_S02,9,2,"Hora, continuar, sitio, generacion","Subtema T09.S02 centrado en hora, continuar, sitio, generacion.","hora, continuar, sitio, generacion",4,5,0.833,12.0
+T09_S03,9,3,"Operar, sistema, puerto, recurso","Subtema T09.S03 centrado en operar, sistema, puerto, recurso, clase.","operar, sistema, puerto, recurso, clase",5,7,0.7,12.0
+T09_S04,9,4,"Cuerpo, humano, conocimiento","Subtema T09.S04 centrado en cuerpo, humano, conocimiento.","cuerpo, humano, conocimiento",3,3,1.0,10.0
+T10_S00,10,0,"Madre, militar, alejandra","Subtema T10.S00 centrado en madre, militar, alejandra.","madre, militar, alejandra",3,3,1.0,24.0
+T10_S01,10,1,"Menor, actividad, revisar","Subtema T10.S01 centrado en menor, actividad, revisar.","menor, actividad, revisar",3,3,1.0,13.0
+T10_S02,10,2,"Medico, victima, salud","Subtema T10.S02 centrado en medico, victima, salud.","medico, victima, salud",3,3,1.0,12.0
+T10_S03,10,3,"Presunto, video, declaracion","Subtema T10.S03 centrado en presunto, video, declaracion.","presunto, video, declaracion",3,3,1.0,11.0
+T10_S04,10,4,"Exigir, macay, mariela","Subtema T10.S04 centrado en exigir, macay, mariela.","exigir, macay, mariela",3,3,1.0,9.0
+T11_S00,11,0,"Pequeno, mexicano, entender, enfrentar","Subtema T11.S00 centrado en pequeno, mexicano, entender, enfrentar, consecuencia, profesional.","pequeno, mexicano, entender, enfrentar, consecuencia, profesional",6,13,0.867,34.0
+T11_S01,11,1,"Aprovechar, mundial, alla, observar","Subtema T11.S01 centrado en aprovechar, mundial, alla, observar, ofrecer, entorno.","aprovechar, mundial, alla, observar, ofrecer, entorno",6,12,0.8,27.0
+T11_S02,11,2,"Explicar, impulsar, escenario, comercio","Subtema T11.S02 centrado en explicar, impulsar, escenario, comercio, avance, milenio.","explicar, impulsar, escenario, comercio, avance, milenio",6,12,0.8,27.0
+T11_S03,11,3,"Importante, economico, oportunidad, representar","Subtema T11.S03 centrado en importante, economico, oportunidad, representar.","importante, economico, oportunidad, representar",4,6,1.0,25.0
+T11_S04,11,4,"Ano, posibilidad, marcado","Subtema T11.S04 centrado en ano, posibilidad, marcado.","ano, posibilidad, marcado",3,3,1.0,11.0
+T11_S05,11,5,"Directivo, cambio, ayudar","Subtema T11.S05 centrado en directivo, cambio, ayudar.","directivo, cambio, ayudar",3,3,1.0,5.0
+T12_S00,12,0,"Dafne, militarizado, localviernes","Subtema T12.S00 centrado en dafne, militarizado, localviernes.","dafne, militarizado, localviernes",3,3,1.0,31.0
+T12_S01,12,1,"Antonio, juan, sosa, evento","Subtema T12.S01 centrado en antonio, juan, sosa, evento, reunir, hernandez.","antonio, juan, sosa, evento, reunir, hernandez",6,11,0.733,29.0
+T12_S02,12,2,"Ciudad, mante, originario","Subtema T12.S02 centrado en ciudad, mante, originario.","ciudad, mante, originario",3,3,1.0,22.0
+T12_S03,12,3,"Recibir, pedir, luis, localdomingo","Subtema T12.S03 centrado en recibir, pedir, luis, localdomingo.","recibir, pedir, luis, localdomingo",4,6,1.0,14.0
+T13_S00,13,0,"Gobierno, escuchar, apoyar, responder","Subtema T13.S00 centrado en gobierno, escuchar, apoyar, responder, jorge, cercano.","gobierno, escuchar, apoyar, responder, jorge, cercano",6,14,0.933,42.0
+T13_S01,13,1,"Deber, ley, pendiente, obra","Subtema T13.S01 centrado en deber, ley, pendiente, obra, problema.","deber, ley, pendiente, obra, problema",5,9,0.9,37.0
+T13_S02,13,2,"Frente, hombre, evitar, tarde","Subtema T13.S02 centrado en frente, hombre, evitar, tarde, ejercito, miercoles.","frente, hombre, evitar, tarde, ejercito, miercoles",6,15,1.0,33.0
+T13_S03,13,3,"Agua, utilizar, pescador, informar","Subtema T13.S03 centrado en agua, utilizar, pescador, informar.","agua, utilizar, pescador, informar",4,6,1.0,23.0
+T14_S00,14,0,"Centro, general, region, comunidad","Subtema T14.S00 centrado en centro, general, region, comunidad, victoria.","centro, general, region, comunidad, victoria",5,10,1.0,36.0
+T14_S01,14,1,"Millon, proyecto, construir","Subtema T14.S01 centrado en millon, proyecto, construir.","millon, proyecto, construir",3,3,1.0,26.0
+T14_S02,14,2,"Terminar, esperar, indicar, encargado","Subtema T14.S02 centrado en terminar, esperar, indicar, encargado.","terminar, esperar, indicar, encargado",4,6,1.0,17.0
+T14_S03,14,3,"Federal, frontera, coahuila, unidos","Subtema T14.S03 centrado en federal, frontera, coahuila, unidos.","federal, frontera, coahuila, unidos",4,6,1.0,12.0
+T14_S04,14,4,"Infraestructura, generar, medio, grupo","Subtema T14.S04 centrado en infraestructura, generar, medio, grupo.","infraestructura, generar, medio, grupo",4,5,0.833,10.0
+T14_S05,14,5,"Laredo, sumar, confirmar","Subtema T14.S05 centrado en laredo, sumar, confirmar.","laredo, sumar, confirmar",3,3,1.0,10.0
+T15_S00,15,0,"Joven, existir, declarar, mantener","Subtema T15.S00 centrado en joven, existir, declarar, mantener, mes.","joven, existir, declarar, mantener, mes",5,10,1.0,38.0
+T15_S01,15,1,"Delito, ocurrir, veracruz, considerar","Subtema T15.S01 centrado en delito, ocurrir, veracruz, considerar, grave, prueba.","delito, ocurrir, veracruz, considerar, grave, prueba",6,13,0.867,30.0
+T15_S03,15,3,"Familia, mar, instancia","Subtema T15.S03 centrado en familia, mar, instancia.","familia, mar, instancia",3,2,0.667,17.0
+T16_S00,16,0,"Villarreal, monica, fortalecer, oferta","Subtema T16.S00 centrado en villarreal, monica, fortalecer, oferta, acudir.","villarreal, monica, fortalecer, oferta, acudir",5,9,0.9,45.0
+T16_S01,16,1,"Prevencion, programa, bienestar, servicio","Subtema T16.S01 centrado en prevencion, programa, bienestar, servicio.","prevencion, programa, bienestar, servicio",4,6,1.0,31.0
+T16_S02,16,2,"Jornada, saludable, familiar","Subtema T16.S02 centrado en jornada, saludable, familiar.","jornada, saludable, familiar",3,3,1.0,10.0
+T17_S00,17,0,"Investigacion, personal, diverso, inmediato","Subtema T17.S00 centrado en investigacion, personal, diverso, inmediato, criminal, entidad.","investigacion, personal, diverso, inmediato, criminal, entidad",6,14,0.933,44.0
+T17_S01,17,1,"Lograr, unidad, elemento, accion","Subtema T17.S01 centrado en lograr, unidad, elemento, accion, labor, vehiculo.","lograr, unidad, elemento, accion, labor, vehiculo",6,14,0.933,44.0
+T17_S02,17,2,"Autoridad, padre, correspondiente, legal","Subtema T17.S02 centrado en autoridad, padre, correspondiente, legal.","autoridad, padre, correspondiente, legal",4,5,0.833,19.0
+T17_S03,17,3,"Asegurar, perder, operativo, publico","Subtema T17.S03 centrado en asegurar, perder, operativo, publico.","asegurar, perder, operativo, publico",4,6,1.0,18.0
+T17_S04,17,4,"Atender, colonia, gestion, alcaldesa","Subtema T17.S04 centrado en atender, colonia, gestion, alcaldesa, excelente.","atender, colonia, gestion, alcaldesa, excelente",5,10,1.0,17.0
+T18_S00,18,0,"Situacion, fuga, emergencia","Subtema T18.S00 centrado en situacion, fuga, emergencia.","situacion, fuga, emergencia",3,3,1.0,17.0
+T18_S01,18,1,"Seguir, calidad, aparecer","Subtema T18.S01 centrado en seguir, calidad, aparecer.","seguir, calidad, aparecer",3,2,0.667,13.0
+T18_S02,18,2,"Inversion, publica, afiliado","Subtema T18.S02 centrado en inversion, publica, afiliado.","inversion, publica, afiliado",3,3,1.0,8.0
+T20_S00,20,0,"Escuela, disciplina, instalacion","Subtema T20.S00 centrado en escuela, disciplina, instalacion.","escuela, disciplina, instalacion",3,3,1.0,19.0
+T20_S01,20,1,"Presidenta, verano, ninos","Subtema T20.S01 centrado en presidenta, verano, ninos.","presidenta, verano, ninos",3,3,1.0,19.0
+T20_S02,20,2,"Fuerza, iniciar, estatal","Subtema T20.S02 centrado en fuerza, iniciar, estatal.","fuerza, iniciar, estatal",3,3,1.0,12.0
+T21_S00,21,0,"Sector, comision, presidente, principal","Subtema T21.S00 centrado en sector, comision, presidente, principal, compromiso, funcionario; conecta tambien exito, aumento.","sector, comision, presidente, principal, compromiso, funcionario, exito, aumento",8,18,0.643,32.0
+T21_S01,21,1,"Vacacion, realidad, seguro, soler","Subtema T21.S01 centrado en vacacion, realidad, seguro, soler, respuesta, proteger.","vacacion, realidad, seguro, soler, respuesta, proteger",6,13,0.867,24.0
+T21_S02,21,2,"Escolar, plantel, convertir, riesgo","Subtema T21.S02 centrado en escolar, plantel, convertir, riesgo.","escolar, plantel, convertir, riesgo",4,6,1.0,22.0
+T21_S03,21,3,"Secretaria, equipo, direccion, entregar","Subtema T21.S03 centrado en secretaria, equipo, direccion, entregar.","secretaria, equipo, direccion, entregar",4,6,1.0,17.0
+T22_S00,22,0,"Accidente, vida, nivel, unicamente","Subtema T22.S00 centrado en accidente, vida, nivel, unicamente.","accidente, vida, nivel, unicamente",4,6,1.0,33.0
+T22_S01,22,1,"Llamado, encontrar, similar, hospital","Subtema T22.S01 centrado en llamado, encontrar, similar, hospital.","llamado, encontrar, similar, hospital",4,6,1.0,18.0
+T22_S02,22,2,"Registrar, guardia, presencia, francisco","Subtema T22.S02 centrado en registrar, guardia, presencia, francisco.","registrar, guardia, presencia, francisco",4,6,1.0,14.0
+T22_S03,22,3,"Ingresar, ubicado, area","Subtema T22.S03 centrado en ingresar, ubicado, area.","ingresar, ubicado, area",3,3,1.0,10.0
+T23_S00,23,0,"Dia, llegar, compartir, forma","Subtema T23.S00 centrado en dia, llegar, compartir, forma, profundo, noche; conecta tambien tamaulipeco, tampiqueno.","dia, llegar, compartir, forma, profundo, noche, tamaulipeco, tampiqueno",8,18,0.643,45.0
+T23_S01,23,1,"Exposicion, bodies, turistico","Subtema T23.S01 centrado en exposicion, bodies, turistico.","exposicion, bodies, turistico",3,3,1.0,29.0
+T23_S03,23,3,"Cultural, descubrir, especial","Subtema T23.S03 centrado en cultural, descubrir, especial.","cultural, descubrir, especial",3,3,1.0,10.0
+T23_S04,23,4,"Metropolitano, disfrutar, jardin","Subtema T23.S04 centrado en metropolitano, disfrutar, jardin.","metropolitano, disfrutar, jardin",3,3,1.0,9.0
+T24_S00,24,0,"Muerte, madero, amenazar, septiembre","Subtema T24.S00 centrado en muerte, madero, amenazar, septiembre, dano, fecha; conecta tambien informe, administracion, marzo.","muerte, madero, amenazar, septiembre, dano, fecha, informe, administracion, marzo",9,29,0.806,121.0
+T24_S01,24,1,"Militarizada, doenitz, seguridad, temer","Subtema T24.S01 centrado en militarizada, doenitz, seguridad, temer.","militarizada, doenitz, seguridad, temer",4,6,1.0,103.0
+T24_S02,24,2,"Academia, director, cobrar, denunciar","Subtema T24.S02 centrado en academia, director, cobrar, denunciar.","academia, director, cobrar, denunciar",4,6,1.0,46.0
+T24_S03,24,3,"Nombre, revelar, sexo","Subtema T24.S03 centrado en nombre, revelar, sexo.","nombre, revelar, sexo",3,3,1.0,12.0
+T25_S00,25,0,"Casa, responsabilidad, respetar, libertad","Subtema T25.S00 centrado en casa, responsabilidad, respetar, libertad, salir, emitir; conecta tambien articulo.","casa, responsabilidad, respetar, libertad, salir, emitir, articulo",7,16,0.762,73.0
+T25_S01,25,1,"Columna, cartones, loultimo, newsletter","Subtema T25.S01 centrado en columna, cartones, loultimo, newsletter, noticias.","columna, cartones, loultimo, newsletter, noticias",5,9,0.9,55.0
+T25_S02,25,2,"Mandar, correo, conversacion, resumen","Subtema T25.S02 centrado en mandar, correo, conversacion, resumen, informativo.","mandar, correo, conversacion, resumen, informativo",5,9,0.9,45.0
+T25_S03,25,3,"Quedar, proteccion, fuerte, abril","Subtema T25.S03 centrado en quedar, proteccion, fuerte, abril, impactar.","quedar, proteccion, fuerte, abril, impactar",5,10,1.0,29.0

@@ -1,0 +1,26 @@
+{
+  "corpus": "últimas 2 semanas locales disponibles de Tampico",
+  "n_palabras": 1803,
+  "n_aristas_palabra": 4342,
+  "n_cuentas_sel": 45,
+  "n_aristas_cuenta": 216,
+  "plataformas": [
+    "Facebook",
+    "Instagram",
+    "Medios",
+    "TikTok",
+    "Twitter",
+    "YouTube"
+  ],
+  "params": {
+    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas",
+    "top_n": 500,
+    "min_msgs": 5,
+    "top_k": 5,
+    "peso_min": 1,
+    "peso_arista": 4.0,
+    "output_filename": "red_tampico_cuentas_ultimas_2_semanas.html",
+    "scope_label": "de las últimas 2 semanas",
+    "corpus_label": "últimas 2 semanas locales disponibles de Tampico"
+  }
+}
