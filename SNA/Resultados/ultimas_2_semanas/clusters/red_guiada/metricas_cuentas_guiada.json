@@ -1,14 +1,13 @@
 {
   "corpus": "últimas 2 semanas locales disponibles de Tampico",
-  "n_palabras": 1803,
-  "n_aristas_palabra": 4342,
-  "n_cuentas_sel": 45,
-  "n_aristas_cuenta": 216,
+  "n_palabras": 1673,
+  "n_aristas_palabra": 3873,
+  "n_cuentas_sel": 42,
+  "n_aristas_cuenta": 203,
   "plataformas": [
     "Facebook",
     "Instagram",
     "Medios",
-    "TikTok",
     "Twitter",
     "YouTube"
   ],

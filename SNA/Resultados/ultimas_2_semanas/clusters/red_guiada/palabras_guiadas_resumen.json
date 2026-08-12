@@ -1,34 +1,34 @@
 {
-  "n_nodos": 1803,
-  "n_nodos_con_categoria": 157,
-  "n_nodos_con_polaridad": 421,
+  "n_nodos": 1673,
+  "n_nodos_con_categoria": 169,
+  "n_nodos_con_polaridad": 385,
   "n_nodos_con_postura": 0,
   "categorias": {
-    "Obras": 37,
-    "Delitos": 29,
-    "Corrupcion": 25,
+    "Obras": 44,
+    "Delitos": 28,
+    "Corrupcion": 27,
     "Prevencion": 21,
-    "Vialidad": 17,
-    "Morena": 10,
-    "Agua": 7,
+    "Vialidad": 21,
+    "Morena": 14,
     "Americo": 7,
     "Gobierno municipal": 6,
     "Mónica Villarreal": 6,
-    "Alumbrado": 4,
+    "Alumbrado": 5,
+    "Agua": 4,
     "Basura": 3
   },
   "polaridades": {
-    "neutral": 1382,
-    "positiva": 218,
-    "negativa": 203
+    "neutral": 1288,
+    "positiva": 211,
+    "negativa": 174
   },
   "posturas": {
-    "sin_postura": 1803
+    "sin_postura": 1673
   },
   "ambitos_estrategicos": {
-    "opportunity": 1382,
-    "consolidation": 218,
-    "risk": 203
+    "opportunity": 1288,
+    "consolidation": 211,
+    "risk": 174
   },
   "metodo_ambito_estrategico": "clasificacion exclusiva por polaridad: negativa=riesgo, positiva=consolidacion, mixta/neutral=oportunidad",
   "metodo_postura": "referencia a Monica Villarreal/gobierno municipal + senales independientes de apoyo o critica",

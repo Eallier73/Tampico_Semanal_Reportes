@@ -1,14 +1,14 @@
 {
   "corpus": "últimas 2 semanas locales disponibles de Tampico",
-  "n_mensajes": 3868,
-  "n_cuentas_total": 2701,
-  "n_posiciones": 33,
-  "n_cuentas_posicion": 793,
-  "n_nodes_html": 1565,
-  "n_edges_html": 1689,
+  "n_mensajes": 2853,
+  "n_cuentas_total": 1823,
+  "n_posiciones": 30,
+  "n_cuentas_posicion": 545,
+  "n_nodes_html": 1411,
+  "n_edges_html": 1527,
   "params": {
-    "base_dir": "SNA/Resultados/ultimas_2_semanas",
-    "input_csv": "SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv",
+    "base_dir": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Resultados/ultimas_2_semanas",
+    "input_csv": "/home/emilio/Documentos/Tampico_Semanal_Reportes/SNA/Datos/tampico_datos_tabulares_ultimas_2_semanas.csv",
     "positions_per_topic": 5,
     "min_account_words": 5,
     "min_topic_words": 3,
@@ -26,8 +26,7 @@
     "corpus_label": "últimas 2 semanas locales disponibles de Tampico"
   },
   "ibea_por_nivel": {
-    "medio": 17,
-    "bajo": 15,
-    "alto": 1
+    "medio": 20,
+    "bajo": 10
   }
 }
