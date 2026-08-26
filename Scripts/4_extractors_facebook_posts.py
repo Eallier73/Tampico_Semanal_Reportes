@@ -17,7 +17,7 @@
 ║                                                                           ║
 ║   Uso Modo B (desde URLs):                                               ║
 ║   python 4_extractors_facebook_posts.py \\                               ║
-║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
+║     --input-csv ./Facebook/2026_marzo_01_al_2026_marzo_12_Facebook/... ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook                                              ║
 ║                                                                           ║
@@ -32,14 +32,14 @@ import random
 import re
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 from urllib.parse import urlparse
 
 import pandas as pd
 
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range, write_range_contract
 
 
 ACTOR_POSTS = "apify/facebook-posts-scraper"
@@ -135,7 +135,7 @@ def parse_item_datetime(item: dict) -> Optional[datetime]:
                 ts = float(raw)
                 if ts > 10_000_000_000:  # milisegundos
                     ts = ts / 1000.0
-                return datetime.fromtimestamp(ts)
+                return datetime.fromtimestamp(ts, tz=timezone.utc)
         except Exception:
             continue
 
@@ -153,12 +153,15 @@ def parse_item_datetime(item: dict) -> Optional[datetime]:
         try:
             if text.endswith("Z"):
                 text = text.replace("Z", "+00:00")
-            return datetime.fromisoformat(text).replace(tzinfo=None)
+            parsed = datetime.fromisoformat(text)
+            if parsed.tzinfo is None:
+                return parsed.replace(tzinfo=timezone.utc)
+            return parsed.astimezone(timezone.utc)
         except Exception:
             pass
         for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%d %H:%M:%S"):
             try:
-                return datetime.strptime(text, fmt)
+                return datetime.strptime(text, fmt).replace(tzinfo=timezone.utc)
             except Exception:
                 continue
     return None
@@ -167,13 +170,24 @@ def parse_item_datetime(item: dict) -> Optional[datetime]:
 def in_date_range(value: Optional[datetime], since: Optional[str], before: Optional[str]) -> bool:
     if value is None:
         return False
-    since_dt = datetime.strptime(since, "%Y-%m-%d") if since else None
-    before_dt = datetime.strptime(before, "%Y-%m-%d") if before else None
-
-    date_only = value.date()
-    if since_dt and date_only < since_dt.date():
+    since_dt = (
+        datetime.strptime(since, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        if since
+        else None
+    )
+    before_dt = (
+        datetime.strptime(before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        if before
+        else None
+    )
+    comparable = (
+        value.replace(tzinfo=timezone.utc)
+        if value.tzinfo is None
+        else value.astimezone(timezone.utc)
+    )
+    if since_dt and comparable < since_dt:
         return False
-    if before_dt and date_only > before_dt.date():
+    if before_dt and comparable >= before_dt:
         return False
     return True
 
@@ -397,7 +411,7 @@ Modo A - Descarga directa desde páginas:
 
 Modo B - Desde URLs preexistentes (recomendado, más eficiente):
   python 4_extractors_facebook_posts.py \\
-        --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
+        --input-csv ./Facebook/2026_marzo_01_al_2026_marzo_12_Facebook/2026_marzo_01_al_2026_marzo_12_Facebook_posts.csv \
     --since 2026-03-01 --before 2026-03-12 \\
     --output-dir ./Facebook
         """,
@@ -449,10 +463,10 @@ def main() -> None:
         print("Debes indicar --since y --before (o capturarlas en prompt).")
         sys.exit(1)
 
-    since_dt = datetime.strptime(args.since, "%Y-%m-%d")
-    before_dt = datetime.strptime(args.before, "%Y-%m-%d")
-    if since_dt > before_dt:
-        print("Fecha invalida: --since no puede ser mayor a --before.")
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        print(f"Fecha invalida: {exc}")
         sys.exit(1)
 
     token = args.token or os.environ.get("APIFY_TOKEN")
@@ -573,9 +587,10 @@ def main() -> None:
     # Preparar salida
     since_label = args.since or "sin_inicio"
     before_label = args.before or "sin_fin"
-    report_tag = build_report_tag(since_label, "Facebook")
+    report_tag = build_range_report_tag(since_label, before_label, "Facebook")
     output_dir = os.path.join(args.output_dir, report_tag)
     os.makedirs(output_dir, exist_ok=True)
+    write_range_contract(output_dir, since_label, before_label, "Facebook")
 
     # Nombre simplificado: [tag]_posts.csv
     csv_path = os.path.join(output_dir, f"{report_tag}_posts.csv")

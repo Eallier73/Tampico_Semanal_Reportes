@@ -20,11 +20,11 @@ import sys
 import json
 import os
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range, write_range_contract
 
 try:
     from playwright.async_api import async_playwright
@@ -96,24 +96,24 @@ class TwitterExtractorIAD:
         self.fecha_inicio = datetime.strptime(fecha_inicio_str, "%Y-%m-%d")
         self.fecha_fin = datetime.strptime(fecha_fin_str, "%Y-%m-%d")
         
-        # Calcular nombre de carpeta de semana
-        self.nombre_semana = self.calcular_nombre_semana()
+        # Calcular nombre de carpeta del rango exacto
+        self.nombre_rango = self.calcular_nombre_rango()
         
         # Paths del sistema
         self.state_path = state_path or DEFAULT_STATE_PATH
         
-        # Directorio de salida semanal dentro del repo
+        # Directorio de salida del rango dentro del repo
         base_dir = output_base_dir or DEFAULT_OUTPUT_BASE_DIR
-        self.output_dir = base_dir / self.nombre_semana
+        self.output_dir = base_dir / self.nombre_rango
         
         # Crear directorio si no existe (normalmente ya debe existir por el main)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
         # Archivos de salida segmentados por tipo de contenido
-        self.output_posts_institucionales_csv = self.output_dir / f"{self.nombre_semana}_post_institucionales.csv"
-        self.output_posts_institucionales_txt = self.output_dir / f"{self.nombre_semana}_post_institucionales.txt"
-        self.output_comentarios_csv = self.output_dir / f"{self.nombre_semana}_comentarios.csv"
-        self.output_comentarios_txt = self.output_dir / f"{self.nombre_semana}_comentarios.txt"
+        self.output_posts_institucionales_csv = self.output_dir / f"{self.nombre_rango}_post_institucionales.csv"
+        self.output_posts_institucionales_txt = self.output_dir / f"{self.nombre_rango}_post_institucionales.txt"
+        self.output_comentarios_csv = self.output_dir / f"{self.nombre_rango}_comentarios.csv"
+        self.output_comentarios_txt = self.output_dir / f"{self.nombre_rango}_comentarios.txt"
         
         # Configuraciones
         self.max_tweets = max_tweets
@@ -134,14 +134,14 @@ class TwitterExtractorIAD:
             )
         
         print(f"📅 Período: {self.fecha_inicio.date()} a {self.fecha_fin.date()}")
-        print(f"📁 Carpeta: {self.nombre_semana}")
+        print(f"📁 Carpeta: {self.nombre_rango}")
         print(f"📂 Salida institucional: {self.output_posts_institucionales_csv}")
         print(f"📂 Salida comentarios: {self.output_comentarios_csv}")
         print(f"🔎 Queries base: {len(base_queries)}")
     
-    def calcular_nombre_semana(self):
+    def calcular_nombre_rango(self):
         """Calcula el nombre de la carpeta de salida."""
-        return build_report_tag(self.fecha_inicio, "Twitter")
+        return build_range_report_tag(self.fecha_inicio, self.fecha_fin, "Twitter")
     
     def clean_text(self, text: str) -> str:
         """Limpiar texto eliminando espacios extras"""
@@ -349,21 +349,24 @@ class TwitterExtractorIAD:
                 if not tweet_datetime:
                     continue
                 
-                # Convertir a fecha sin timezone para comparación
-                tweet_date = tweet_datetime.date()
-                inicio_date = self.fecha_inicio.date()
-                fin_date = self.fecha_fin.date()
+                tweet_utc = (
+                    tweet_datetime.replace(tzinfo=timezone.utc)
+                    if tweet_datetime.tzinfo is None
+                    else tweet_datetime.astimezone(timezone.utc)
+                )
+                inicio_utc = self.fecha_inicio.replace(tzinfo=timezone.utc)
+                fin_utc = self.fecha_fin.replace(tzinfo=timezone.utc)
                 
                 # Verificar que esté en el rango de fechas y cumpla filtros del query
-                if inicio_date <= tweet_date <= fin_date and self.should_include_tweet(tweet, query):
+                if inicio_utc <= tweet_utc < fin_utc and self.should_include_tweet(tweet, query):
                     
                     tweet_data = {
                         **tweet,
                         "datetime_parsed_utc": tweet_datetime.isoformat(),
                         "query_used": query,
-                        "fecha_inicio": self.fecha_inicio.strftime("%Y-%m-%d"),
+                        "fecha_inicio_rango": self.fecha_inicio.strftime("%Y-%m-%d"),
                         "fecha_fin": self.fecha_fin.strftime("%Y-%m-%d"),
-                        "nombre_semana": self.nombre_semana,
+                        "nombre_rango": self.nombre_rango,
                         "is_reply": False,
                         "in_reply_to_url": ""
                     }
@@ -429,18 +432,22 @@ class TwitterExtractorIAD:
                 if not tweet_datetime:
                     continue
 
-                tweet_date = tweet_datetime.date()
-                inicio_date = self.fecha_inicio.date()
-                fin_date = self.fecha_fin.date()
+                tweet_utc = (
+                    tweet_datetime.replace(tzinfo=timezone.utc)
+                    if tweet_datetime.tzinfo is None
+                    else tweet_datetime.astimezone(timezone.utc)
+                )
+                inicio_utc = self.fecha_inicio.replace(tzinfo=timezone.utc)
+                fin_utc = self.fecha_fin.replace(tzinfo=timezone.utc)
 
-                if inicio_date <= tweet_date <= fin_date:
+                if inicio_utc <= tweet_utc < fin_utc:
                     tweet_data = {
                         **tweet,
                         "datetime_parsed_utc": tweet_datetime.isoformat(),
                         "query_used": f"reply_to:{tweet_url}",
-                        "fecha_inicio": self.fecha_inicio.strftime("%Y-%m-%d"),
+                        "fecha_inicio_rango": self.fecha_inicio.strftime("%Y-%m-%d"),
                         "fecha_fin": self.fecha_fin.strftime("%Y-%m-%d"),
-                        "nombre_semana": self.nombre_semana,
+                        "nombre_rango": self.nombre_rango,
                         "is_reply": True,
                         "in_reply_to_url": tweet_url
                     }
@@ -468,7 +475,7 @@ class TwitterExtractorIAD:
         
         # Definir columnas del CSV
         fieldnames = [
-            "fecha_semana", "nombre_semana", "author", "datetime", "datetime_parsed_utc", 
+            "fecha_inicio_rango", "nombre_rango", "author", "datetime", "datetime_parsed_utc",
             "url", "text", "replies", "retweets", "likes", "bookmarks", 
             "views", "query_used", "is_reply", "in_reply_to_url"
         ]
@@ -571,7 +578,7 @@ class TwitterExtractorIAD:
                 await browser.close()
                 
                 print(f"\n✅ EXTRACCIÓN COMPLETADA")
-                print(f"📁 Carpeta: {self.nombre_semana}")
+                print(f"📁 Carpeta: {self.nombre_rango}")
                 print(f"📊 Total de tweets únicos: {len(unique_tweets)}")
                 
                 return True
@@ -647,8 +654,10 @@ def main():
         print("❌ Formato de fecha inválido. Usar YYYY-MM-DD")
         sys.exit(1)
 
-    if fecha_inicio_dt > fecha_fin_dt:
-        print("❌ fecha_inicio no puede ser mayor que fecha_fin.")
+    try:
+        validate_date_range(fecha_inicio, fecha_fin)
+    except ValueError as exc:
+        print(f"❌ {exc}")
         sys.exit(1)
 
     custom_queries = [q.strip() for q in args.queries if q and q.strip()]
@@ -668,6 +677,12 @@ def main():
         max_replies_per_tweet=args.max_replies_per_tweet,
         max_reply_scrolls=args.max_reply_scrolls,
         headless=args.headless,
+    )
+    write_range_contract(
+        extractor.output_dir,
+        fecha_inicio,
+        fecha_fin,
+        "Twitter",
     )
     success = asyncio.run(extractor.run_extraction())
     

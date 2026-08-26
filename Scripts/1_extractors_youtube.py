@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Sequence
 
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range, write_range_contract
 
 try:
     import googleapiclient.discovery as google_discovery
@@ -141,6 +141,7 @@ def resolver_rango_fechas(since: str | None, before: str | None) -> tuple[dateti
         sys.exit(1)
 
     if since and before:
+        validate_date_range(since, before)
         start_date = datetime.strptime(since, "%Y-%m-%d")
         end_date = datetime.strptime(before, "%Y-%m-%d")
     else:
@@ -800,9 +801,10 @@ def main() -> None:
     verificar_dependencias(run_comments, run_transcripts)
     start_date, end_date = resolver_rango_fechas(args.since, args.before)
 
-    report_tag = build_report_tag(start_date, "Youtube")
+    report_tag = build_range_report_tag(start_date, end_date, "Youtube")
     output_dir = os.path.join(args.output_dir, report_tag)
     os.makedirs(output_dir, exist_ok=True)
+    write_range_contract(output_dir, start_date, end_date, "Youtube")
 
     print("🚀 Iniciando extracción de YouTube...")
     print(f"📅 Periodo: {start_date.strftime('%d/%m/%Y')} - {end_date.strftime('%d/%m/%Y')}")

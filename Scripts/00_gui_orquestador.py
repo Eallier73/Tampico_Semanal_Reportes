@@ -2,14 +2,23 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import subprocess
 import sys
 import threading
 import tkinter as tk
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from tkinter import messagebox, scrolledtext, ttk
+
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from download_history import latest_downloads_by_pipeline, read_download_history
+from output_naming import build_range_label, build_range_report_tag, write_range_contract
+from sna_recent_ranges import resolve_recent_scope
 
 
 def manual_load_dotenv(path: Path) -> bool:
@@ -30,7 +39,6 @@ def manual_load_dotenv(path: Path) -> bool:
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ENV_FILE = REPO_ROOT / ".env.local"
-SCRIPTS_DIR = Path(__file__).resolve().parent
 
 try:
     from dotenv import load_dotenv
@@ -58,24 +66,27 @@ def load_orquestador_module():
 ORQ = load_orquestador_module()
 PIPELINES = ORQ.PIPELINES
 PIPELINES_BY_CODE = ORQ.PIPELINES_BY_CODE
-DEFAULT_GLOBAL_ISO_WEEK = ORQ.DEFAULT_GLOBAL_ISO_WEEK
-DEFAULT_GLOBAL_SINCE, DEFAULT_GLOBAL_BEFORE = ORQ.iso_week_to_range(DEFAULT_GLOBAL_ISO_WEEK)
+_TODAY = datetime.now().date()
+_CURRENT_RANGE_START = _TODAY - timedelta(days=_TODAY.weekday())
+DEFAULT_GLOBAL_SINCE = _CURRENT_RANGE_START.isoformat()
+DEFAULT_GLOBAL_BEFORE = (_CURRENT_RANGE_START + timedelta(days=7)).isoformat()
 
-SNA_DATA_DIR = REPO_ROOT / "SNA" / "Datos"
-SNA_HISTORICAL_CSV = SNA_DATA_DIR / "tampico_datos_tabulares_consolidados.csv"
-SNA_LAST_TWO_WEEKS_CSV = (
-    SNA_DATA_DIR / "tampico_datos_tabulares_ultimas_2_semanas.csv"
-)
-SNA_LAST_WEEK_CSV = SNA_DATA_DIR / "tampico_datos_tabulares_ultima_semana.csv"
-SNA_RESULTS_ROOT = REPO_ROOT / "SNA" / "Resultados"
-
-
-def build_sna_run(scope: str) -> dict[str, object]:
+def build_sna_run(
+    scope: str,
+    *,
+    repo_root: Path = REPO_ROOT,
+    now: datetime | None = None,
+) -> dict[str, object]:
     """Construye la cadena SNA y mantiene aislados corpus, resultados y HTML."""
+    sna_data_dir = repo_root / "SNA" / "Datos"
+    sna_results_root = repo_root / "SNA" / "Resultados"
+    exact_since: str | None = None
+    exact_before: str | None = None
+    selected_ranges: list[dict[str, object]] = []
     if scope == "historico":
         label = "material histórico (fuentes locales + RAdAR)"
-        input_csv = SNA_HISTORICAL_CSV
-        results_dir = SNA_RESULTS_ROOT / "historico"
+        input_csv = sna_data_dir / "tampico_datos_tabulares_consolidados.csv"
+        results_dir = sna_results_root / "historico"
         consolidate_args = ["--output", str(input_csv)]
         scope_short = "histórico"
         network_scope = "Tampico histórico"
@@ -83,28 +94,41 @@ def build_sna_run(scope: str) -> dict[str, object]:
         corpus_label = "histórico consolidado de Tampico con RAdAR"
         filename_scope = "historico"
         log_name = "ultima_ejecucion.log"
-    elif scope == "ultimas_2_semanas":
-        label = "últimas 2 semanas (solo fuentes locales)"
-        input_csv = SNA_LAST_TWO_WEEKS_CSV
-        results_dir = SNA_RESULTS_ROOT / "ultimas_2_semanas"
-        consolidate_args = ["--last-weeks", "2", "--output", str(input_csv)]
-        scope_short = "de las últimas 2 semanas"
-        network_scope = "Tampico · últimas 2 semanas"
-        accounts_scope = "de las últimas 2 semanas"
-        corpus_label = "últimas 2 semanas locales disponibles de Tampico"
-        filename_scope = "ultimas_2_semanas"
-        log_name = "ultima_ejecucion_ultimas_2_semanas.log"
-    elif scope == "ultima_semana":
-        label = "última semana (solo fuentes locales)"
-        input_csv = SNA_LAST_WEEK_CSV
-        results_dir = SNA_RESULTS_ROOT / "ultima_semana"
-        consolidate_args = ["--last-weeks", "1", "--output", str(input_csv)]
-        scope_short = "de la última semana disponible"
-        network_scope = "Tampico · última semana"
-        accounts_scope = "de la última semana disponible"
-        corpus_label = "última semana local disponible de Tampico"
-        filename_scope = "ultima_semana"
-        log_name = "ultima_ejecucion_ultima_semana.log"
+    elif scope in {"ultimos_2_rangos", "ultimo_rango"}:
+        count = 2 if scope == "ultimos_2_rangos" else 1
+        recent = resolve_recent_scope(repo_root, count)
+        exact_since = recent.since.isoformat()
+        exact_before = recent.before.isoformat()
+        range_label = build_range_label(exact_since, exact_before)
+        range_tag = build_range_report_tag(exact_since, exact_before, "SNA")
+        execution_time = now or datetime.now()
+        execution_id = execution_time.strftime("ejecucion_%Y%m%dT%H%M%S_%f")
+        input_dir = sna_data_dir / range_tag / execution_id
+        input_csv = input_dir / f"tampico_datos_tabulares_{range_label}.csv"
+        results_dir = sna_results_root / range_tag / execution_id
+        consolidate_args = [
+            "--since", exact_since,
+            "--before", exact_before,
+            "--output", str(input_csv),
+        ]
+        selected_ranges = [
+            {
+                "since": item.since.isoformat(),
+                "before": item.before.isoformat(),
+                "identity": item.identity,
+                "sources": list(item.sources),
+                "inferred_from_rows": item.inferred_from_rows,
+            }
+            for item in recent.selected_ranges
+        ]
+        selection_label = "2 rangos más recientes" if count == 2 else "rango más reciente"
+        label = f"{selection_label} · cobertura [{exact_since}, {exact_before})"
+        scope_short = f"de [{exact_since}, {exact_before})"
+        network_scope = f"Tampico · [{exact_since}, {exact_before})"
+        accounts_scope = scope_short
+        corpus_label = f"fuentes locales de Tampico en [{exact_since}, {exact_before})"
+        filename_scope = range_label
+        log_name = f"ejecucion_sna_{range_label}.log"
     else:
         raise ValueError(f"Alcance SNA desconocido: {scope}")
 
@@ -240,7 +264,37 @@ def build_sna_run(scope: str) -> dict[str, object]:
             guided_dir / guided_accounts_name,
             guided_dir / guided_positions_name,
         ],
+        "since": exact_since,
+        "before": exact_before,
+        "selected_ranges": selected_ranges,
     }
+
+
+def write_sna_run_manifest(run: dict[str, object]) -> Path | None:
+    """Registra el alcance reciente sin modificar los CSV fuente."""
+    since = run.get("since")
+    before = run.get("before")
+    if not isinstance(since, str) or not isinstance(before, str):
+        return None
+    results_dir = Path(run["results_dir"])
+    write_range_contract(results_dir, since, before, "SNA")
+    path = results_dir / "manifiesto_ejecucion_sna.json"
+    payload = {
+        "manifest_version": 1,
+        "scope": run.get("scope"),
+        "label": run.get("label"),
+        "since": since,
+        "before": before,
+        "interval": "[since,before)",
+        "selected_ranges": run.get("selected_ranges", []),
+        "input_csv": str(run["input_csv"]),
+        "results_dir": str(results_dir),
+    }
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 def validate_date(value: str) -> str:
@@ -253,8 +307,10 @@ def validate_date(value: str) -> str:
 def parse_date_range(since: str, before: str) -> tuple[str, str]:
     parsed_since = validate_date(since)
     parsed_before = validate_date(before)
-    if parsed_since > parsed_before:
-        raise ValueError("La fecha inicial no puede ser mayor que la fecha final.")
+    if parsed_since >= parsed_before:
+        raise ValueError(
+            "La fecha final exclusiva debe ser posterior a la fecha inicial."
+        )
     return parsed_since, parsed_before
 
 
@@ -293,7 +349,7 @@ class OrquestadorGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Orquestador Pipelines Tampico")
-        self.root.geometry("860x760")
+        self.root.geometry("940x900")
 
         self.running_process: subprocess.Popen[str] | None = None
         self.stop_requested = False
@@ -341,21 +397,77 @@ class OrquestadorGUI:
             foreground="gray",
         ).grid(row=2, column=0, sticky=tk.W, padx=20, pady=(4, 0))
 
-        date_frame = ttk.LabelFrame(main_frame, text="Configuracion Temporal", padding="10")
+        date_frame = ttk.LabelFrame(
+            main_frame,
+            text="Rango exacto [since, before)",
+            padding="10",
+        )
         date_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Label(date_frame, text="Semana ISO (YYYY-Www):").grid(row=0, column=0, sticky=tk.W, padx=5)
-        self.iso_week_var = tk.StringVar(value=DEFAULT_GLOBAL_ISO_WEEK)
-        ttk.Entry(date_frame, textvariable=self.iso_week_var, width=15).grid(row=0, column=1, sticky=tk.W, padx=5)
-        ttk.Button(date_frame, text="Usar Semana", command=self.update_dates_from_week).grid(row=0, column=2, padx=5)
-
-        ttk.Label(date_frame, text="Desde (YYYY-MM-DD):").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        ttk.Label(date_frame, text="Desde inclusivo (YYYY-MM-DD):").grid(
+            row=0,
+            column=0,
+            sticky=tk.W,
+            padx=5,
+            pady=5,
+        )
         self.since_var = tk.StringVar(value=DEFAULT_GLOBAL_SINCE)
-        ttk.Entry(date_frame, textvariable=self.since_var, width=15).grid(row=1, column=1, sticky=tk.W, padx=5)
+        ttk.Entry(date_frame, textvariable=self.since_var, width=15).grid(
+            row=0,
+            column=1,
+            sticky=tk.W,
+            padx=5,
+        )
 
-        ttk.Label(date_frame, text="Hasta (YYYY-MM-DD):").grid(row=1, column=2, sticky=tk.W, padx=5)
+        ttk.Label(date_frame, text="Antes de, exclusivo (YYYY-MM-DD):").grid(
+            row=0,
+            column=2,
+            sticky=tk.W,
+            padx=5,
+        )
         self.before_var = tk.StringVar(value=DEFAULT_GLOBAL_BEFORE)
-        ttk.Entry(date_frame, textvariable=self.before_var, width=15).grid(row=1, column=3, sticky=tk.W, padx=5)
+        ttk.Entry(date_frame, textvariable=self.before_var, width=15).grid(
+            row=0,
+            column=3,
+            sticky=tk.W,
+            padx=5,
+        )
+        ttk.Label(
+            date_frame,
+            text="Se incluye Desde y se excluye Antes de.",
+            foreground="gray",
+        ).grid(row=1, column=0, columnspan=4, sticky=tk.W, padx=5)
+
+        history_frame = ttk.LabelFrame(
+            main_frame,
+            text="Últimas descargas por fuente",
+            padding="8",
+        )
+        history_frame.pack(fill=tk.X, pady=5)
+        history_columns = ("fuente", "rango", "estado", "finalizo", "carpeta")
+        self.download_history_tree = ttk.Treeview(
+            history_frame,
+            columns=history_columns,
+            show="headings",
+            height=5,
+        )
+        headings = {
+            "fuente": ("Fuente", 145),
+            "rango": ("Rango exacto", 225),
+            "estado": ("Estado", 85),
+            "finalizo": ("Finalizó", 135),
+            "carpeta": ("Carpeta", 260),
+        }
+        for column, (label, width) in headings.items():
+            self.download_history_tree.heading(column, text=label)
+            self.download_history_tree.column(column, width=width, anchor=tk.W)
+        self.download_history_tree.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        ttk.Button(
+            history_frame,
+            text="Actualizar",
+            command=self.refresh_download_history,
+        ).pack(side=tk.RIGHT, padx=(8, 0))
+        self.refresh_download_history()
 
         options_frame = ttk.Frame(main_frame, padding="5")
         options_frame.pack(fill=tk.X)
@@ -387,8 +499,8 @@ class OrquestadorGUI:
         ttk.Label(
             sna_frame,
             text=(
-                "Histórico incorpora las fuentes locales y RAdAR. Dos semanas y "
-                "última semana usan exclusivamente las fuentes locales de Tampico."
+                "Histórico incorpora las fuentes locales y RAdAR. Los alcances "
+                "recientes resuelven fechas reales y usan solo fuentes locales."
             ),
             wraplength=800,
         ).grid(row=0, column=0, columnspan=2, sticky=tk.W, padx=5)
@@ -404,8 +516,8 @@ class OrquestadorGUI:
 
         self.sna_recent_button = ttk.Button(
             sna_frame,
-            text="EJECUTAR SNA DOS SEMANAS",
-            command=lambda: self.start_sna_execution("ultimas_2_semanas"),
+            text="EJECUTAR SNA 2 RANGOS RECIENTES",
+            command=lambda: self.start_sna_execution("ultimos_2_rangos"),
         )
         self.sna_recent_button.grid(
             row=1, column=1, sticky=tk.EW, padx=5, pady=(7, 3)
@@ -413,8 +525,8 @@ class OrquestadorGUI:
 
         self.sna_last_week_button = ttk.Button(
             sna_frame,
-            text="EJECUTAR SNA ÚLTIMA SEMANA",
-            command=lambda: self.start_sna_execution("ultima_semana"),
+            text="EJECUTAR SNA ÚLTIMO RANGO",
+            command=lambda: self.start_sna_execution("ultimo_rango"),
         )
         self.sna_last_week_button.grid(
             row=2, column=0, columnspan=2, sticky=tk.EW, padx=5, pady=3
@@ -425,8 +537,8 @@ class OrquestadorGUI:
         ttk.Label(
             sna_frame,
             text=(
-                "Cada alcance conserva un CSV, una carpeta de resultados y una "
-                "bitácora propios; ejecutar uno no sobrescribe los otros."
+                "Cada rango conserva su CSV; cada ejecución crea una subcarpeta "
+                "con timestamp y no sobrescribe resultados anteriores."
             ),
             foreground="gray",
             font=("Helvetica", 8),
@@ -456,9 +568,6 @@ class OrquestadorGUI:
         canvas.configure(yscrollcommand=scrollbar.set)
 
         for pipe in PIPELINES:
-            # SNA se ofrece arriba como tres acciones completas y explícitas.
-            if pipe.key == "analisis_sna":
-                continue
             var = tk.BooleanVar(value=False)
             self.pipeline_vars[pipe.code] = var
             ttk.Checkbutton(
@@ -496,14 +605,39 @@ class OrquestadorGUI:
             )
         return "No se detectaron credenciales en .env.local o en el entorno"
 
-    def update_dates_from_week(self) -> None:
-        week = self.iso_week_var.get().strip()
-        try:
-            since, before = ORQ.iso_week_to_range(week)
-            self.since_var.set(since)
-            self.before_var.set(before)
-        except Exception as exc:
-            messagebox.showerror("Error", f"Semana ISO invalida: {exc}")
+    def refresh_download_history(self) -> None:
+        for item in self.download_history_tree.get_children():
+            self.download_history_tree.delete(item)
+        records = latest_downloads_by_pipeline(
+            read_download_history(limit=500)
+        )
+        if not records:
+            self.download_history_tree.insert(
+                "",
+                tk.END,
+                values=("—", "Sin descargas registradas", "—", "—", "—"),
+            )
+            return
+        for record in records:
+            finished = str(record.get("finished_at") or "")
+            try:
+                parsed = datetime.fromisoformat(finished.replace("Z", "+00:00"))
+                finished = parsed.astimezone().strftime("%Y-%m-%d %H:%M")
+            except ValueError:
+                pass
+            output_dir = str(record.get("output_dir") or "")
+            folder = Path(output_dir).name if output_dir else "—"
+            self.download_history_tree.insert(
+                "",
+                tk.END,
+                values=(
+                    record.get("pipeline_label") or record.get("pipeline_key") or "—",
+                    f"{record.get('since')} → {record.get('before')} (excl.)",
+                    record.get("status") or "—",
+                    finished or "—",
+                    folder,
+                ),
+            )
 
     def log(self, message: str) -> None:
         def _append() -> None:
@@ -547,10 +681,10 @@ class OrquestadorGUI:
 
         selected = ensure_pipeline_after(selected, "10", ["1", "2", "4"])
         selected = ensure_pipeline_after(
-            selected, "6", ["1", "2", "4", "5", "12", "13"]
+            selected, "6", ["1", "2", "3", "4", "5", "12", "13"]
         )
         selected = ensure_pipeline_after(
-            selected, "11", ["1", "2", "4", "5", "12", "13"]
+            selected, "11", ["1", "2", "3", "4", "5", "12", "13"]
         )
 
         unique_selected = []
@@ -612,7 +746,11 @@ class OrquestadorGUI:
             messagebox.showwarning("En ejecución", "Ya hay un proceso en ejecución.")
             return
 
-        run = build_sna_run(scope)
+        try:
+            run = build_sna_run(scope)
+        except (OSError, RuntimeError, ValueError) as exc:
+            messagebox.showerror("No se pudo resolver el alcance SNA", str(exc))
+            return
         steps = run["steps"]
         self.clear_log()
         self.log(f"Iniciando SNA: {run['label']}")
@@ -645,6 +783,9 @@ class OrquestadorGUI:
                 break
 
             self.log(f"\n--- Ejecutando: {spec.label} ---")
+            cmd: list[str] | None = None
+            started_at: str | None = None
+            download_recorded = False
             try:
                 cmd, env_vars = ORQ.build_pipeline(
                     spec,
@@ -662,6 +803,7 @@ class OrquestadorGUI:
                 env = os.environ.copy()
                 env.update(env_vars)
 
+                started_at = ORQ.utc_now()
                 self.running_process = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,
@@ -679,12 +821,34 @@ class OrquestadorGUI:
 
                 self.running_process.wait()
                 return_code = self.running_process.returncode
+                download_status = (
+                    "completada"
+                    if return_code == 0
+                    else "detenida"
+                    if self.stop_requested
+                    else "fallida"
+                )
+                ORQ.record_download_result(
+                    spec,
+                    since,
+                    before,
+                    cmd,
+                    started_at=started_at,
+                    status=download_status,
+                    return_code=return_code,
+                )
+                download_recorded = True
+                self.root.after(0, self.refresh_download_history)
 
                 if return_code == 0:
                     self.log(f"{spec.label} finalizado con exito.")
                     if spec.code == "4":
                         output_dir_arg = ORQ._extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
-                        report_tag = ORQ.build_report_tag(since, "Facebook")
+                        report_tag = ORQ.build_range_report_tag(
+                            since,
+                            before,
+                            "Facebook",
+                        )
                         facebook_posts_csv = str(Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv")
                         if os.path.exists(facebook_posts_csv):
                             self.log(f"Detectado CSV de posts: {facebook_posts_csv}")
@@ -703,6 +867,17 @@ class OrquestadorGUI:
                     break
 
             except Exception as exc:
+                if cmd is not None and started_at is not None and not download_recorded:
+                    ORQ.record_download_result(
+                        spec,
+                        since,
+                        before,
+                        cmd,
+                        started_at=started_at,
+                        status="detenida" if self.stop_requested else "fallida",
+                        return_code=None,
+                    )
+                    self.root.after(0, self.refresh_download_history)
                 self.log(f"Error inesperado ejecutando {spec.label}: {exc}")
                 if not self.continue_error_var.get():
                     break
@@ -719,6 +894,7 @@ class OrquestadorGUI:
         had_error = False
         success = False
         results_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path = write_sna_run_manifest(run)
 
         with run_log.open("w", encoding="utf-8", buffering=1) as log_handle:
             def sna_log(message: str) -> None:
@@ -729,6 +905,15 @@ class OrquestadorGUI:
                 sna_log(f"Inicio: {datetime.now().isoformat(timespec='seconds')}")
                 sna_log(f"Intérprete: {python_exec}")
                 sna_log(f"Alcance: {run['label']}")
+                selected_ranges = run.get("selected_ranges") or []
+                for selected in selected_ranges:
+                    sna_log(
+                        "Lote fuente: "
+                        f"{selected['identity']} "
+                        f"[{selected['since']}, {selected['before']})"
+                    )
+                if manifest_path is not None:
+                    sna_log(f"Manifiesto: {manifest_path}")
 
                 for label, script_name, args in steps:
                     if self.stop_requested:

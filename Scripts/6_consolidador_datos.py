@@ -8,9 +8,9 @@ Consolida los .txt de cada extractor en dos archivos de análisis:
 Uso:
   python 6_consolidador_datos.py --since 2026-03-30 --before 2026-04-05
 
-  El script infiere la semana ISO desde --since y busca los archivos en las
-  carpetas de cada red (relativas a la raíz del repo o a --base-dir).
-  La salida va a Datos/{semana_tag}/.
+  El script conserva el rango exacto [since, before) y busca los archivos en
+  las carpetas de cada red (relativas a la raíz del repo o a --base-dir).
+  La salida va a Datos/{rango_tag}/.
 """
 
 from __future__ import annotations
@@ -22,27 +22,27 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Importar build_report_tag desde el mismo directorio
+# Importar el contrato de rangos desde el mismo directorio
 sys.path.insert(0, str(REPO_ROOT / "Scripts"))
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range, write_range_contract
 
 
 # ---------------------------------------------------------------------------
 # Definición de fuentes
 # ---------------------------------------------------------------------------
 
-def _sources(since: str, base_dir: Path) -> dict[str, list[Path]]:
+def _sources(since: str, before: str, base_dir: Path) -> dict[str, list[Path]]:
     """
     Devuelve dos listas de paths (pueden no existir):
       "institucional": posts oficiales
       "comentarios":   reacciones ciudadanas
     """
-    tw  = build_report_tag(since, "Twitter")
-    fb  = build_report_tag(since, "Facebook")
-    yt  = build_report_tag(since, "Youtube")
-    med = build_report_tag(since, "Medios")
-    ig  = build_report_tag(since, "Instagram")
-    tt  = build_report_tag(since, "TikTok")
+    tw = build_range_report_tag(since, before, "Twitter")
+    fb = build_range_report_tag(since, before, "Facebook")
+    yt = build_range_report_tag(since, before, "Youtube")
+    med = build_range_report_tag(since, before, "Medios")
+    ig = build_range_report_tag(since, before, "Instagram")
+    tt = build_range_report_tag(since, before, "TikTok")
 
     institucional = [
         base_dir / "Twitter" / tw  / f"{tw}_post_institucionales.txt",
@@ -113,9 +113,9 @@ def parse_args() -> argparse.Namespace:
         description="Consolida .txt de todos los extractores en material_institucional.txt y material_comentarios.txt"
     )
     parser.add_argument("--since", required=True, type=valid_date,
-                        help="Fecha inicio YYYY-MM-DD (define la semana ISO)")
+                        help="Límite inicial inclusivo YYYY-MM-DD")
     parser.add_argument("--before", required=True, type=valid_date,
-                        help="Fecha fin YYYY-MM-DD (heredado del orquestador)")
+                        help="Límite final exclusivo YYYY-MM-DD")
     parser.add_argument("--base-dir", default=str(REPO_ROOT),
                         help=f"Raíz del repositorio (default: {REPO_ROOT})")
     parser.add_argument("--output-dir", default=None,
@@ -125,19 +125,24 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        raise SystemExit(f"❌ {exc}") from exc
     base_dir = Path(args.base_dir)
     output_base = Path(args.output_dir) if args.output_dir else base_dir / "Datos"
 
-    datos_tag = build_report_tag(args.since, "Datos")
+    datos_tag = build_range_report_tag(args.since, args.before, "Datos")
     output_dir = output_base / datos_tag
+    write_range_contract(output_dir, args.since, args.before, "Datos")
 
     print("\n" + "=" * 70)
     print("📦 CONSOLIDADOR DE DATOS SEMANALES")
     print("=" * 70)
-    print(f"Semana : {datos_tag}")
+    print(f"Rango  : [{args.since}, {args.before})")
     print(f"Salida : {output_dir}")
 
-    sources = _sources(args.since, base_dir)
+    sources = _sources(args.since, args.before, base_dir)
 
     # ── Material institucional ──
     print("\n── Material institucional ──")

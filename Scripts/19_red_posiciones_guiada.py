@@ -461,7 +461,7 @@ def add_nader_structural_branch(
             })
             continue
 
-        node_id = f"STRUCT_NADER_W{index}"
+        node_id = f"STRUCT_NADER_WORD{index}"
         angle = 2 * math.pi * (index - 1) / max(1, len(selected_words))
         radius = 145 + 24 * ((index - 1) // 24)
         nodes.append({
@@ -1396,7 +1396,7 @@ def build_network_data(
                 2 * math.pi * word_slot / max(1, words_this_ring)
             ) + math.pi
             radius = 110 + word_ring * 28
-            node_id = f"W{len(word_node_ids) + 1}"
+            node_id = f"WORD{len(word_node_ids) + 1}"
             word_node_ids[word_key] = node_id
             nodes.append({
                 "id": node_id,
@@ -1441,7 +1441,7 @@ def build_html(
     meta: dict[str, Any],
     topic_info: dict[int, dict[str, Any]],
     base: Path,
-    semana: str,
+    alcance: str,
 ) -> str:
     vis_css, vis_js = extract_vis_assets(base)
     topics = sorted(topic_info)
@@ -1506,14 +1506,14 @@ def build_html(
             f'<small class="topic-score"></small></button>'
         )
     topic_cards_html = "\n".join(topic_cards)
-    image_slug = re.sub(r"[^a-z0-9]+", "_", _topic_key(semana)).strip("_")
+    image_slug = re.sub(r"[^a-z0-9]+", "_", _topic_key(alcance)).strip("_")
     image_filename = f"red_{image_slug}_posiciones.png"
 
     return f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>Red {semana} · posiciones discursivas</title>
+<title>Red {alcance} · posiciones discursivas</title>
 {vis_css}
 {vis_js}
 <style>
@@ -1620,7 +1620,7 @@ def build_html(
 </head>
 <body>
 <aside id="left">
-  <h1>Red {semana}: posiciones discursivas</h1>
+  <h1>Red {alcance}: posiciones discursivas</h1>
   <div class="muted">Temas, posiciones, cuentas y palabras. El borde de cada posicion indica senal indiciaria: gris baja, amarillo media, rojo alta.</div>
   <div class="tool-help"><b>Selección múltiple:</b> mantén Ctrl y haz clic en cada nodo que quieras agregar o quitar del resaltado. Al arrastrar uno o varios temas seleccionados, se moverán con ellos sus posiciones, cuentas y palabras.</div>
   <div class="grp">

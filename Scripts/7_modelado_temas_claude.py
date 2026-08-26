@@ -22,7 +22,13 @@ try:
 except ImportError:
     pass
 
-from output_naming import build_output_dir, build_report_tag, ensure_tagged_name
+from output_naming import (
+    build_range_output_dir,
+    build_range_report_tag,
+    ensure_tagged_name,
+    validate_date_range,
+    write_range_contract,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -64,10 +70,10 @@ def valid_date(value: str) -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Combina los materiales de Datos, los envia a Claude y genera salidas semanales para Tampico"
+        description="Combina los materiales de Datos y genera salidas por rango exacto"
     )
     parser.add_argument("--since", required=True, type=valid_date,
-                        help="Fecha inicio YYYY-MM-DD (define la semana ISO)")
+                        help="Límite inicial inclusivo YYYY-MM-DD")
     parser.add_argument("--before", required=True, type=valid_date,
                         help="Fecha fin YYYY-MM-DD (compatibilidad con orquestador)")
     parser.add_argument("--input-dir", default=str(DEFAULT_INPUT_DIR),
@@ -85,12 +91,12 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def weekly_input_dir(base_dir: Path, since: str) -> Path:
-    return Path(base_dir) / build_report_tag(since, "Datos")
+def range_input_dir(base_dir: Path, since: str, before: str) -> Path:
+    return Path(base_dir) / build_range_report_tag(since, before, "Datos")
 
 
-def weekly_output_dir(base_dir: Path, since: str) -> Path:
-    return build_output_dir(base_dir, since, "Claude")
+def range_output_dir(base_dir: Path, since: str, before: str) -> Path:
+    return build_range_output_dir(base_dir, since, before, "Claude_Temas")
 
 
 def read_text(path: Path) -> str:
@@ -109,8 +115,12 @@ def write_text(path: Path, content: str) -> None:
         handle.write(content)
 
 
-def build_combined_corpus(datos_dir: Path, since: str) -> tuple[Path, str, list[str]]:
-    datos_tag = build_report_tag(since, "Datos")
+def build_combined_corpus(
+    datos_dir: Path,
+    since: str,
+    before: str,
+) -> tuple[Path, str, list[str]]:
+    datos_tag = build_range_report_tag(since, before, "Datos")
     corpus_name = f"{ensure_tagged_name('corpus_claude', datos_tag)}.txt"
     corpus_path = datos_dir / corpus_name
 
@@ -178,7 +188,7 @@ def sample_corpus(text: str, max_chars: int, seed: int) -> tuple[str, dict[str, 
     }
 
 
-def build_prompt(since: str) -> str:
+def build_prompt(since: str, before: str) -> str:
     dt = datetime.strptime(since, "%Y-%m-%d")
     month_label = MONTH_NAMES[dt.month]
     year_label = dt.year
@@ -189,6 +199,8 @@ Analiza este corpus de conversación digital sobre TAMPICO, enfocándote especí
 - Políticas públicas, servicios urbanos e intervención municipal en Tampico (alumbrado, limpieza, seguridad, turismo, cultura, protección civil, infraestructura, movilidad y mantenimiento urbano)
 - Percepción ciudadana sobre el gobierno municipal, sus funcionarios, programas y resultados
 - Problemáticas, sucesos y debates propios de Tampico y su zona inmediata cuando afecten directamente al municipio
+
+El corpus corresponde exclusivamente al rango exacto [{since}, {before}).
 
 Genera un análisis temático con el siguiente formato EXACTO:
 
@@ -339,21 +351,30 @@ def save_metadata(path: Path, metadata: dict[str, object]) -> None:
 
 def main() -> None:
     args = parse_args()
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        raise SystemExit(f"❌ {exc}") from exc
 
     input_dir = Path(args.input_dir)
     output_dir = Path(args.output_dir)
-    datos_dir = weekly_input_dir(input_dir, args.since)
-    claude_dir = weekly_output_dir(output_dir, args.since)
-    claude_tag = build_report_tag(args.since, "Claude")
+    datos_dir = range_input_dir(input_dir, args.since, args.before)
+    claude_dir = range_output_dir(output_dir, args.since, args.before)
+    claude_tag = build_range_report_tag(args.since, args.before, "Claude_Temas")
+    write_range_contract(claude_dir, args.since, args.before, "Claude_Temas")
 
     log_message("🤖 ANÁLISIS TEMÁTICO CON CLAUDE PARA TAMPICO")
-    log_message(f"Semana de datos: {datos_dir}")
+    log_message(f"Rango de datos: [{args.since}, {args.before}) en {datos_dir}")
     log_message(f"Salida Claude: {claude_dir}")
 
     if not datos_dir.exists():
-        raise SystemExit(f"No existe la carpeta semanal de datos: {datos_dir}")
+        raise SystemExit(f"No existe la carpeta del rango de datos: {datos_dir}")
 
-    corpus_path, corpus_text, used_files = build_combined_corpus(datos_dir, args.since)
+    corpus_path, corpus_text, used_files = build_combined_corpus(
+        datos_dir,
+        args.since,
+        args.before,
+    )
     log_message(f"📄 Corpus combinado generado: {corpus_path.name}")
     log_message(f"📚 Archivos integrados: {', '.join(used_files)}")
 
@@ -376,7 +397,7 @@ def main() -> None:
             f"No se encontro {API_ENV_NAME}. Define la variable en .env.local o en el entorno antes de ejecutar este script."
         )
 
-    prompt = build_prompt(args.since)
+    prompt = build_prompt(args.since, args.before)
     analysis_text, usage = generar_analisis_claude(api_key, args.model, prompt, sampled_corpus)
     if not analysis_text:
         raise SystemExit("Claude no devolvio texto de analisis")

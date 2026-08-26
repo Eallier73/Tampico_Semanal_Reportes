@@ -4,7 +4,7 @@
 """
 8_influencia_temas.py
 ====================
-Analiza corpus semanal de Tampico y estima la influencia de temas (0-6)
+Analiza un corpus de rango exacto y estima la influencia de temas (0-6)
 sobre la polaridad global mediante regresión Ridge + Logística + Correlación.
 
 ENTRADAS
@@ -48,7 +48,12 @@ import sys
 # IMPORTAR FUNCIONES REPO
 # =========================
 sys.path.insert(0, str(Path(__file__).parent))
-from output_naming import build_report_tag, build_output_dir, ensure_tagged_name
+from output_naming import (
+    build_range_report_tag,
+    ensure_tagged_name,
+    validate_date_range,
+    write_range_contract,
+)
 
 DEFAULT_STOPWORDS_PATH = (
     Path(__file__).resolve().parent
@@ -883,19 +888,19 @@ def analizar_influencia(docs: list, stoplist: set, output_dir: Path, report_tag:
 # =========================
 # MAIN
 # =========================
-def weekly_input_dir(base_dir: Path, since: str) -> Path:
-    """Retorna directorio semanal de entrada (Datos)."""
+def range_input_dir(base_dir: Path, since: str, before: str) -> Path:
+    """Retorna el directorio de entrada del rango (Datos)."""
     base_path = Path(base_dir)
-    week_tag = build_report_tag(since, "Datos")
+    week_tag = build_range_report_tag(since, before, "Datos")
     if base_path.name == week_tag:
         return base_path
     return base_path / week_tag
 
 
-def weekly_output_dir(base_dir: Path, since: str) -> Path:
-    """Retorna directorio semanal de salida (Influencia_Temas)."""
+def range_output_dir(base_dir: Path, since: str, before: str) -> Path:
+    """Retorna el directorio de salida del rango (Influencia_Temas)."""
     base_path = Path(base_dir)
-    week_tag = build_report_tag(since, "Influencia_Temas")
+    week_tag = build_range_report_tag(since, before, "Influencia_Temas")
     if base_path.name == week_tag:
         return base_path
     return base_path / week_tag
@@ -914,21 +919,26 @@ def main():
     )
     
     args = parser.parse_args()
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        raise SystemExit(f"❌ {exc}") from exc
     
     # Construir rutas dinámicas
-    report_tag = build_report_tag(args.since, "Influencia_Temas")
+    report_tag = build_range_report_tag(args.since, args.before, "Influencia_Temas")
     
     if args.input_dir:
         input_base_dir = Path(args.input_dir)
     else:
         input_base_dir = Path(__file__).parent.parent / "Datos"
-    input_dir = weekly_input_dir(input_base_dir, args.since)
+    input_dir = range_input_dir(input_base_dir, args.since, args.before)
     
     if args.output_dir:
         output_base_dir = Path(args.output_dir)
     else:
         output_base_dir = Path(__file__).parent.parent / "Influencia_Temas"
-    output_dir = weekly_output_dir(output_base_dir, args.since)
+    output_dir = range_output_dir(output_base_dir, args.since, args.before)
+    write_range_contract(output_dir, args.since, args.before, "Influencia_Temas")
     
     log("=" * 70)
     log("ANÁLISIS DE INFLUENCIA DE TEMAS - TAMPICO")

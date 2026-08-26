@@ -27,7 +27,7 @@ from apify_social_common import (
     validate_window,
     write_social_outputs,
 )
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, write_range_contract
 from queries_config import TIKTOK_HASHTAGS, TIKTOK_PROFILES, TIKTOK_SEARCH_QUERIES
 
 
@@ -225,7 +225,7 @@ def main() -> None:
     args = parse_args()
     validate_window(args.since, args.before)
     plans = build_plans(args)
-    report_tag = build_report_tag(args.since, "TikTok")
+    report_tag = build_range_report_tag(args.since, args.before, "TikTok")
     output_base = Path(args.output_dir)
     if args.dry_run:
         print_dry_run(ACTOR_ID, plans, output_base, report_tag)
@@ -246,6 +246,7 @@ def main() -> None:
         f"{len(rows)} pertinentes tras fecha y filtro local"
     )
     outputs = write_social_outputs(rows, output_base, report_tag)
+    write_range_contract(output_base / report_tag, args.since, args.before, "TikTok")
     print(f"✅ TikTok: {len(rows)} filas dentro de [{args.since}, {args.before})")
     for path in outputs.values():
         print(f"  - {path}")

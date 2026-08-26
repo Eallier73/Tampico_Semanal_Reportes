@@ -51,6 +51,7 @@ Reportes/**
 
 state/x_state.json
 state/x_state.local.json
+state/download_history.jsonl
 
 .idea/
 .vscode/

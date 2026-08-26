@@ -21,7 +21,13 @@ try:
 except ImportError:
     pass
 
-from output_naming import build_output_dir, build_report_tag, ensure_tagged_name
+from output_naming import (
+    build_range_output_dir,
+    build_range_report_tag,
+    ensure_tagged_name,
+    validate_date_range,
+    write_range_contract,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -55,8 +61,8 @@ MONTH_NAMES = {
     12: "DICIEMBRE",
 }
 COMMON_COLUMNS = [
-    "fecha_semana",
-    "nombre_semana",
+    "fecha_inicio_rango",
+    "nombre_rango",
     "red_social",
     "red_social_label",
     "tipo_publicacion",
@@ -94,7 +100,7 @@ def parse_args() -> argparse.Namespace:
         )
     )
     parser.add_argument("--since", required=True, type=valid_date,
-                        help="Fecha inicio YYYY-MM-DD (define la semana ISO)")
+                        help="Límite inicial inclusivo YYYY-MM-DD")
     parser.add_argument("--before", required=True, type=valid_date,
                         help="Fecha fin YYYY-MM-DD")
     parser.add_argument("--twitter-dir", default=str(DEFAULT_TWITTER_DIR),
@@ -118,8 +124,8 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def weekly_dir(base_dir: Path, since: str, source: str) -> Path:
-    return Path(base_dir) / build_report_tag(since, source)
+def range_dir(base_dir: Path, since: str, before: str, source: str) -> Path:
+    return Path(base_dir) / build_range_report_tag(since, before, source)
 
 
 def write_text(path: Path, content: str) -> None:
@@ -181,9 +187,13 @@ def build_text_for_analysis(title: str, body: str) -> str:
     return title or body
 
 
-def load_twitter_records(base_dir: Path, since: str) -> tuple[list[dict[str, str]], dict[str, object]]:
-    week_dir = weekly_dir(base_dir, since, "Twitter")
-    csv_path = week_dir / f"{week_dir.name}_post_institucionales.csv"
+def load_twitter_records(
+    base_dir: Path,
+    since: str,
+    before: str,
+) -> tuple[list[dict[str, str]], dict[str, object]]:
+    source_range_dir = range_dir(base_dir, since, before, "Twitter")
+    csv_path = source_range_dir / f"{source_range_dir.name}_post_institucionales.csv"
     meta: dict[str, object] = {
         "source": "twitter",
         "path": str(csv_path),
@@ -210,8 +220,8 @@ def load_twitter_records(base_dir: Path, since: str) -> tuple[list[dict[str, str
         )
         records.append(
             {
-                "fecha_semana": since,
-                "nombre_semana": normalize_whitespace(row.get("nombre_semana")) or week_dir.name,
+                "fecha_inicio_rango": since,
+                "nombre_rango": normalize_whitespace(row.get("nombre_rango")) or source_range_dir.name,
                 "red_social": "twitter",
                 "red_social_label": NETWORK_LABELS["twitter"],
                 "tipo_publicacion": "tweet",
@@ -232,9 +242,13 @@ def load_twitter_records(base_dir: Path, since: str) -> tuple[list[dict[str, str
     return records, meta
 
 
-def load_facebook_records(base_dir: Path, since: str) -> tuple[list[dict[str, str]], dict[str, object]]:
-    week_dir = weekly_dir(base_dir, since, "Facebook")
-    csv_path = week_dir / f"{week_dir.name}_posts.csv"
+def load_facebook_records(
+    base_dir: Path,
+    since: str,
+    before: str,
+) -> tuple[list[dict[str, str]], dict[str, object]]:
+    source_range_dir = range_dir(base_dir, since, before, "Facebook")
+    csv_path = source_range_dir / f"{source_range_dir.name}_posts.csv"
     meta: dict[str, object] = {
         "source": "facebook",
         "path": str(csv_path),
@@ -263,8 +277,8 @@ def load_facebook_records(base_dir: Path, since: str) -> tuple[list[dict[str, st
         url = normalize_whitespace(row.get("post_url"))
         records.append(
             {
-                "fecha_semana": since,
-                "nombre_semana": week_dir.name,
+                "fecha_inicio_rango": since,
+                "nombre_rango": source_range_dir.name,
                 "red_social": "facebook",
                 "red_social_label": NETWORK_LABELS["facebook"],
                 "tipo_publicacion": "post_facebook",
@@ -285,9 +299,13 @@ def load_facebook_records(base_dir: Path, since: str) -> tuple[list[dict[str, st
     return records, meta
 
 
-def load_youtube_records(base_dir: Path, since: str) -> tuple[list[dict[str, str]], dict[str, object]]:
-    week_dir = weekly_dir(base_dir, since, "Youtube")
-    csv_path = week_dir / f"{week_dir.name}_scripts.csv"
+def load_youtube_records(
+    base_dir: Path,
+    since: str,
+    before: str,
+) -> tuple[list[dict[str, str]], dict[str, object]]:
+    source_range_dir = range_dir(base_dir, since, before, "Youtube")
+    csv_path = source_range_dir / f"{source_range_dir.name}_scripts.csv"
     meta: dict[str, object] = {
         "source": "youtube",
         "path": str(csv_path),
@@ -320,8 +338,8 @@ def load_youtube_records(base_dir: Path, since: str) -> tuple[list[dict[str, str
         url = f"https://www.youtube.com/watch?v={video_id}" if video_id else ""
         records.append(
             {
-                "fecha_semana": since,
-                "nombre_semana": week_dir.name,
+                "fecha_inicio_rango": since,
+                "nombre_rango": source_range_dir.name,
                 "red_social": "youtube",
                 "red_social_label": NETWORK_LABELS["youtube"],
                 "tipo_publicacion": "video_youtube",
@@ -344,9 +362,9 @@ def load_youtube_records(base_dir: Path, since: str) -> tuple[list[dict[str, str
 
 def consolidate_records(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[str, object]]:
     loaders = [
-        load_twitter_records(Path(args.twitter_dir), args.since),
-        load_facebook_records(Path(args.facebook_dir), args.since),
-        load_youtube_records(Path(args.youtube_dir), args.since),
+        load_twitter_records(Path(args.twitter_dir), args.since, args.before),
+        load_facebook_records(Path(args.facebook_dir), args.since, args.before),
+        load_youtube_records(Path(args.youtube_dir), args.since, args.before),
     ]
 
     source_meta: dict[str, object] = {}
@@ -359,7 +377,7 @@ def consolidate_records(args: argparse.Namespace) -> tuple[pd.DataFrame, dict[st
     if not frames:
         raise FileNotFoundError(
             "No se encontraron publicaciones institucionales. "
-            "Se esperaban CSVs de Twitter, Facebook o YouTube para la semana solicitada."
+            "Se esperaban CSVs de Twitter, Facebook o YouTube para el rango solicitado."
         )
 
     df = pd.concat(frames, ignore_index=True)
@@ -499,14 +517,14 @@ def sample_corpus(
     }
 
 
-def build_prompt(since: str, stats: dict[str, object]) -> str:
+def build_prompt(since: str, before: str, stats: dict[str, object]) -> str:
     dt = datetime.strptime(since, "%Y-%m-%d")
     month_label = MONTH_NAMES[dt.month]
     year_label = dt.year
     summary_block = build_summary_block(stats)
 
     return f"""
-Analiza publicaciones institucionales oficiales de Tampico correspondientes a una semana de Twitter/X, Facebook y YouTube.
+Analiza publicaciones institucionales oficiales de Tampico correspondientes al rango exacto [{since}, {before}) de Twitter/X, Facebook y YouTube.
 
 El corpus puede incluir publicaciones del Gobierno Municipal de Tampico, de la presidencia municipal, de dependencias o areas oficiales, y de canales institucionales vinculados a la agenda del municipio.
 
@@ -698,10 +716,29 @@ def build_markdown_report(payload: dict[str, object], stats: dict[str, object]) 
 
 def main() -> None:
     args = parse_args()
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        raise SystemExit(f"❌ {exc}") from exc
 
     output_dir = Path(args.output_dir)
-    claude_dir = build_output_dir(output_dir, args.since, "Claude")
-    claude_tag = build_report_tag(args.since, "Claude")
+    claude_dir = build_range_output_dir(
+        output_dir,
+        args.since,
+        args.before,
+        "Claude_Publicaciones",
+    )
+    claude_tag = build_range_report_tag(
+        args.since,
+        args.before,
+        "Claude_Publicaciones",
+    )
+    write_range_contract(
+        claude_dir,
+        args.since,
+        args.before,
+        "Claude_Publicaciones",
+    )
 
     log_message("🤖 ANALISIS DE PUBLICACIONES INSTITUCIONALES CON CLAUDE")
     log_message(f"Salida Claude: {claude_dir}")
@@ -717,7 +754,7 @@ def main() -> None:
     claude_dir.mkdir(parents=True, exist_ok=True)
     df.to_csv(csv_path, index=False, encoding="utf-8")
 
-    prompt = build_prompt(args.since, stats)
+    prompt = build_prompt(args.since, args.before, stats)
     write_text(prompt_path, prompt + "\n")
 
     sampled_corpus, sampling_stats = sample_corpus(df, args.max_corpus_chars, args.sample_seed, args.max_doc_chars)

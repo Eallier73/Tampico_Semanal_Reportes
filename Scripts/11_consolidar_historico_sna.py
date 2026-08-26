@@ -14,15 +14,16 @@ from urllib.parse import urlparse
 
 import pandas as pd
 
+from output_naming import (
+    build_range_label,
+    build_range_report_tag,
+    validate_date_range,
+    write_range_contract,
+)
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_consolidados.csv"
-DEFAULT_LAST_TWO_WEEKS_OUTPUT = (
-    REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_ultimas_2_semanas.csv"
-)
-DEFAULT_LAST_WEEK_OUTPUT = (
-    REPO_ROOT / "SNA" / "Datos" / "tampico_datos_tabulares_ultima_semana.csv"
-)
 DEFAULT_RADAR_DIR = Path("/home/emilio/Documentos/RAdAR/Datos_RAdAR/Juntos")
 SOURCE_ROOTS: list[tuple[Path, str]] = [(REPO_ROOT, "")]
 
@@ -38,7 +39,6 @@ EMOJI_RE = re.compile(
     "]+",
     flags=re.UNICODE,
 )
-WEEK_RE = re.compile(r"(20\d{2}_W\d{2})")
 DATE_PREFIX_RE = re.compile(r"(20\d{2}-\d{2}-\d{2})")
 INSTITUTIONAL_HANDLES = {"monicavtampico", "tampicogob"}
 MEDIA_NAME_ALIASES = {
@@ -47,7 +47,7 @@ MEDIA_NAME_ALIASES = {
 }
 
 OUTPUT_COLUMNS = [
-    "id", "plataforma", "tipo_registro", "usuario", "semana", "semanas_origen",
+    "id", "plataforma", "tipo_registro", "usuario", "rango", "rangos_origen",
     "fecha", "texto_original", "texto_limpio", "urls_extraidas",
     "menciones_extraidas", "hashtags_extraidos", "emojis_extraidos",
     "idioma_detectado", "likes", "comentarios", "shares", "vistas", "es_reply",
@@ -105,22 +105,7 @@ def source_relative(path: Path) -> Path:
     return Path("externo") / path.name
 
 
-def week_from_path(path: Path) -> str:
-    relative = source_relative(path)
-    week_match = WEEK_RE.search(str(relative))
-    if week_match:
-        return week_match.group(1)
-    date_match = DATE_PREFIX_RE.search(str(relative))
-    if not date_match:
-        return ""
-    parsed = pd.to_datetime(date_match.group(1), errors="coerce")
-    if pd.isna(parsed):
-        return ""
-    iso = parsed.isocalendar()
-    return f"{iso.year}_W{iso.week:02d}"
-
-
-def date_or_source_week(value: Any, path: Path) -> str:
+def date_or_source_date(value: Any, path: Path) -> str:
     raw = text(value)
     parsed = pd.to_datetime(raw, errors="coerce", utc=True)
     if raw and not pd.isna(parsed):
@@ -129,13 +114,14 @@ def date_or_source_week(value: Any, path: Path) -> str:
     return match.group(1) if match else raw
 
 
-def week_from_date_or_path(value: Any, path: Path) -> str:
-    """Usa la fecha del registro y recurre a la ruta solo como respaldo."""
+def range_from_date(value: Any) -> str:
+    """Representa la fecha observable como un rango diario exacto."""
     parsed = pd.to_datetime(text(value), errors="coerce", utc=True)
-    if not pd.isna(parsed):
-        iso = parsed.isocalendar()
-        return f"{iso.year}_W{iso.week:02d}"
-    return week_from_path(path)
+    if pd.isna(parsed):
+        return "sin_rango_verificable"
+    since = parsed.date()
+    before = since + pd.Timedelta(days=1)
+    return build_range_label(since, before)
 
 
 def stable_hash(*values: Any) -> str:
@@ -199,7 +185,7 @@ def base_record(
     **extra: Any,
 ) -> dict[str, Any]:
     relative = source_relative(path)
-    week = week_from_date_or_path(fecha, path)
+    record_range = range_from_date(fecha)
     clean = clean_and_extract(contenido)
     fallback_key = "|".join([plataforma, tipo_registro, usuario, fecha, contenido])
     dedup_key = f"{plataforma}:{tipo_registro}:{stable_key or hashlib.sha1(fallback_key.encode('utf-8')).hexdigest()}"
@@ -207,7 +193,7 @@ def base_record(
         "plataforma": plataforma,
         "tipo_registro": tipo_registro,
         "usuario": usuario,
-        "semana": week,
+        "rango": record_range,
         "fecha": normalize_date(fecha),
         "texto_original": contenido,
         **clean,
@@ -322,7 +308,7 @@ def adapt_radar_facebook_legacy(row: pd.Series, path: Path) -> dict[str, Any]:
     synthetic_url = f"radar://facebook/{object_id}" if object_id else ""
     return base_record(
         row, path, "Facebook", "comentario" if is_comment else "publicacion_institucional",
-        "", date_or_source_week(row.get("created_time"), path), contenido,
+        "", date_or_source_date(row.get("created_time"), path), contenido,
         first(row, "path") or stable_hash(row.get("id"), row.get("created_time"), contenido),
         likes=integer(row.get("like_count")), comentarios=integer(row.get("comment_count")),
         url_origen=synthetic_url, url_contexto=synthetic_url,
@@ -336,7 +322,7 @@ def adapt_radar_facebook_actual(row: pd.Series, path: Path) -> dict[str, Any]:
     contenido = first(row, "texto")
     url = first(row, "url")
     parent = first(row, "post_url_padre") or url
-    fecha = date_or_source_week(row.get("fecha"), path)
+    fecha = date_or_source_date(row.get("fecha"), path)
     stable = stable_hash(tipo_raw, url, parent, fecha, contenido)
     return base_record(
         row, path, "Facebook", "publicacion_institucional" if is_post else "comentario",
@@ -358,7 +344,7 @@ def adapt_radar_twitter_legacy(row: pd.Series, path: Path) -> dict[str, Any]:
     institutional = _radar_twitter_institutional(usuario)
     return base_record(
         row, path, "Twitter", "publicacion_institucional" if institutional else "comentario",
-        usuario, date_or_source_week(row.get("UTC_Time"), path), contenido, stable,
+        usuario, date_or_source_date(row.get("UTC_Time"), path), contenido, stable,
         likes=integer(row.get("Like_Count")), comentarios=integer(row.get("Reply_Count")),
         shares=integer(row.get("Repost_Count")), vistas=integer(row.get("View_Count")),
         es_reply=boolean(row.get("Replying_to")), url_origen=url, url_contexto=url,
@@ -374,10 +360,10 @@ def adapt_radar_twitter_actual(row: pd.Series, path: Path) -> dict[str, Any]:
 
 def adapt_radar_youtube_simple(row: pd.Series, path: Path) -> dict[str, Any]:
     contenido = first(row, "comment_text")
-    fecha = date_or_source_week(row.get("published_at"), path)
+    fecha = date_or_source_date(row.get("published_at"), path)
     query = first(row, "query")
-    week = week_from_path(path) or "sin_semana"
-    context = f"radar://youtube/{week}/{slug(query)}"
+    range_label = range_from_date(fecha)
+    context = f"radar://youtube/{range_label}/{slug(query)}"
     stable = stable_hash(fecha, contenido.lower(), query.lower())
     return base_record(
         row, path, "YouTube", "comentario", "", fecha, contenido, stable,
@@ -394,10 +380,10 @@ def adapt_radar_youtube_full(row: pd.Series, path: Path) -> dict[str, Any]:
     contenido = first(row, "comment_text")
     return base_record(
         row, path, "YouTube", "comentario", first(row, "author"),
-        date_or_source_week(row.get("published_at"), path), contenido,
+        date_or_source_date(row.get("published_at"), path), contenido,
         comment_id or stable_hash(row.get("published_at"), contenido, row.get("query")),
         likes=integer(row.get("like_count")), url_origen=comment_url,
-        url_contexto=video_url or f"radar://youtube/{week_from_path(path)}/sin_video",
+        url_contexto=video_url or "radar://youtube/sin_rango_verificable/sin_video",
         query_busqueda=first(row, "query"), titulo_contexto=first(row, "video_title"),
         autor_contexto=first(row, "channel_title"),
     )
@@ -407,10 +393,12 @@ def adapt_radar_recovered(
     row: pd.Series, path: Path, plataforma: str, line_number: int
 ) -> dict[str, Any]:
     contenido = first(row, "texto_recuperado")
-    week = week_from_path(path) or "sin_semana"
-    context = f"radar://recuperado/{plataforma.lower()}/{week}/{path.stem}"
+    context = (
+        f"radar://recuperado/{plataforma.lower()}/"
+        f"sin_rango_verificable/{path.stem}"
+    )
     return base_record(
-        row, path, plataforma, "comentario", "", date_or_source_week("", path),
+        row, path, plataforma, "comentario", "", date_or_source_date("", path),
         contenido, stable_hash(path.name, line_number, contenido),
         url_contexto=context, query_busqueda="recuperacion_sin_encabezado",
         autor_contexto="RAdAR recuperacion parcial",
@@ -558,68 +546,57 @@ def consolidate_radar(
     return records, inventory
 
 
-def latest_source_weeks(limit: int) -> list[str]:
-    """Obtiene las semanas ISO más recientes de las fuentes locales."""
-    weeks = {
-        week
-        for _, pattern, _ in SOURCES
-        for path in REPO_ROOT.glob(pattern)
-        if (week := week_from_path(path))
-    }
-    return sorted(weeks)[-limit:]
-
-
 def consolidate(
     radar_dir: Path | None = None,
-    last_weeks: int | None = None,
-) -> tuple[pd.DataFrame, list[dict[str, Any]], list[str]]:
-    selected_weeks = latest_source_weeks(last_weeks) if last_weeks else []
-    if last_weeks and len(selected_weeks) < last_weeks:
-        raise RuntimeError(
-            f"Se solicitaron {last_weeks} semanas locales, pero solo hay "
-            f"{len(selected_weeks)} disponible(s)."
-        )
-    if selected_weeks:
-        print(
-            f"[ALCANCE] Últimas {len(selected_weeks)} semanas locales: "
-            + ", ".join(selected_weeks),
-            flush=True,
-        )
+    since: str | None = None,
+    before: str | None = None,
+) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
+    if bool(since) != bool(before):
+        raise ValueError("--since y --before deben enviarse juntos")
+    if since and before:
+        validate_date_range(since, before)
+        range_start = pd.Timestamp(since, tz="UTC")
+        range_end = pd.Timestamp(before, tz="UTC")
+    else:
+        range_start = None
+        range_end = None
+
+    def belongs_to_exact_range(record: dict[str, Any]) -> bool:
+        if range_start is None or range_end is None:
+            return True
+        parsed = pd.to_datetime(text(record.get("fecha")), errors="coerce", utc=True)
+        return not pd.isna(parsed) and range_start <= parsed < range_end
 
     records: list[dict[str, Any]] = []
     inventory: list[dict[str, Any]] = []
     for family, pattern, adapter in SOURCES:
         paths = sorted(REPO_ROOT.glob(pattern))
-        if selected_weeks:
-            paths = [path for path in paths if week_from_path(path) in selected_weeks]
         for path in paths:
             frame = read_csv(path)
             inventory.append({"familia": family, "archivo": str(path.relative_to(REPO_ROOT)), "filas": len(frame)})
             for _, row in frame.iterrows():
                 record = adapter(row, path)
-                # El alcance por últimas semanas ya se resolvió mediante la carpeta
-                # fuente. No vuelvas a filtrar por la semana ISO de cada registro:
-                # un lote semanal puede cruzar de lunes (por ejemplo, 22–29) y
-                # todos sus registros pertenecen al mismo archivo seleccionado.
-                if text(record.get("texto_original")):
+                if text(record.get("texto_original")) and belongs_to_exact_range(record):
                     records.append(record)
 
     if radar_dir and radar_dir.exists():
         SOURCE_ROOTS.append((radar_dir, "RAdAR/Juntos"))
         radar_records, radar_inventory = consolidate_radar(radar_dir)
-        records.extend(radar_records)
+        records.extend(
+            record for record in radar_records if belongs_to_exact_range(record)
+        )
         inventory.extend(radar_inventory)
 
     if not records:
-        return pd.DataFrame(columns=OUTPUT_COLUMNS), inventory, selected_weeks
+        return pd.DataFrame(columns=OUTPUT_COLUMNS), inventory
 
     raw = pd.DataFrame(records)
     consolidated: list[dict[str, Any]] = []
     for _, group in raw.groupby("clave_deduplicacion", sort=False, dropna=False):
         selected = group.iloc[-1].to_dict()
-        weeks = sorted({text(v) for v in group["semana"] if text(v)})
+        source_ranges = sorted({text(v) for v in group["rango"] if text(v)})
         files = list(dict.fromkeys(text(v) for v in group["archivo_origen"] if text(v)))
-        selected["semanas_origen"] = "|".join(weeks)
+        selected["rangos_origen"] = "|".join(source_ranges)
         selected["archivos_origen"] = "|".join(files)
         selected["n_apariciones_descarga"] = len(group)
         selected["id"] = hashlib.sha1(str(selected["clave_deduplicacion"]).encode("utf-8")).hexdigest()[:20]
@@ -631,55 +608,67 @@ def consolidate(
             output[column] = ""
     output = output[OUTPUT_COLUMNS]
     output = output.sort_values(["fecha", "plataforma", "tipo_registro", "id"], na_position="last").reset_index(drop=True)
-    return output, inventory, selected_weeks
+    return output, inventory
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--since", help="Límite inicial inclusivo YYYY-MM-DD")
+    parser.add_argument("--before", help="Límite final exclusivo YYYY-MM-DD")
     parser.add_argument("--radar-dir", type=Path, default=DEFAULT_RADAR_DIR)
     parser.add_argument(
         "--sin-radar", action="store_true",
         help="Consolida solo las fuentes del repo de Tampico",
     )
-    parser.add_argument(
-        "--last-weeks",
-        type=int,
-        metavar="N",
-        help="Consolida solo las N semanas ISO locales más recientes; RAdAR se excluye.",
-    )
     args = parser.parse_args()
-    if args.last_weeks is not None and args.last_weeks < 1:
-        parser.error("--last-weeks debe ser mayor que cero")
-
+    if bool(args.since) != bool(args.before):
+        parser.error("--since y --before deben enviarse juntos")
+    if args.since and args.before:
+        try:
+            validate_date_range(args.since, args.before)
+        except ValueError as exc:
+            parser.error(str(exc))
     output_path = args.output
     if output_path is None:
-        if args.last_weeks == 2:
-            output_path = DEFAULT_LAST_TWO_WEEKS_OUTPUT
-        elif args.last_weeks == 1:
-            output_path = DEFAULT_LAST_WEEK_OUTPUT
-        elif args.last_weeks:
+        if args.since and args.before:
+            range_label = build_range_label(args.since, args.before)
             output_path = (
-                REPO_ROOT / "SNA" / "Datos"
-                / f"tampico_datos_tabulares_ultimas_{args.last_weeks}_semanas.csv"
+                REPO_ROOT
+                / "SNA"
+                / "Datos"
+                / build_range_report_tag(args.since, args.before, "SNA")
+                / f"tampico_datos_tabulares_{range_label}.csv"
             )
         else:
             output_path = DEFAULT_OUTPUT
 
-    radar_dir = None if args.sin_radar or args.last_weeks else args.radar_dir
+    radar_dir = (
+        None
+        if args.sin_radar or args.since
+        else args.radar_dir
+    )
     if radar_dir and not radar_dir.exists():
         print(f"[AVISO] No existe RAdAR: {radar_dir}; se continua sin esa fuente")
         radar_dir = None
-    output, inventory, selected_weeks = consolidate(
+    output, inventory = consolidate(
         radar_dir=radar_dir,
-        last_weeks=args.last_weeks,
+        since=args.since,
+        before=args.before,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output.to_csv(output_path, index=False, encoding="utf-8")
+    if args.since and args.before:
+        write_range_contract(
+            output_path.parent,
+            args.since,
+            args.before,
+            "SNA",
+        )
 
     print(f"Archivo: {output_path}")
-    if selected_weeks:
-        scope_label = " | ".join(selected_weeks) + " (solo fuentes locales)"
+    if args.since and args.before:
+        scope_label = f"[{args.since}, {args.before}) (solo fuentes locales)"
     elif radar_dir:
         scope_label = "histórico local + RAdAR"
     else:

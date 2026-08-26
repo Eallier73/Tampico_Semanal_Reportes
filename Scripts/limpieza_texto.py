@@ -27,7 +27,7 @@ ACCENT_REPLACEMENTS = {
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATOS_DIR = REPO_ROOT / "Datos" / "2026_W14_Datos"
+DEFAULT_DATOS_DIR = REPO_ROOT / "Datos"
 TARGET_FILES = ("material_comentarios.txt", "material_institucional.txt")
 
 
@@ -174,12 +174,12 @@ def clean_target_file(path: Path, normalizer_name: str, words_per_line: int | No
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Limpia solo material_comentarios.txt y material_institucional.txt en una carpeta semanal de Datos"
+        description="Limpia los materiales de una carpeta de rango de Datos"
     )
     parser.add_argument(
         "--datos-dir",
         default=str(DEFAULT_DATOS_DIR),
-        help=f"Carpeta semanal de Datos (default: {DEFAULT_DATOS_DIR})",
+        help=f"Carpeta de rango de Datos (default: {DEFAULT_DATOS_DIR})",
     )
     parser.add_argument(
         "--comentarios-normalizer",

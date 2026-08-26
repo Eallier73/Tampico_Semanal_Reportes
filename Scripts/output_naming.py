@@ -1,33 +1,25 @@
 from __future__ import annotations
 
 import re
+import json
 from datetime import date, datetime
 from pathlib import Path
 
 
-def _normalize_date_label(run_date: str | date | datetime | None, fallback: str) -> str:
-    if isinstance(run_date, datetime):
-        iso = run_date.isocalendar()
-        return f"{iso.year}_W{iso.week:02d}"
-    if isinstance(run_date, date):
-        iso = run_date.isocalendar()
-        return f"{iso.year}_W{iso.week:02d}"
-    if run_date:
-        raw = str(run_date).strip()
-        try:
-            dt = datetime.strptime(raw, "%Y-%m-%d")
-            iso = dt.date().isocalendar()
-            return f"{iso.year}_W{iso.week:02d}"
-        except ValueError:
-            pass
-        m = re.match(r"^(\d{4})[-_]?W(\d{1,2})$", raw, flags=re.IGNORECASE)
-        if m:
-            year = int(m.group(1))
-            week = int(m.group(2))
-            if 1 <= week <= 53:
-                return f"{year}_W{week:02d}"
-        return raw
-    return fallback
+SPANISH_MONTHS = (
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+)
 
 
 def _normalize_source_label(source: str) -> str:
@@ -35,21 +27,84 @@ def _normalize_source_label(source: str) -> str:
     return normalized.strip("_") or "Reporte"
 
 
-def build_report_tag(
-    run_date: str | date | datetime | None,
-    source: str,
-    fallback: str = "sin_inicio",
+def _as_date(value: str | date | datetime, field_name: str) -> date:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    try:
+        return datetime.strptime(str(value).strip(), "%Y-%m-%d").date()
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} debe usar YYYY-MM-DD: {value!r}") from exc
+
+
+def validate_date_range(
+    since: str | date | datetime,
+    before: str | date | datetime,
+) -> tuple[date, date]:
+    """Valida el contrato temporal único del pipeline: [since, before)."""
+    start = _as_date(since, "since")
+    end = _as_date(before, "before")
+    if end <= start:
+        raise ValueError("before debe ser posterior a since; el rango es [since, before)")
+    return start, end
+
+
+def build_range_label(
+    since: str | date | datetime,
+    before: str | date | datetime,
 ) -> str:
-    return f"{_normalize_date_label(run_date, fallback)}_{_normalize_source_label(source)}"
+    """Etiqueta legible y no ambigua que conserva ambos límites exactos."""
+    start, end = validate_date_range(since, before)
+    return (
+        f"{start.year}_{SPANISH_MONTHS[start.month - 1]}_{start.day:02d}"
+        f"_al_{end.year}_{SPANISH_MONTHS[end.month - 1]}_{end.day:02d}"
+    )
 
 
-def build_output_dir(
-    base_dir: str | Path,
-    run_date: str | date | datetime | None,
+def build_range_report_tag(
+    since: str | date | datetime,
+    before: str | date | datetime,
     source: str,
-    fallback: str = "sin_inicio",
+) -> str:
+    return f"{build_range_label(since, before)}_{_normalize_source_label(source)}"
+
+
+def build_range_output_dir(
+    base_dir: str | Path,
+    since: str | date | datetime,
+    before: str | date | datetime,
+    source: str,
 ) -> Path:
-    return Path(base_dir) / build_report_tag(run_date, source, fallback=fallback)
+    return Path(base_dir) / build_range_report_tag(since, before, source)
+
+
+def write_range_contract(
+    output_dir: str | Path,
+    since: str | date | datetime,
+    before: str | date | datetime,
+    source: str,
+) -> Path:
+    """Persiste junto a la salida los límites que debe respetar cada stage."""
+    start, end = validate_date_range(since, before)
+    directory = Path(output_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / "contrato_rango_fechas.json"
+    payload = {
+        "contract_version": 1,
+        "since": start.isoformat(),
+        "before": end.isoformat(),
+        "interval": "[since,before)",
+        "before_is_exclusive": True,
+        "timezone": "UTC",
+        "source": _normalize_source_label(source),
+        "storage_tag": build_range_report_tag(start, end, source),
+    }
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 def ensure_tagged_name(base_name: str, report_tag: str) -> str:

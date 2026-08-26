@@ -73,8 +73,8 @@ DOMINIOS_PLAYWRIGHT_PRIORITARIO = [
 ]
 
 # --- General ---
-OMITIR_SEMANAS_EXISTENTES = True
-CARPETA_BASE_SEMANAL = None
+OMITIR_RANGOS_EXISTENTES = True
+CARPETA_BASE_RANGOS = None
 NOMBRE_ARCHIVO_BASE = "noticias_tampico"
 PAUSA = 2.0            # segundos entre requests de trafilatura
 PAUSA_ENTRE_QUERIES = 3.0   # segundos entre queries RSS (para no ser bloqueado)
@@ -108,10 +108,10 @@ import cloudscraper
 import trafilatura
 import pandas as pd
 
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range, write_range_contract
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-CARPETA_BASE_SEMANAL = str(REPO_ROOT / "Medios")
+CARPETA_BASE_RANGOS = str(REPO_ROOT / "Medios")
 
 # Intentar importar googlenewsdecoder como fallback
 TIENE_GNEWS_DECODER = False
@@ -320,7 +320,7 @@ def _dominio_requiere_playwright(url):
 # CACHE LOCAL
 # ============================================================
 def _ruta_cache_rss():
-    return Path(CARPETA_BASE_SEMANAL) / NOMBRE_CARPETA_CACHE_RSS
+    return Path(CARPETA_BASE_RANGOS) / NOMBRE_CARPETA_CACHE_RSS
 
 
 def _hash_cache(texto):
@@ -628,8 +628,8 @@ def deduplicar(lista):
 
 
 def filtrar_por_fecha(noticias, fecha_ini, fecha_fin):
-    ini = datetime.strptime(fecha_ini, "%Y-%m-%d")
-    fin = datetime.strptime(fecha_fin, "%Y-%m-%d")
+    ini = pd.Timestamp(fecha_ini, tz="UTC")
+    fin = pd.Timestamp(fecha_fin, tz="UTC")
 
     filtradas = []
     sin_fecha = []
@@ -637,16 +637,19 @@ def filtrar_por_fecha(noticias, fecha_ini, fecha_fin):
     for r in noticias:
         if r.get("iso_date"):
             try:
-                fecha = datetime.fromisoformat(r["iso_date"]).replace(tzinfo=None)
-                if ini <= fecha < fin:
+                fecha = pd.to_datetime(r["iso_date"], errors="coerce", utc=True)
+                if not pd.isna(fecha) and ini <= fecha < fin:
                     filtradas.append(r)
                 continue
             except Exception:
                 pass
         sin_fecha.append(r)
 
-    print(f"  Dentro del rango: {len(filtradas)} | Sin fecha parseable: {len(sin_fecha)}")
-    return filtradas + sin_fecha
+    print(
+        f"  Dentro del rango: {len(filtradas)} | "
+        f"Excluidas sin fecha parseable: {len(sin_fecha)}"
+    )
+    return filtradas
 
 
 def filtrar_por_terminos(noticias, terminos):
@@ -941,7 +944,7 @@ def guardar_txt_noticias(noticias, ruta_txt):
 
 
 # ============================================================
-# ESTRUCTURA SEMANAL
+# ESTRUCTURA POR RANGO
 # ============================================================
 def primer_lunes_del_mes(anio, mes):
     primer_dia = date(anio, mes, 1)
@@ -949,27 +952,18 @@ def primer_lunes_del_mes(anio, mes):
     return primer_dia + timedelta(days=dias_hasta_lunes)
 
 
-def iterar_semanas(fecha_inicio, fecha_fin):
-    inicio = fecha_inicio
-    while inicio <= fecha_fin:
-        fin = min(inicio + timedelta(days=6), fecha_fin)
-        yield inicio, fin
-        inicio += timedelta(days=7)
+def nombre_carpeta_rango(fecha_inicio, fecha_fin):
+    return build_range_report_tag(fecha_inicio, fecha_fin, "Medios")
 
 
-def nombre_carpeta_semana(fecha_inicio, fecha_fin):
-    del fecha_fin
-    return build_report_tag(fecha_inicio, "Medios")
-
-
-def rutas_salida_semana(fecha_inicio_semana, fecha_fin_semana):
-    report_tag = nombre_carpeta_semana(
-        fecha_inicio_semana, fecha_fin_semana
+def rutas_salida_rango(fecha_inicio_rango, fecha_fin_rango):
+    report_tag = nombre_carpeta_rango(
+        fecha_inicio_rango, fecha_fin_rango
     )
-    carpeta_semana = Path(CARPETA_BASE_SEMANAL) / report_tag
-    archivo_salida = carpeta_semana / f"{NOMBRE_ARCHIVO_BASE}_{report_tag}.csv"
-    archivo_txt = carpeta_semana / f"{NOMBRE_ARCHIVO_BASE}_{report_tag}.txt"
-    return carpeta_semana, archivo_salida, archivo_txt
+    carpeta_rango = Path(CARPETA_BASE_RANGOS) / report_tag
+    archivo_salida = carpeta_rango / f"{NOMBRE_ARCHIVO_BASE}_{report_tag}.csv"
+    archivo_txt = carpeta_rango / f"{NOMBRE_ARCHIVO_BASE}_{report_tag}.txt"
+    return carpeta_rango, archivo_salida, archivo_txt
 
 
 # ============================================================
@@ -1033,7 +1027,7 @@ def parse_args():
         "-o",
         "--output-dir",
         required=True,
-        help="Carpeta base donde se guardan las semanas (heredada del orquestador)",
+        help="Carpeta base donde se guardan los rangos exactos",
     )
     parser.add_argument(
         "--nombre-archivo-base",
@@ -1053,17 +1047,17 @@ def parse_args():
         help="Mes para calcular el primer lunes cuando no se usa --since.",
     )
     parser.add_argument(
-        "--omitir-semanas-existentes",
-        dest="omitir_semanas_existentes",
+        "--omitir-rangos-existentes",
+        dest="omitir_rangos_existentes",
         action="store_true",
-        default=OMITIR_SEMANAS_EXISTENTES,
-        help="Omite semanas cuyo CSV ya existe.",
+        default=OMITIR_RANGOS_EXISTENTES,
+        help="Omite rangos cuyo CSV ya existe.",
     )
     parser.add_argument(
-        "--no-omitir-semanas-existentes",
-        dest="omitir_semanas_existentes",
+        "--no-omitir-rangos-existentes",
+        dest="omitir_rangos_existentes",
         action="store_false",
-        help="Fuerza reprocesar semanas aunque ya exista CSV.",
+        help="Fuerza reprocesar rangos aunque ya exista CSV.",
     )
     parser.add_argument(
         "--pausa",
@@ -1081,26 +1075,32 @@ def parse_args():
 
 
 # ============================================================
-# PROCESAR SEMANA
+# PROCESAR RANGO
 # ============================================================
-def procesar_semana(fecha_inicio_semana, fecha_fin_semana):
-    fecha_inicio = fecha_inicio_semana.strftime("%Y-%m-%d")
-    fecha_fin = fecha_fin_semana.strftime("%Y-%m-%d")
+def procesar_rango(fecha_inicio_rango, fecha_fin_rango):
+    fecha_inicio = fecha_inicio_rango.strftime("%Y-%m-%d")
+    fecha_fin = fecha_fin_rango.strftime("%Y-%m-%d")
 
-    carpeta_semana, archivo_salida, archivo_txt = rutas_salida_semana(
-        fecha_inicio_semana, fecha_fin_semana
+    carpeta_rango, archivo_salida, archivo_txt = rutas_salida_rango(
+        fecha_inicio_rango, fecha_fin_rango
     )
-    carpeta_semana.mkdir(parents=True, exist_ok=True)
+    carpeta_rango.mkdir(parents=True, exist_ok=True)
+    write_range_contract(
+        carpeta_rango,
+        fecha_inicio_rango,
+        fecha_fin_rango,
+        "Medios",
+    )
 
     print("=" * 60)
     print(f"  MEDIOS:       {', '.join(MEDIOS)}")
     print(f"  TERMINOS:     {', '.join(TERMINOS)}")
     print(f"  FECHA INICIO: {fecha_inicio}")
-    print(f"  FECHA FIN:    {fecha_fin}")
+    print(f"  ANTES DE:     {fecha_fin} (exclusivo)")
     print(f"  MÉTODO:       Google News RSS (gratuito)")
     print(f"  DECODER:      base64 + {'gnewsdecoder' if TIENE_GNEWS_DECODER else 'HTTP redirect'} (fallback)")
     print(f"  PLAYWRIGHT:   {'✓ habilitado' if TIENE_PLAYWRIGHT else '✗ no disponible'}")
-    print(f"  CARPETA:      {carpeta_semana}")
+    print(f"  CARPETA:      {carpeta_rango}")
     print("=" * 60)
 
     queries = generar_queries(MEDIOS, TERMINOS, modo=MODO_QUERIES)
@@ -1121,7 +1121,7 @@ def procesar_semana(fecha_inicio_semana, fecha_fin_semana):
     print(f"\n  TOTAL ÚNICO: {len(todos)} noticias")
 
     if not todos:
-        print("  (sin resultados para esta semana)")
+        print("  (sin resultados para este rango)")
         pd.DataFrame().to_csv(archivo_salida, index=False, encoding="utf-8-sig")
         with open(archivo_txt, "w", encoding="utf-8") as f:
             f.write("")
@@ -1169,7 +1169,7 @@ def procesar_semana(fecha_inicio_semana, fecha_fin_semana):
 def main():
     global MEDIOS, TERMINOS, ANIO_INICIO, MES_INICIO
     global FECHA_INICIO_EXACTA, FECHA_FIN_EXACTA, MODO_QUERIES
-    global OMITIR_SEMANAS_EXISTENTES, CARPETA_BASE_SEMANAL
+    global OMITIR_RANGOS_EXISTENTES, CARPETA_BASE_RANGOS
     global NOMBRE_ARCHIVO_BASE, PAUSA, PAUSA_ENTRE_QUERIES
 
     args = parse_args()
@@ -1181,8 +1181,8 @@ def main():
     FECHA_INICIO_EXACTA = args.fecha_inicio
     FECHA_FIN_EXACTA = args.fecha_fin
     MODO_QUERIES = args.modo_queries
-    OMITIR_SEMANAS_EXISTENTES = args.omitir_semanas_existentes
-    CARPETA_BASE_SEMANAL = args.output_dir
+    OMITIR_RANGOS_EXISTENTES = args.omitir_rangos_existentes
+    CARPETA_BASE_RANGOS = args.output_dir
     NOMBRE_ARCHIVO_BASE = args.nombre_archivo_base
     PAUSA = args.pausa
     PAUSA_ENTRE_QUERIES = args.pausa_entre_queries
@@ -1208,14 +1208,16 @@ def main():
         fecha_fin_global = date.today()
         etiqueta_fin = f"{fecha_fin_global} (hoy)"
 
-    if fecha_inicio_global > fecha_fin_global:
-        raise SystemExit("❌ fecha_inicio no puede ser mayor que fecha_fin.")
+    try:
+        validate_date_range(fecha_inicio_global, fecha_fin_global)
+    except ValueError as exc:
+        raise SystemExit(f"❌ {exc}") from exc
 
     print("\n" + "#" * 60)
-    print("  EXTRACCIÓN SEMANAL — Google News RSS")
+    print("  EXTRACCIÓN POR RANGO — Google News RSS")
     print(f"  DESDE: {etiqueta_inicio}")
     print(f"  HASTA: {etiqueta_fin}")
-    print(f"  BASE:  {CARPETA_BASE_SEMANAL}")
+    print(f"  BASE:  {CARPETA_BASE_RANGOS}")
     print(f"  MODO_QUERIES: {MODO_QUERIES}")
     print(f"  DECODER: base64 → {'gnewsdecoder' if TIENE_GNEWS_DECODER else 'HTTP redirect'} (fallback)")
     print(f"  PLAYWRIGHT: {'✓ habilitado' if TIENE_PLAYWRIGHT else '✗ no disponible'}")
@@ -1230,15 +1232,15 @@ def main():
     print(f"RANGO ÚNICO: {fecha_inicio_global} -> {fecha_fin_global}")
     print("#" * 60)
 
-    _, archivo_salida, _ = rutas_salida_semana(fecha_inicio_global, fecha_fin_global)
-    if OMITIR_SEMANAS_EXISTENTES and archivo_salida.exists():
+    _, archivo_salida, _ = rutas_salida_rango(fecha_inicio_global, fecha_fin_global)
+    if OMITIR_RANGOS_EXISTENTES and archivo_salida.exists():
         print(f"↷ Rango omitido (ya existe CSV): {archivo_salida}")
         df = pd.read_csv(archivo_salida, encoding="utf-8-sig")
         _cerrar_playwright()
         return df
 
     try:
-        df = procesar_semana(fecha_inicio_global, fecha_fin_global)
+        df = procesar_rango(fecha_inicio_global, fecha_fin_global)
     except Exception as exc:
         _cerrar_playwright()
         raise SystemExit(f"⚠ Error en rango {fecha_inicio_global} -> {fecha_fin_global}: {exc}")

@@ -748,7 +748,7 @@ def build_network_data(
     for _, row in top_words.iterrows():
         word = str(row["palabra"])
         if word not in word_node_ids:
-            node_id = f"W{len(word_node_ids) + 1}"
+            node_id = f"WORD{len(word_node_ids) + 1}"
             word_node_ids[word] = node_id
             pos_id = str(row["posicion_id"])
             px, py = position_coords.get(pos_id, (0.0, 0.0))
@@ -798,7 +798,7 @@ def build_html(
     meta: dict[str, Any],
     topic_info: dict[int, dict[str, Any]],
     base: Path,
-    semana: str,
+    alcance: str,
 ) -> str:
     vis_css, vis_js = extract_vis_assets(base)
     topics = sorted(topic_info)
@@ -852,7 +852,7 @@ def build_html(
 <html>
 <head>
 <meta charset="utf-8">
-<title>Red {semana} · posiciones discursivas</title>
+<title>Red {alcance} · posiciones discursivas</title>
 {vis_css}
 {vis_js}
 <style>
@@ -887,7 +887,7 @@ def build_html(
 </head>
 <body>
 <aside id="left">
-  <h1>Red {semana}: posiciones discursivas</h1>
+  <h1>Red {alcance}: posiciones discursivas</h1>
   <div class="muted">Temas, posiciones, cuentas y palabras. El borde de cada posicion indica senal indiciaria: gris baja, amarillo media, rojo alta.</div>
   <div class="grp">
     <h2>Buscar</h2>

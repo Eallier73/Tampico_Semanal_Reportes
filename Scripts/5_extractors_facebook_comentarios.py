@@ -11,12 +11,12 @@ r"""
 ║                                                                           ║
 ║   Uso:                                                                   ║
 ║   python 5_extractors_facebook_comentarios.py \\                         ║
-║     --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \\  ║
+║     --input-csv ./Facebook/2026_marzo_01_al_2026_marzo_12_Facebook/... ║
 ║     --since 2026-03-01 --before 2026-03-12 \\                            ║
 ║     --output-dir ./Facebook \\                                            ║
 ║     --max-comments 200                                                   ║
 ║                                                                           ║
-║   Output: YYYY-MM-DD_Facebook/YYYY-MM-DD_comentarios.csv                ║
+║   Output: <rango_exacto>_Facebook/<rango_exacto>_Facebook_comentarios.csv║
 ║                                                                           ║
 ║   Requisitos: pip install apify-client pandas                            ║
 ║                                                                           ║
@@ -41,7 +41,12 @@ from urllib.request import Request, urlopen
 
 import pandas as pd
 
-from output_naming import build_report_tag, ensure_tagged_name
+from output_naming import (
+    build_range_report_tag,
+    ensure_tagged_name,
+    validate_date_range,
+    write_range_contract,
+)
 
 
 ACTOR_COMMENTS = "apify/facebook-comments-scraper"
@@ -130,11 +135,14 @@ def encontrar_csv_urls_mas_reciente(base_dir: str) -> Optional[str]:
     return candidatos[0][1]
 
 
-def encontrar_csv_urls_en_semana(base_dir: str, since_label: str, before_label: str) -> Optional[str]:
-    semana_dir = os.path.join(base_dir, build_report_tag(since_label, "Facebook"))
-    if not os.path.isdir(semana_dir):
+def encontrar_csv_urls_en_rango(base_dir: str, since_label: str, before_label: str) -> Optional[str]:
+    rango_dir = os.path.join(
+        base_dir,
+        build_range_report_tag(since_label, before_label, "Facebook"),
+    )
+    if not os.path.isdir(rango_dir):
         return None
-    return encontrar_csv_urls_mas_reciente(semana_dir)
+    return encontrar_csv_urls_mas_reciente(rango_dir)
 
 
 def encontrar_csv_urls_por_filtros(
@@ -144,14 +152,19 @@ def encontrar_csv_urls_por_filtros(
     before_label: Optional[str],
 ) -> Optional[str]:
     """
-    Busca CSV de URLs priorizando semana y páginas, luego cae a opciones más amplias.
+    Busca CSV de URLs priorizando rango y páginas, luego cae a opciones más amplias.
     """
     safe_pages = "_".join(p.strip() for p in (pages or []) if p.strip()).replace("/", "_")
     candidatos: list[tuple[float, str]] = []
 
     roots = []
     if since_label and before_label:
-        roots.append(os.path.join(base_dir, build_report_tag(since_label, "Facebook")))
+        roots.append(
+            os.path.join(
+                base_dir,
+                build_range_report_tag(since_label, before_label, "Facebook"),
+            )
+        )
     roots.append(base_dir)
 
     for root in roots:
@@ -223,7 +236,11 @@ def obtener_comentarios_batch(
     return items
 
 
-def procesar_items_comentarios(items: list) -> List[dict]:
+def procesar_items_comentarios(
+    items: list,
+    since: Optional[str] = None,
+    before: Optional[str] = None,
+) -> List[dict]:
     """Extrae campos relevantes de los items del actor."""
     filas = []
     vistos = set()
@@ -246,6 +263,27 @@ def procesar_items_comentarios(items: list) -> List[dict]:
             continue
         vistos.add(clave)
 
+        fecha_comentario = (
+            item.get("date")
+            or item.get("timestamp")
+            or item.get("commentDate")
+            or ""
+        )
+        if since and before:
+            if isinstance(fecha_comentario, (int, float)) or (
+                isinstance(fecha_comentario, str)
+                and fecha_comentario.strip().isdigit()
+            ):
+                timestamp = float(fecha_comentario)
+                unit = "ms" if timestamp > 10_000_000_000 else "s"
+                parsed = pd.to_datetime(timestamp, unit=unit, errors="coerce", utc=True)
+            else:
+                parsed = pd.to_datetime(fecha_comentario, errors="coerce", utc=True)
+            start = pd.Timestamp(since, tz="UTC")
+            end = pd.Timestamp(before, tz="UTC")
+            if pd.isna(parsed) or not (start <= parsed < end):
+                continue
+
         fila = {
             "post_url": post_url,
             "comentario_texto": texto,
@@ -255,12 +293,7 @@ def procesar_items_comentarios(items: list) -> List[dict]:
                 or item.get("userName")
                 or ""
             ),
-            "fecha_comentario": (
-                item.get("date")
-                or item.get("timestamp")
-                or item.get("commentDate")
-                or ""
-            ),
+            "fecha_comentario": fecha_comentario,
             "likes_comentario": (
                 item.get("likesCount")
                 or item.get("likes")
@@ -461,6 +494,7 @@ def run_pipeline(
     urls: List[str],
     max_comments: int,
     since: Optional[str],
+    before: Optional[str],
     output_dir: str,
     input_csv: str,
     batch_size: int,
@@ -492,7 +526,7 @@ def run_pipeline(
 
             items = obtener_comentarios_batch(client, batch, max_comments_eff, since)
 
-            filas = procesar_items_comentarios(items)
+            filas = procesar_items_comentarios(items, since, before)
             todas_las_filas_comentarios.extend(filas)
             print(f"     📊 Acumulado comentarios: {len(todas_las_filas_comentarios)}")
 
@@ -797,7 +831,7 @@ Uso:
 
   2) Bajar comentarios:
      python 5_extractors_facebook_comentarios.py \\
-       --input-csv ./Facebook/2026-03-01_Facebook/2026-03-01_posts.csv \
+       --input-csv ./Facebook/2026_marzo_01_al_2026_marzo_12_Facebook/2026_marzo_01_al_2026_marzo_12_Facebook_posts.csv \
        --since 2026-03-01 --before 2026-03-12 \\
        --output-dir ./Facebook \\
        --max-comments 200
@@ -835,6 +869,12 @@ Uso:
 def main():
     """Ejecuta descarga de SOLO comentarios desde CSV de URLs."""
     args = parse_args()
+
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        print(f"❌ {exc}")
+        sys.exit(1)
 
     # Validar token
     token = args.token or os.environ.get("APIFY_TOKEN")
@@ -891,9 +931,10 @@ def main():
     before_label = args.before or "sin_fin"
     output_dir = os.path.join(
         args.output_dir,
-        build_report_tag(since_label, "Facebook")
+        build_range_report_tag(since_label, before_label, "Facebook")
     )
     os.makedirs(output_dir, exist_ok=True)
+    write_range_contract(output_dir, since_label, before_label, "Facebook")
 
     print("\n" + "=" * 70)
     print("💬 EXTRACTOR DE COMENTARIOS FACEBOOK VÍA APIFY")
@@ -918,7 +959,7 @@ def main():
             since=args.since,
         )
         
-        comentarios = procesar_items_comentarios(items)
+        comentarios = procesar_items_comentarios(items, args.since, args.before)
         all_comments.extend(comentarios)
         print(f"   Acumulado comentarios: {len(all_comments)}")
         
@@ -930,7 +971,7 @@ def main():
 
     # Nombre simplificado: [tag]_comentarios.csv
     since_label = args.since or "sin_inicio"
-    report_tag = build_report_tag(since_label, "Facebook")
+    report_tag = build_range_report_tag(since_label, before_label, "Facebook")
     csv_path = os.path.join(output_dir, f"{report_tag}_comentarios.csv")
     txt_path = os.path.join(output_dir, f"{report_tag}_comentarios.txt")
 

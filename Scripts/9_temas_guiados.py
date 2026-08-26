@@ -2,14 +2,14 @@
 """
 9_temas_guiados.py
 ==================
-Analisis de temas guiados por palabras clave para el reporte semanal de Tampico.
+Analisis de temas guiados por palabras clave para un rango exacto de Tampico.
 
 Entradas por defecto:
-- Datos/{semana}/material_institucional.txt
-- Datos/{semana}/material_comentarios.txt
+- Datos/{rango}/material_institucional.txt
+- Datos/{rango}/material_comentarios.txt
 
 Salidas por defecto:
-- Temas_Guiados/{semana}/
+- Temas_Guiados/{rango}/
 """
 
 from __future__ import annotations
@@ -25,7 +25,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from output_naming import build_report_tag, ensure_tagged_name
+from output_naming import (
+    build_range_report_tag,
+    ensure_tagged_name,
+    validate_date_range,
+    write_range_contract,
+)
 
 DEFAULT_EXCLUDE_WORDS_PATH = (
     Path(__file__).resolve().parent
@@ -128,17 +133,17 @@ def read_wordlist(path: Path) -> set[str]:
     return words
 
 
-def weekly_input_dir(base_dir: Path, since: str) -> Path:
+def range_input_dir(base_dir: Path, since: str, before: str) -> Path:
     base_path = Path(base_dir)
-    tag = build_report_tag(since, "Datos")
+    tag = build_range_report_tag(since, before, "Datos")
     if base_path.name == tag:
         return base_path
     return base_path / tag
 
 
-def weekly_output_dir(base_dir: Path, since: str) -> Path:
+def range_output_dir(base_dir: Path, since: str, before: str) -> Path:
     base_path = Path(base_dir)
-    tag = build_report_tag(since, "Temas_Guiados")
+    tag = build_range_report_tag(since, before, "Temas_Guiados")
     if base_path.name == tag:
         return base_path
     return base_path / tag
@@ -166,11 +171,11 @@ def classify_document(text: str, exclude_words: set[str]) -> tuple[int, dict[int
     return -1, found
 
 
-def load_documents(input_week_dir: Path, input_file: str | None) -> list[str]:
+def load_documents(input_range_dir: Path, input_file: str | None) -> list[str]:
     if input_file:
         source = Path(input_file)
         if not source.is_absolute():
-            source = input_week_dir / input_file
+            source = input_range_dir / input_file
         if not source.exists():
             raise FileNotFoundError(f"No existe archivo de entrada: {source}")
         lines = source.read_text(encoding="utf-8", errors="ignore").splitlines()
@@ -178,7 +183,7 @@ def load_documents(input_week_dir: Path, input_file: str | None) -> list[str]:
 
     docs: list[str] = []
     for filename in ("material_institucional.txt", "material_comentarios.txt"):
-        path = input_week_dir / filename
+        path = input_range_dir / filename
         if path.exists():
             lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
             docs.extend([line.strip() for line in lines if line.strip()])
@@ -289,7 +294,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--before", required=True, help="Fecha fin (YYYY-MM-DD)")
     parser.add_argument("--input-dir", help="Directorio base de entrada (default: Datos)")
     parser.add_argument("--output-dir", help="Directorio base de salida (default: Temas_Guiados)")
-    parser.add_argument("--input-file", help="Archivo de entrada opcional dentro de la carpeta semanal")
+    parser.add_argument("--input-file", help="Archivo de entrada opcional dentro de la carpeta del rango")
     parser.add_argument(
         "--exclude-words-path",
         default=str(DEFAULT_EXCLUDE_WORDS_PATH),
@@ -300,21 +305,27 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    try:
+        validate_date_range(args.since, args.before)
+    except ValueError as exc:
+        log(f"❌ {exc}")
+        return 2
 
     repo_root = Path(__file__).resolve().parent.parent
     input_base_dir = Path(args.input_dir) if args.input_dir else repo_root / "Datos"
     output_base_dir = Path(args.output_dir) if args.output_dir else repo_root / "Temas_Guiados"
 
-    input_week_dir = weekly_input_dir(input_base_dir, args.since)
-    output_week_dir = weekly_output_dir(output_base_dir, args.since)
-    report_tag = build_report_tag(args.since, "Temas_Guiados")
+    input_range_dir = range_input_dir(input_base_dir, args.since, args.before)
+    output_range_dir = range_output_dir(output_base_dir, args.since, args.before)
+    report_tag = build_range_report_tag(args.since, args.before, "Temas_Guiados")
+    write_range_contract(output_range_dir, args.since, args.before, "Temas_Guiados")
 
     log("=" * 70)
     log("ANALISIS DE TEMAS GUIADOS - TAMPICO")
     log("=" * 70)
     log(f"Periodo: {args.since} a {args.before}")
-    log(f"Input semanal: {input_week_dir}")
-    log(f"Output semanal: {output_week_dir}")
+    log(f"Input del rango: {input_range_dir}")
+    log(f"Output del rango: {output_range_dir}")
 
     exclude_words_path = Path(args.exclude_words_path)
     exclude_words = read_wordlist(exclude_words_path)
@@ -324,7 +335,7 @@ def main() -> int:
         log(f"⚠️ No se cargaron palabras de exclusion desde: {exclude_words_path}")
 
     try:
-        docs = load_documents(input_week_dir, args.input_file)
+        docs = load_documents(input_range_dir, args.input_file)
     except FileNotFoundError as exc:
         log(f"❌ {exc}")
         return 1
@@ -337,7 +348,7 @@ def main() -> int:
 
     run_topic_analysis(
         docs=docs,
-        output_dir=output_week_dir,
+        output_dir=output_range_dir,
         report_tag=report_tag,
         source_label=report_tag,
         exclude_words=exclude_words,

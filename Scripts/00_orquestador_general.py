@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Orquestador general para los pipelines semanales de Tampico.
+Orquestador general para los pipelines por rango exacto de Tampico.
 
 Objetivo:
 - Centralizar la captura de argumentos en un solo prompt.
@@ -14,7 +14,6 @@ import argparse
 import getpass
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -48,14 +47,16 @@ from queries_config import (
     TIKTOK_HASHTAGS,
     TIKTOK_DEFAULT_RESULTS_LIMIT,
 )
-from output_naming import build_report_tag
+from output_naming import build_range_report_tag, validate_date_range
+from download_history import (
+    append_download_record,
+    is_download_pipeline,
+    utc_now,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = REPO_ROOT / "Scripts"
-
-_today_iso = date.today().isocalendar()
-DEFAULT_GLOBAL_ISO_WEEK = f"{_today_iso.year}-W{_today_iso.week:02d}"
 
 # Usar configuración centralizada (desde queries_config.py)
 DEFAULT_YOUTUBE_CHANNELS = YOUTUBE_CHANNELS
@@ -213,38 +214,20 @@ def append_optional(cmd: list[str], flag: str, value: str | int | float | None) 
     cmd.extend([flag, str(value)])
 
 
-def parse_iso_week(value: str) -> tuple[int, int]:
-    raw = (value or "").strip().upper().replace("_", "-")
-    if "-W" in raw:
-        year_str, week_str = raw.split("-W", 1)
-    else:
-        parts = raw.split("-")
-        if len(parts) != 2:
-            raise ValueError("Formato inválido. Usa YYYY-Www, por ejemplo 2026-W14")
-        year_str, week_str = parts[0], parts[1]
-    year = int(year_str)
-    week = int(week_str)
-    if week < 1 or week > 53:
-        raise ValueError("Semana ISO inválida. Debe estar entre 1 y 53.")
-    date.fromisocalendar(year, week, 1)
-    return year, week
-
-
-def iso_week_to_range(value: str) -> tuple[str, str]:
-    year, week = parse_iso_week(value)
-    since = date.fromisocalendar(year, week, 1)
-    before = date.fromisocalendar(year, week, 7)
-    return since.isoformat(), before.isoformat()
-
-
 def prompt_common_context() -> tuple[str, str]:
-    print("\n📅 Semana global")
+    print("\n📅 Rango global exacto [since, before)")
+    today = date.today()
+    default_start = today - timedelta(days=today.weekday())
+    default_since = default_start.isoformat()
+    default_before = (default_start + timedelta(days=7)).isoformat()
     while True:
-        iso_week = prompt_text("Semana ISO (YYYY-Www)", default=DEFAULT_GLOBAL_ISO_WEEK)
+        since = prompt_text("Desde inclusivo (YYYY-MM-DD)", default=default_since)
+        before = prompt_text("Antes de, exclusivo (YYYY-MM-DD)", default=default_before)
         try:
-            return iso_week_to_range(iso_week)
-        except (ValueError, TypeError):
-            print("⚠️ Formato inválido. Usa YYYY-Www, por ejemplo 2026-W14")
+            start, end = validate_date_range(since, before)
+            return start.isoformat(), end.isoformat()
+        except (ValueError, TypeError) as exc:
+            print(f"⚠️ Rango inválido: {exc}")
 
 
 def prompt_execution_mode() -> str:
@@ -398,7 +381,7 @@ def build_medios(
         modo_queries = prompt_choice("Modo de queries", ["compacto", "combinado"], "combinado")
         output_dir = prompt_text("Directorio base de salida", default_output)
         nombre_archivo_base = prompt_text("Prefijo del archivo de salida", default_filename_base)
-        omitir_existentes = prompt_bool("¿Omitir semanas ya procesadas?", True)
+        omitir_existentes = prompt_bool("¿Omitir rangos ya procesados?", True)
         pausa = prompt_float("Pausa entre requests", 2.0)
         pausa_queries = prompt_float("Pausa entre queries RSS", 3.0)
 
@@ -418,9 +401,9 @@ def build_medios(
     for termino in terminos:
         cmd.extend(["--termino", termino])
     if omitir_existentes:
-        cmd.append("--omitir-semanas-existentes")
+        cmd.append("--omitir-rangos-existentes")
     else:
-        cmd.append("--no-omitir-semanas-existentes")
+        cmd.append("--no-omitir-rangos-existentes")
     return cmd, {}
 
 
@@ -832,7 +815,12 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
     if spec.key == "publicaciones_institucionales_claude":
         return build_publicaciones_institucionales_claude(since, before, use_defaults)
     if spec.key == "analisis_sna":
-        return [sys.executable, str(SCRIPTS_DIR / spec.filename)], {}
+        return [
+            sys.executable,
+            str(SCRIPTS_DIR / spec.filename),
+            "--since", since,
+            "--before", before,
+        ], {}
     raise ValueError(f"Pipeline no soportado: {spec.key}")
 
 
@@ -857,27 +845,66 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "instagram": "Instagram",
         "tiktok": "TikTok",
         "consolidador_datos": "Datos",
-        "claude_nlp": "Claude",
+        "claude_nlp": "Claude_Temas",
         "influencia_temas": "Influencia_Temas",
         "temas_guiados": "Temas_Guiados",
-        "publicaciones_institucionales_claude": "Claude",
+        "publicaciones_institucionales_claude": "Claude_Publicaciones",
         "analisis_sna": "SNA/Resultados/historico",
     }
     return labels.get(spec.key)
 
 
-def _weekly_datos_dir_from_consolidador_cmd(since: str, cmd: list[str]) -> Path:
+def _range_datos_dir_from_consolidador_cmd(
+    since: str,
+    before: str,
+    cmd: list[str],
+) -> Path:
     output_dir_arg = _extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Datos")
-    datos_tag = build_report_tag(since, "Datos")
+    datos_tag = build_range_report_tag(since, before, "Datos")
     return Path(output_dir_arg) / datos_tag
 
 
-def weekly_output_dir_for_command(spec: PipelineSpec, since: str, cmd: list[str]) -> Path | None:
+def range_output_dir_for_command(
+    spec: PipelineSpec,
+    since: str,
+    before: str,
+    cmd: list[str],
+) -> Path | None:
     output_dir = _extract_flag_value(cmd, "--output-dir")
     source_label = _source_label_for_spec(spec)
     if not output_dir or not source_label:
         return None
-    return Path(output_dir) / build_report_tag(since, source_label)
+    return Path(output_dir) / build_range_report_tag(since, before, source_label)
+
+
+def record_download_result(
+    spec: PipelineSpec,
+    since: str,
+    before: str,
+    cmd: list[str],
+    *,
+    started_at: str,
+    status: str,
+    return_code: int | None,
+) -> None:
+    if not is_download_pipeline(spec.key):
+        return
+    output_dir = range_output_dir_for_command(spec, since, before, cmd)
+    try:
+        append_download_record(
+            pipeline_code=spec.code,
+            pipeline_key=spec.key,
+            pipeline_label=spec.label,
+            since=since,
+            before=before,
+            status=status,
+            started_at=started_at,
+            output_dir=output_dir,
+            return_code=return_code,
+        )
+        print(f"🧾 Historial actualizado: {spec.label} · [{since}, {before})")
+    except OSError as exc:
+        print(f"⚠️ No se pudo actualizar el historial de descargas: {exc}")
 
 
 def main() -> None:
@@ -944,7 +971,7 @@ def main() -> None:
                 selected.insert(index_dep, consolidador_spec)
 
     selected_codes = {s.code for s in selected}
-    source_codes = {"1", "2", "4", "5", "12", "13"}
+    source_codes = {"1", "2", "3", "4", "5", "12", "13"}
     if "6" in selected_codes:
         consolidador_index = next(
             index for index, item in enumerate(selected) if item.code == "6"
@@ -1017,9 +1044,7 @@ def main() -> None:
     print("\n" + "="*70)
     print("RESUMEN DE EJECUCIÓN")
     print("="*70)
-    since_date = date.fromisoformat(since)
-    iso = since_date.isocalendar()
-    print(f"🗓️ Semana ISO: {iso.year}-W{iso.week:02d}")
+    print(f"🗓️ Contrato temporal: [{since}, {before})")
     print(f"📋 Modo: {execution_mode.replace('_', ' ').title()}")
     print(f"📅 Fechas: {since} → {before}")
     print(f"📊 Pipelines: {len(selected)}")
@@ -1045,21 +1070,33 @@ def main() -> None:
     
     facebook_posts_csv = ""  # CSV generado por extractor 4
     
-    cleaned_week_dirs: set[str] = set()
-
     for spec, cmd, env_overrides in prepared:
-        week_dir = weekly_output_dir_for_command(spec, since, cmd)
-        if week_dir is not None:
-            week_dir_key = str(week_dir.resolve())
-            if week_dir_key not in cleaned_week_dirs and week_dir.exists():
-                shutil.rmtree(week_dir)
-                print(f"🧹 Resultado previo eliminado: {week_dir}")
-            cleaned_week_dirs.add(week_dir_key)
-
         print(f"\n▶ Ejecutando {spec.label}")
         env = os.environ.copy()
         env.update(env_overrides)
-        result = subprocess.run(cmd, env=env, cwd=str(REPO_ROOT))
+        started_at = utc_now()
+        try:
+            result = subprocess.run(cmd, env=env, cwd=str(REPO_ROOT))
+        except Exception:
+            record_download_result(
+                spec,
+                since,
+                before,
+                cmd,
+                started_at=started_at,
+                status="fallida",
+                return_code=None,
+            )
+            raise
+        record_download_result(
+            spec,
+            since,
+            before,
+            cmd,
+            started_at=started_at,
+            status="completada" if result.returncode == 0 else "fallida",
+            return_code=result.returncode,
+        )
         if result.returncode == 0:
             print(f"✅ {spec.label} completado")
             
@@ -1067,7 +1104,12 @@ def main() -> None:
             if spec.code == "4":
                 output_dir_arg = _extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
                 since_arg = _extract_flag_value(cmd, "--since") or since
-                report_tag = build_report_tag(since_arg, "Facebook")
+                before_arg = _extract_flag_value(cmd, "--before") or before
+                report_tag = build_range_report_tag(
+                    since_arg,
+                    before_arg,
+                    "Facebook",
+                )
                 facebook_posts_csv = str(Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv")
                 if os.path.exists(facebook_posts_csv):
                     print(f"   📄 CSV de posts: {facebook_posts_csv}")
@@ -1084,9 +1126,13 @@ def main() -> None:
                             pending_cmd.extend(["--input-csv", facebook_posts_csv])
                             prepared[i] = (pending_spec, pending_cmd, pending_env)
 
-            # Si se ejecuta el consolidado, limpiar automaticamente los dos txt semanales de Datos.
+            # Si se ejecuta el consolidado, limpiar automáticamente los dos TXT del rango.
             if spec.code == "6":
-                datos_dir = _weekly_datos_dir_from_consolidador_cmd(since, cmd)
+                datos_dir = _range_datos_dir_from_consolidador_cmd(
+                    since,
+                    before,
+                    cmd,
+                )
                 limpieza_cmd = [
                     sys.executable,
                     str(SCRIPTS_DIR / "limpieza_texto.py"),
