@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import asyncio
 import json
 import sys
 import tempfile
@@ -119,6 +120,66 @@ class DownloadHistoryTests(unittest.TestCase):
         self.assertEqual(latest[0]["since"], "2026-08-10")
         self.assertEqual(latest[0]["status"], "fallida")
 
+
+class TwitterExactRangeTests(unittest.TestCase):
+    def test_scroll_stop_uses_the_same_utc_exact_range(self) -> None:
+        twitter = load_script("test_tampico_twitter", "2_extractors_twitter.py")
+
+        async def no_search(_page, _query):
+            return None
+
+        visible_tweets = [
+            {
+                "author": "@TampicoGob",
+                "datetime": "2026-08-03T12:00:00Z",
+                "url": "https://x.com/TampicoGob/status/1",
+                "text": "Dentro del rango",
+                "replies": 0,
+                "retweets": 0,
+                "likes": 0,
+                "bookmarks": 0,
+                "views": 0,
+            },
+            {
+                "author": "@TampicoGob",
+                "datetime": "2026-08-09T00:00:00Z",
+                "url": "https://x.com/TampicoGob/status/2",
+                "text": "En el límite exclusivo",
+                "replies": 0,
+                "retweets": 0,
+                "likes": 0,
+                "bookmarks": 0,
+                "views": 0,
+            },
+            {
+                "author": "@TampicoGob",
+                "datetime": "2026-07-31T23:59:59Z",
+                "url": "https://x.com/TampicoGob/status/3",
+                "text": "Anterior al rango",
+                "replies": 0,
+                "retweets": 0,
+                "likes": 0,
+                "bookmarks": 0,
+                "views": 0,
+            },
+        ]
+
+        async def extract_visible(_page):
+            return visible_tweets
+
+        with tempfile.TemporaryDirectory() as tmp:
+            extractor = twitter.TwitterExtractorIAD(
+                "2026-08-01",
+                "2026-08-09",
+                output_base_dir=Path(tmp),
+            )
+            extractor.goto_search = no_search
+            extractor.extract_visible_tweets = extract_visible
+            rows = asyncio.run(extractor.extract_query_data(object(), "tampico"))
+
+        self.assertEqual([row["text"] for row in rows], ["Dentro del rango"])
+        self.assertEqual(rows[0]["fecha_inicio_rango"], "2026-08-01")
+        self.assertEqual(rows[0]["nombre_rango"], "2026_agosto_01_al_2026_agosto_09_Twitter")
 
 class SnaRecentRangeTests(unittest.TestCase):
     @staticmethod

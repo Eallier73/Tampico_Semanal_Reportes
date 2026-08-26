@@ -553,8 +553,10 @@ class OrquestadorGUI:
         self.stop_button = ttk.Button(control_frame, text="DETENER", command=self.stop_execution, state=tk.DISABLED)
         self.stop_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
-        pipeline_frame = ttk.LabelFrame(main_frame, text="Seleccion de Pipelines", padding="10")
-        pipeline_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        workspace_pane = ttk.Panedwindow(main_frame, orient=tk.HORIZONTAL)
+        workspace_pane.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        pipeline_frame = ttk.LabelFrame(workspace_pane, text="Seleccion de Pipelines", padding="10")
 
         self.pipeline_vars: dict[str, tk.BooleanVar] = {}
         canvas = tk.Canvas(pipeline_frame)
@@ -578,9 +580,9 @@ class OrquestadorGUI:
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+        workspace_pane.add(pipeline_frame, weight=1)
 
-        log_frame = ttk.LabelFrame(main_frame, text="Consola de Salida", padding="5")
-        log_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        log_frame = ttk.LabelFrame(workspace_pane, text="Consola de Salida", padding="5")
 
         self.log_area = scrolledtext.ScrolledText(
             log_frame,
@@ -591,6 +593,7 @@ class OrquestadorGUI:
             font=("Courier", 10),
         )
         self.log_area.pack(fill=tk.BOTH, expand=True)
+        workspace_pane.add(log_frame, weight=2)
 
     def build_credential_status(self) -> str:
         tracked = ["YOUTUBE_API_KEY", "APIFY_TOKEN", "CLAUDE_API_KEY"]

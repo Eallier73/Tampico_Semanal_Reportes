@@ -327,6 +327,8 @@ class TwitterExtractorIAD:
         # Configuración de extracción
         max_iterations = 10
         iteration = 0
+        inicio_utc = self.fecha_inicio.replace(tzinfo=timezone.utc)
+        fin_utc = self.fecha_fin.replace(tzinfo=timezone.utc)
         
         while len(collected) < self.max_tweets and stagnation_count < 8 and iteration < max_iterations:
             visible_tweets = await self.extract_visible_tweets(page)
@@ -354,8 +356,6 @@ class TwitterExtractorIAD:
                     if tweet_datetime.tzinfo is None
                     else tweet_datetime.astimezone(timezone.utc)
                 )
-                inicio_utc = self.fecha_inicio.replace(tzinfo=timezone.utc)
-                fin_utc = self.fecha_fin.replace(tzinfo=timezone.utc)
                 
                 # Verificar que esté en el rango de fechas y cumpla filtros del query
                 if inicio_utc <= tweet_utc < fin_utc and self.should_include_tweet(tweet, query):
@@ -373,9 +373,17 @@ class TwitterExtractorIAD:
                     collected.append(tweet_data)
             
             # Verificar si hemos llegado a tweets más antiguos que nuestro rango
-            tweet_dates = [self.parse_datetime(t["datetime"]) for t in visible_tweets 
-                          if self.parse_datetime(t["datetime"])]
-            if tweet_dates and min(tweet_dates).date() < inicio_date:
+            tweet_dates_utc = []
+            for visible_tweet in visible_tweets:
+                parsed_datetime = self.parse_datetime(visible_tweet["datetime"])
+                if parsed_datetime is None:
+                    continue
+                tweet_dates_utc.append(
+                    parsed_datetime.replace(tzinfo=timezone.utc)
+                    if parsed_datetime.tzinfo is None
+                    else parsed_datetime.astimezone(timezone.utc)
+                )
+            if tweet_dates_utc and min(tweet_dates_utc) < inicio_utc:
                 print(f"📍 Llegamos a tweets anteriores al período")
                 break
             
@@ -467,7 +475,7 @@ class TwitterExtractorIAD:
 
         print(f"   ↳ Respuestas encontradas: {len(collected)}")
         return collected
-    
+
     def save_to_csv(self, all_tweets):
         """Guardar tweets en dos CSV: posts institucionales y comentarios."""
         if not all_tweets:
