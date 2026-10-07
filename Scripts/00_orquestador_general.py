@@ -17,7 +17,7 @@ import shlex
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 # Cargar variables de entorno desde .env.local
@@ -47,10 +47,16 @@ from queries_config import (
     TIKTOK_HASHTAGS,
     TIKTOK_DEFAULT_RESULTS_LIMIT,
 )
-from output_naming import build_range_report_tag, validate_date_range
+from output_naming import (
+    build_range_report_tag,
+    validate_date_range,
+    validate_range_contract_file,
+)
 from download_history import (
+    append_pipeline_record,
     append_download_record,
     is_download_pipeline,
+    pipeline_completed_for_range,
     utc_now,
 )
 
@@ -71,6 +77,17 @@ DEFAULT_INSTAGRAM_HASHTAGS = INSTAGRAM_HASHTAGS
 DEFAULT_TIKTOK_PROFILES = TIKTOK_PROFILES
 DEFAULT_TIKTOK_QUERIES = TIKTOK_SEARCH_QUERIES
 DEFAULT_TIKTOK_HASHTAGS = TIKTOK_HASHTAGS
+
+CHUCHO_NADER_MARKERS = ("chucho nader", "chuchonader", "jesus nader", "diputado nader")
+
+
+def without_chucho_nader(values: list[str]) -> list[str]:
+    """Retira únicamente entradas dedicadas a Chucho/Jesús Nader."""
+    return [
+        value
+        for value in values
+        if not any(marker in value.casefold() for marker in CHUCHO_NADER_MARKERS)
+    ]
 
 
 @dataclass(frozen=True)
@@ -99,6 +116,57 @@ PIPELINES = [
 
 PIPELINES_BY_CODE = {item.code: item for item in PIPELINES}
 PIPELINES_BY_KEY = {item.key: item for item in PIPELINES}
+SOURCE_PIPELINE_CODES = frozenset({"1", "2", "3", "4", "5", "12", "13"})
+STATIC_PIPELINE_DEPENDENCIES = {
+    "5": frozenset({"4"}),
+    "7": frozenset({"6"}),
+    "8": frozenset({"6"}),
+    "9": frozenset({"6"}),
+    "10": frozenset({"1", "2", "4"}),
+}
+
+
+def create_run_id(since: str, before: str, now: datetime | None = None) -> str:
+    timestamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%S_%fZ")
+    return f"{since}_al_{before}_{timestamp}"
+
+
+def pipeline_run_log_path(run_id: str) -> Path:
+    return REPO_ROOT / "state" / "pipeline_runs" / f"{run_id}.log"
+
+
+def append_run_log(path: str | Path, message: str) -> None:
+    log_path = Path(path)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(message.rstrip("\n") + "\n")
+
+
+def failed_dependencies_for_stage(
+    stage_code: str,
+    selected_codes: set[str],
+    unsuccessful_codes: set[str],
+) -> set[str]:
+    """Calcula bloqueos reales sin encadenar stages independientes."""
+    dependencies = set(STATIC_PIPELINE_DEPENDENCIES.get(stage_code, ()))
+    if stage_code in {"6", "11"}:
+        dependencies.update(selected_codes & SOURCE_PIPELINE_CODES)
+    return dependencies & unsuccessful_codes
+
+
+def inject_facebook_posts_input(
+    prepared: list[tuple[PipelineSpec, list[str], dict[str, str]]],
+    start_index: int,
+    posts_csv: str,
+) -> None:
+    """Enlaza el CSV institucional con comentarios, incluso al reanudar."""
+    if not posts_csv:
+        return
+    for index in range(start_index, len(prepared)):
+        spec, cmd, env = prepared[index]
+        if spec.code == "5" and "--input-csv" not in cmd:
+            cmd.extend(["--input-csv", posts_csv])
+            prepared[index] = (spec, cmd, env)
 
 
 def prompt_text(label: str, default: str = "", allow_blank: bool = False) -> str:
@@ -316,7 +384,7 @@ def build_youtube(since: str, before: str, use_defaults: bool = False) -> tuple[
 def build_twitter(since: str, before: str, use_defaults: bool = False) -> tuple[list[str], dict[str, str]]:
     if use_defaults:
         # MODO GENÉRICO: usar parámetros por defecto
-        queries = []  # Usa defaults del script
+        queries = DEFAULT_TWITTER_QUERIES
         output_dir = str(REPO_ROOT / "Twitter")
         state_path = str(REPO_ROOT / "state" / "x_state.json")
         max_tweets = 3000
@@ -780,13 +848,22 @@ def build_publicaciones_institucionales_claude(
     return cmd, env
 
 
-def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bool = False, facebook_posts_csv: str = "") -> tuple[list[str], dict[str, str]]:
+def build_pipeline(
+    spec: PipelineSpec,
+    since: str,
+    before: str,
+    use_defaults: bool = False,
+    facebook_posts_csv: str = "",
+    include_chucho_nader: bool = True,
+) -> tuple[list[str], dict[str, str]]:
     if spec.key == "youtube":
-        return build_youtube(since, before, use_defaults)
+        cmd, env = build_youtube(since, before, use_defaults)
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "twitter":
-        return build_twitter(since, before, use_defaults)
+        cmd, env = build_twitter(since, before, use_defaults)
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "medios_tampico":
-        return build_medios(
+        cmd, env = build_medios(
             spec.filename,
             spec.label,
             DEFAULT_TERMS_TAMPICO,
@@ -796,14 +873,18 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
             before,
             use_defaults,
         )
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "facebook_posts":
-        return build_facebook_posts(since, before, use_defaults)
+        cmd, env = build_facebook_posts(since, before, use_defaults)
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "facebook_comentarios":
         return build_facebook_comentarios(since, before, use_defaults, facebook_posts_csv)
     if spec.key == "instagram":
-        return build_instagram(since, before, use_defaults)
+        cmd, env = build_instagram(since, before, use_defaults)
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "tiktok":
-        return build_tiktok(since, before, use_defaults)
+        cmd, env = build_tiktok(since, before, use_defaults)
+        return filter_chucho_nader_command(cmd, spec.key, include_chucho_nader), env
     if spec.key == "consolidador_datos":
         return build_consolidador_datos(since, before, use_defaults)
     if spec.key == "claude_nlp":
@@ -822,6 +903,48 @@ def build_pipeline(spec: PipelineSpec, since: str, before: str, use_defaults: bo
             "--before", before,
         ], {}
     raise ValueError(f"Pipeline no soportado: {spec.key}")
+
+
+def filter_chucho_nader_command(
+    cmd: list[str],
+    pipeline_key: str,
+    include_chucho_nader: bool,
+) -> list[str]:
+    """Filtra targets Nader ya materializados en el comando del extractor."""
+    if include_chucho_nader:
+        return cmd
+    flags_by_pipeline = {
+        "youtube": {"--queries"},
+        "twitter": {"--query"},
+        "medios_tampico": {"--termino"},
+        "facebook_posts": {"--pages"},
+        "instagram": {"--profile", "--query"},
+        "tiktok": {"--profile", "--query"},
+    }
+    target_flags = flags_by_pipeline.get(pipeline_key, set())
+    multi_value_flags = {"--queries", "--pages"}
+    filtered: list[str] = []
+    index = 0
+    while index < len(cmd):
+        token = cmd[index]
+        if token in target_flags and token in multi_value_flags:
+            filtered.append(token)
+            index += 1
+            while index < len(cmd) and not cmd[index].startswith("--"):
+                value = cmd[index]
+                if without_chucho_nader([value]):
+                    filtered.append(value)
+                index += 1
+            continue
+        if token in target_flags and index + 1 < len(cmd):
+            value = cmd[index + 1]
+            if without_chucho_nader([value]):
+                filtered.extend([token, value])
+            index += 2
+            continue
+        filtered.append(token)
+        index += 1
+    return filtered
 
 
 def render_command(cmd: list[str]) -> str:
@@ -849,7 +972,7 @@ def _source_label_for_spec(spec: PipelineSpec) -> str | None:
         "influencia_temas": "Influencia_Temas",
         "temas_guiados": "Temas_Guiados",
         "publicaciones_institucionales_claude": "Claude_Publicaciones",
-        "analisis_sna": "SNA/Resultados/historico",
+        "analisis_sna": "SNA",
     }
     return labels.get(spec.key)
 
@@ -872,9 +995,83 @@ def range_output_dir_for_command(
 ) -> Path | None:
     output_dir = _extract_flag_value(cmd, "--output-dir")
     source_label = _source_label_for_spec(spec)
+    if spec.key == "analisis_sna":
+        return (
+            REPO_ROOT
+            / "SNA"
+            / "Resultados"
+            / build_range_report_tag(since, before, "SNA")
+        )
     if not output_dir or not source_label:
         return None
     return Path(output_dir) / build_range_report_tag(since, before, source_label)
+
+
+def validate_stage_output_contract(
+    spec: PipelineSpec,
+    since: str,
+    before: str,
+    cmd: list[str],
+) -> tuple[bool, str]:
+    output_dir = range_output_dir_for_command(spec, since, before, cmd)
+    source_label = _source_label_for_spec(spec)
+    if output_dir is None or source_label is None:
+        return False, f"no se pudo resolver la salida del stage {spec.code}"
+    return validate_range_contract_file(
+        output_dir,
+        since,
+        before,
+        source_label,
+    )
+
+
+def record_pipeline_result(
+    spec: PipelineSpec,
+    since: str,
+    before: str,
+    cmd: list[str],
+    *,
+    run_id: str,
+    started_at: str,
+    status: str,
+    return_code: int | None,
+    log_path: str | Path | None = None,
+    reason: str = "",
+) -> None:
+    output_dir = range_output_dir_for_command(spec, since, before, cmd)
+    try:
+        append_pipeline_record(
+            run_id=run_id,
+            pipeline_code=spec.code,
+            pipeline_key=spec.key,
+            pipeline_label=spec.label,
+            since=since,
+            before=before,
+            status=status,
+            started_at=started_at,
+            output_dir=output_dir,
+            return_code=return_code,
+            log_path=log_path,
+            reason=reason,
+        )
+        if is_download_pipeline(spec.key) and status in {"completada", "fallida", "detenida"}:
+            append_download_record(
+                pipeline_code=spec.code,
+                pipeline_key=spec.key,
+                pipeline_label=spec.label,
+                since=since,
+                before=before,
+                status=status,
+                started_at=started_at,
+                output_dir=output_dir,
+                return_code=return_code,
+            )
+        print(
+            f"🧾 Bitácora actualizada: {spec.label} · {status} · "
+            f"[{since}, {before})"
+        )
+    except OSError as exc:
+        print(f"⚠️ No se pudo actualizar la bitácora del pipeline: {exc}")
 
 
 def record_download_result(
@@ -887,6 +1084,7 @@ def record_download_result(
     status: str,
     return_code: int | None,
 ) -> None:
+    """Compatibilidad con llamadas antiguas limitadas a descargas."""
     if not is_download_pipeline(spec.key):
         return
     output_dir = range_output_dir_for_command(spec, since, before, cmd)
@@ -902,7 +1100,6 @@ def record_download_result(
             output_dir=output_dir,
             return_code=return_code,
         )
-        print(f"🧾 Historial actualizado: {spec.label} · [{since}, {before})")
     except OSError as exc:
         print(f"⚠️ No se pudo actualizar el historial de descargas: {exc}")
 
@@ -1010,7 +1207,8 @@ def main() -> None:
         print("\n" + "="*70)
         print("MODO: GENÉRICO (Todas las redes con parámetros por defecto)")
         print("="*70)
-        continue_on_error = prompt_bool("\n¿Continuar si un pipeline falla?", False)
+        continue_on_error = prompt_bool("\n¿Continuar stages independientes si uno falla?", True)
+        resume_completed = prompt_bool("¿Reanudar sin repetir stages completados para el rango?", True)
         
         prepared: list[tuple[PipelineSpec, list[str], dict[str, str]]] = []
         for spec in selected:
@@ -1027,7 +1225,8 @@ def main() -> None:
         print("\n" + "="*70)
         print("MODO: ESPECÍFICO POR RED")
         print("="*70)
-        continue_on_error = prompt_bool("\n¿Continuar si un pipeline falla?", False)
+        continue_on_error = prompt_bool("\n¿Continuar stages independientes si uno falla?", True)
+        resume_completed = prompt_bool("¿Reanudar sin repetir stages completados para el rango?", True)
         
         prepared: list[tuple[PipelineSpec, list[str], dict[str, str]]] = []
         for spec in selected:
@@ -1064,41 +1263,222 @@ def main() -> None:
         return
 
     # 6️⃣ PASO 6: Ejecutar pipelines
-    print("\n" + "="*70)
-    print("INICIANDO EJECUCIÓN")
-    print("="*70)
-    
+    run_id = create_run_id(since, before)
+    run_log = pipeline_run_log_path(run_id)
+
+    def emit(message: str) -> None:
+        print(message)
+        append_run_log(run_log, message)
+
+    emit("\n" + "="*70)
+    emit("INICIANDO EJECUCIÓN")
+    emit("="*70)
+    emit(f"ID de ejecución: {run_id}")
+    emit(f"Contrato temporal: [{since}, {before})")
+    emit(f"Bitácora persistente: {run_log}")
+
     facebook_posts_csv = ""  # CSV generado por extractor 4
-    
-    for spec, cmd, env_overrides in prepared:
-        print(f"\n▶ Ejecutando {spec.label}")
-        env = os.environ.copy()
-        env.update(env_overrides)
-        started_at = utc_now()
-        try:
-            result = subprocess.run(cmd, env=env, cwd=str(REPO_ROOT))
-        except Exception:
-            record_download_result(
-                spec,
-                since,
-                before,
-                cmd,
-                started_at=started_at,
-                status="fallida",
-                return_code=None,
-            )
-            raise
-        record_download_result(
+    selected_codes = {spec.code for spec, _, _ in prepared}
+    unsuccessful_codes: set[str] = set()
+
+    def record(
+        spec: PipelineSpec,
+        cmd: list[str],
+        *,
+        started_at: str,
+        status: str,
+        return_code: int | None,
+        reason: str = "",
+    ) -> None:
+        record_pipeline_result(
             spec,
             since,
             before,
             cmd,
+            run_id=run_id,
             started_at=started_at,
-            status="completada" if result.returncode == 0 else "fallida",
-            return_code=result.returncode,
+            status=status,
+            return_code=return_code,
+            log_path=run_log,
+            reason=reason,
         )
-        if result.returncode == 0:
-            print(f"✅ {spec.label} completado")
+
+    def mark_remaining_omitted(start_index: int, reason: str) -> None:
+        for pending_spec, pending_cmd, _ in prepared[start_index:]:
+            started = utc_now()
+            record(
+                pending_spec,
+                pending_cmd,
+                started_at=started,
+                status="omitida",
+                return_code=None,
+                reason=reason,
+            )
+            unsuccessful_codes.add(pending_spec.code)
+            emit(f"⏭️ {pending_spec.label} omitido: {reason}")
+
+    for index, (spec, cmd, env_overrides) in enumerate(prepared):
+        blocked = failed_dependencies_for_stage(
+            spec.code,
+            selected_codes,
+            unsuccessful_codes,
+        )
+        if blocked:
+            reason = "dependencias_no_completadas:" + ",".join(sorted(blocked))
+            started_at = utc_now()
+            record(
+                spec,
+                cmd,
+                started_at=started_at,
+                status="omitida",
+                return_code=None,
+                reason=reason,
+            )
+            unsuccessful_codes.add(spec.code)
+            emit(f"\n⏭️ {spec.label} omitido: {reason}")
+            continue
+
+        already_completed = resume_completed and pipeline_completed_for_range(
+            spec.key,
+            since,
+            before,
+        )
+        if already_completed:
+            contract_ok, contract_detail = validate_stage_output_contract(
+                spec,
+                since,
+                before,
+                cmd,
+            )
+            if not contract_ok:
+                emit(
+                    f"Reanudación no omite {spec.label}: {contract_detail}; "
+                    "se ejecutará de nuevo."
+                )
+                already_completed = False
+
+        if already_completed:
+            started_at = utc_now()
+            record(
+                spec,
+                cmd,
+                started_at=started_at,
+                status="omitida",
+                return_code=0,
+                reason="ya_completada",
+            )
+            emit(f"\n⏭️ {spec.label} ya estaba completado; se conserva y se omite")
+            if spec.code == "4":
+                output_dir_arg = _extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
+                report_tag = build_range_report_tag(since, before, "Facebook")
+                candidate = Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv"
+                facebook_posts_csv = str(candidate) if candidate.exists() else ""
+                inject_facebook_posts_input(
+                    prepared,
+                    index + 1,
+                    facebook_posts_csv,
+                )
+            continue
+
+        emit(f"\n▶ Ejecutando {spec.label}")
+        emit(f"Comando: {render_command(cmd)}")
+        env = os.environ.copy()
+        env.update(env_overrides)
+        started_at = utc_now()
+        terminal_recorded = False
+        try:
+            record(
+                spec,
+                cmd,
+                started_at=started_at,
+                status="iniciada",
+                return_code=None,
+            )
+            process = subprocess.Popen(
+                cmd,
+                env=env,
+                cwd=str(REPO_ROOT),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+            )
+            assert process.stdout is not None
+            for line in process.stdout:
+                emit(line.rstrip())
+            return_code = process.wait()
+
+            # La limpieza forma parte del contrato del consolidador; si falla,
+            # el stage 6 no debe registrarse como completado.
+            if return_code == 0 and spec.code == "6":
+                datos_dir = _range_datos_dir_from_consolidador_cmd(
+                    since,
+                    before,
+                    cmd,
+                )
+                limpieza_cmd = [
+                    sys.executable,
+                    str(SCRIPTS_DIR / "limpieza_texto.py"),
+                    "--datos-dir",
+                    str(datos_dir),
+                ]
+                emit(f"🧼 Ejecutando limpieza de texto: {datos_dir}")
+                limpieza = subprocess.Popen(
+                    limpieza_cmd,
+                    env=env,
+                    cwd=str(REPO_ROOT),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1,
+                )
+                assert limpieza.stdout is not None
+                for line in limpieza.stdout:
+                    emit(line.rstrip())
+                return_code = limpieza.wait()
+
+            if return_code == 0:
+                contract_ok, contract_detail = validate_stage_output_contract(
+                    spec,
+                    since,
+                    before,
+                    cmd,
+                )
+                if contract_ok:
+                    emit(f"✅ Contrato de rango verificado: {contract_detail}")
+                else:
+                    emit(f"❌ Stage sin contrato válido: {contract_detail}")
+                    return_code = 3
+
+            status = "completada" if return_code == 0 else "fallida"
+            record(
+                spec,
+                cmd,
+                started_at=started_at,
+                status=status,
+                return_code=return_code,
+            )
+            terminal_recorded = True
+
+        except Exception as exc:
+            if not terminal_recorded:
+                record(
+                    spec,
+                    cmd,
+                    started_at=started_at,
+                    status="fallida",
+                    return_code=None,
+                    reason=f"{type(exc).__name__}: {exc}",
+                )
+            unsuccessful_codes.add(spec.code)
+            emit(f"❌ Error inesperado en {spec.label}: {type(exc).__name__}: {exc}")
+            if not continue_on_error:
+                mark_remaining_omitted(index + 1, f"abortada_por_fallo:{spec.code}")
+                break
+            continue
+
+        if return_code == 0:
+            emit(f"✅ {spec.label} completado")
             
             # Si es el extractor de Posts (4), calcular el path del CSV generado
             if spec.code == "4":
@@ -1112,48 +1492,35 @@ def main() -> None:
                 )
                 facebook_posts_csv = str(Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv")
                 if os.path.exists(facebook_posts_csv):
-                    print(f"   📄 CSV de posts: {facebook_posts_csv}")
+                    emit(f"   📄 CSV de posts: {facebook_posts_csv}")
                 else:
-                    print(f"   ⚠️  CSV esperado no encontrado: {facebook_posts_csv}")
+                    emit(f"   ⚠️  CSV esperado no encontrado: {facebook_posts_csv}")
                     facebook_posts_csv = ""
 
-                # Inyectar --input-csv en los comandos pendientes del extractor 5
-                current_idx = next(i for i, (s, _, __) in enumerate(prepared) if s.code == "4" and s is spec)
-                for i in range(current_idx + 1, len(prepared)):
-                    pending_spec, pending_cmd, pending_env = prepared[i]
-                    if pending_spec.code == "5" and facebook_posts_csv:
-                        if "--input-csv" not in pending_cmd:
-                            pending_cmd.extend(["--input-csv", facebook_posts_csv])
-                            prepared[i] = (pending_spec, pending_cmd, pending_env)
-
-            # Si se ejecuta el consolidado, limpiar automáticamente los dos TXT del rango.
-            if spec.code == "6":
-                datos_dir = _range_datos_dir_from_consolidador_cmd(
-                    since,
-                    before,
-                    cmd,
+                inject_facebook_posts_input(
+                    prepared,
+                    index + 1,
+                    facebook_posts_csv,
                 )
-                limpieza_cmd = [
-                    sys.executable,
-                    str(SCRIPTS_DIR / "limpieza_texto.py"),
-                    "--datos-dir",
-                    str(datos_dir),
-                ]
-                print(f"🧼 Ejecutando limpieza de texto: {datos_dir}")
-                limpieza_result = subprocess.run(limpieza_cmd, env=env, cwd=str(REPO_ROOT))
-                if limpieza_result.returncode == 0:
-                    print("✅ Limpieza de texto completada")
-                else:
-                    print(f"⚠️ Limpieza de texto falló con código {limpieza_result.returncode}")
+
             continue
 
-        print(f"❌ {spec.label} falló con código {result.returncode}")
+        unsuccessful_codes.add(spec.code)
+        emit(f"❌ {spec.label} falló con código {return_code}")
         if not continue_on_error:
-            sys.exit(result.returncode)
+            mark_remaining_omitted(index + 1, f"abortada_por_fallo:{spec.code}")
+            break
 
-    print("\n" + "="*70)
-    print("✅ EJECUCIÓN TERMINADA")
-    print("="*70)
+    emit("\n" + "="*70)
+    if unsuccessful_codes:
+        emit("⚠️ EJECUCIÓN TERMINADA CON STAGES INCOMPLETOS")
+        emit("Stages incompletos: " + ", ".join(sorted(unsuccessful_codes)))
+    else:
+        emit("✅ EJECUCIÓN TERMINADA")
+    emit(f"Bitácora: {run_log}")
+    emit("="*70)
+    if unsuccessful_codes:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

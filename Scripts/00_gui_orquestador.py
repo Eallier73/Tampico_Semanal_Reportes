@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import os
 import subprocess
@@ -16,9 +17,20 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from download_history import latest_downloads_by_pipeline, read_download_history
-from output_naming import build_range_label, build_range_report_tag, write_range_contract
-from sna_recent_ranges import resolve_recent_scope
+from download_history import (
+    latest_downloads_by_pipeline,
+    latest_pipeline_records,
+    pipeline_completed_for_range,
+    read_download_history,
+    read_pipeline_history,
+)
+from output_naming import (
+    build_range_label,
+    build_range_report_tag,
+    validate_range_contract_file,
+    write_range_contract,
+)
+from sna_recent_ranges import MaterialRange, discover_material_ranges, resolve_recent_scope
 
 
 def manual_load_dotenv(path: Path) -> bool:
@@ -66,16 +78,86 @@ def load_orquestador_module():
 ORQ = load_orquestador_module()
 PIPELINES = ORQ.PIPELINES
 PIPELINES_BY_CODE = ORQ.PIPELINES_BY_CODE
+MATERIAL_DEPENDENT_PIPELINE_CODES = frozenset({"7", "8", "9"})
 _TODAY = datetime.now().date()
 _CURRENT_RANGE_START = _TODAY - timedelta(days=_TODAY.weekday())
 DEFAULT_GLOBAL_SINCE = _CURRENT_RANGE_START.isoformat()
 DEFAULT_GLOBAL_BEFORE = (_CURRENT_RANGE_START + timedelta(days=7)).isoformat()
+
+MATERIAL_FILENAMES = (
+    "material_institucional.txt",
+    "material_comentarios.txt",
+)
+
+
+def require_material_folder_for_range(
+    since: str,
+    before: str,
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> Path:
+    """Exige material consolidado con contrato idéntico al rango escrito."""
+    folder = repo_root / "Datos" / build_range_report_tag(since, before, "Datos")
+    if not folder.is_dir():
+        raise RuntimeError(
+            "No existe la carpeta de material para el rango escrito: "
+            f"{folder}"
+        )
+
+    contract_ok, contract_detail = validate_range_contract_file(
+        folder,
+        since,
+        before,
+        "Datos",
+    )
+    if not contract_ok:
+        raise RuntimeError(
+            "La carpeta de material no declara exactamente el rango escrito: "
+            f"{contract_detail}"
+        )
+
+    missing = [name for name in MATERIAL_FILENAMES if not (folder / name).is_file()]
+    if missing:
+        raise RuntimeError(
+            f"La carpeta {folder.name} no contiene: {', '.join(missing)}"
+        )
+
+    if not any((folder / name).stat().st_size > 0 for name in MATERIAL_FILENAMES):
+        raise RuntimeError(f"Los archivos de material están vacíos en {folder}")
+    return folder
+
+
+def probe_material_folder_for_selected(
+    selected_codes: set[str],
+    since: str,
+    before: str,
+    *,
+    repo_root: Path = REPO_ROOT,
+) -> tuple[Path | None, str]:
+    """Detecta material reutilizable sin bloquear una ejecución que puede crearlo."""
+    if not selected_codes & MATERIAL_DEPENDENT_PIPELINE_CODES:
+        return None, ""
+    try:
+        return (
+            require_material_folder_for_range(
+                since,
+                before,
+                repo_root=repo_root,
+            ),
+            "",
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        return None, str(exc)
+
 
 def build_sna_run(
     scope: str,
     *,
     repo_root: Path = REPO_ROOT,
     now: datetime | None = None,
+    since: str | None = None,
+    before: str | None = None,
+    selected_material_ranges: list[MaterialRange] | tuple[MaterialRange, ...] | None = None,
 ) -> dict[str, object]:
     """Construye la cadena SNA y mantiene aislados corpus, resultados y HTML."""
     sna_data_dir = repo_root / "SNA" / "Datos"
@@ -94,11 +176,93 @@ def build_sna_run(
         corpus_label = "histórico consolidado de Tampico con RAdAR"
         filename_scope = "historico"
         log_name = "ultima_ejecucion.log"
-    elif scope in {"ultimos_2_rangos", "ultimo_rango"}:
-        count = 2 if scope == "ultimos_2_rangos" else 1
-        recent = resolve_recent_scope(repo_root, count)
-        exact_since = recent.since.isoformat()
-        exact_before = recent.before.isoformat()
+    elif scope == "rangos_seleccionados":
+        unique_ranges = {
+            item.material_folder.name: item
+            for item in (selected_material_ranges or [])
+        }
+        chosen = sorted(
+            unique_ranges.values(),
+            key=lambda item: (item.since, item.before, item.material_folder.name),
+        )
+        if not chosen:
+            raise ValueError("Selecciona al menos un rango para el análisis SNA")
+
+        exact_since = min(item.since for item in chosen).isoformat()
+        exact_before = max(item.before for item in chosen).isoformat()
+        selection_key = "|".join(
+            f"{item.material_folder.name}:{item.since}:{item.before}"
+            for item in chosen
+        )
+        selection_id = hashlib.sha1(selection_key.encode("utf-8")).hexdigest()[:10]
+        filename_scope = f"seleccion_{len(chosen)}_rangos_{selection_id}"
+        execution_time = now or datetime.now()
+        execution_id = execution_time.strftime("ejecucion_%Y%m%dT%H%M%S_%f")
+        input_dir = sna_data_dir / "selecciones" / filename_scope / execution_id
+        input_csv = input_dir / f"tampico_datos_tabulares_{filename_scope}.csv"
+        results_dir = sna_results_root / "selecciones" / filename_scope / execution_id
+        consolidate_args = ["--output", str(input_csv)]
+        for item in chosen:
+            consolidate_args.extend(
+                ["--include-range", item.since.isoformat(), item.before.isoformat()]
+            )
+        selected_ranges = [
+            {
+                "since": item.since.isoformat(),
+                "before": item.before.isoformat(),
+                "identity": item.identity,
+                "sources": list(item.sources),
+                "inferred_from_rows": item.inferred_from_rows,
+                "material_folder": str(item.material_folder),
+            }
+            for item in chosen
+        ]
+        label = f"selección de {len(chosen)} rango(s) · unión exacta"
+        scope_short = f"de {len(chosen)} rangos seleccionados"
+        network_scope = f"Tampico · selección de {len(chosen)} rangos"
+        accounts_scope = scope_short
+        corpus_label = f"unión exacta de {len(chosen)} rangos locales de Tampico"
+        log_name = f"ejecucion_sna_{filename_scope}.log"
+    elif scope in {"ultimos_2_rangos", "ultimo_rango", "rango_escrito"}:
+        material_folder: Path | None = None
+        if scope == "rango_escrito":
+            if since is None or before is None:
+                raise ValueError("El rango escrito requiere since y before")
+            exact_since, exact_before = parse_date_range(since, before)
+            material_folder = require_material_folder_for_range(
+                exact_since,
+                exact_before,
+                repo_root=repo_root,
+            )
+            selected_ranges = [
+                {
+                    "since": exact_since,
+                    "before": exact_before,
+                    "identity": build_range_label(exact_since, exact_before),
+                    "sources": ["Datos"],
+                    "inferred_from_rows": False,
+                    "material_folder": str(material_folder),
+                }
+            ]
+            selection_label = f"rango escrito · material {material_folder.name}"
+        else:
+            count = 2 if scope == "ultimos_2_rangos" else 1
+            recent = resolve_recent_scope(repo_root, count)
+            exact_since = recent.since.isoformat()
+            exact_before = recent.before.isoformat()
+            selected_ranges = [
+                {
+                    "since": item.since.isoformat(),
+                    "before": item.before.isoformat(),
+                    "identity": item.identity,
+                    "sources": list(item.sources),
+                    "inferred_from_rows": item.inferred_from_rows,
+                }
+                for item in recent.selected_ranges
+            ]
+            selection_label = (
+                "2 rangos más recientes" if count == 2 else "rango más reciente"
+            )
         range_label = build_range_label(exact_since, exact_before)
         range_tag = build_range_report_tag(exact_since, exact_before, "SNA")
         execution_time = now or datetime.now()
@@ -111,17 +275,6 @@ def build_sna_run(
             "--before", exact_before,
             "--output", str(input_csv),
         ]
-        selected_ranges = [
-            {
-                "since": item.since.isoformat(),
-                "before": item.before.isoformat(),
-                "identity": item.identity,
-                "sources": list(item.sources),
-                "inferred_from_rows": item.inferred_from_rows,
-            }
-            for item in recent.selected_ranges
-        ]
-        selection_label = "2 rangos más recientes" if count == 2 else "rango más reciente"
         label = f"{selection_label} · cobertura [{exact_since}, {exact_before})"
         scope_short = f"de [{exact_since}, {exact_before})"
         network_scope = f"Tampico · [{exact_since}, {exact_before})"
@@ -267,6 +420,9 @@ def build_sna_run(
         "since": exact_since,
         "before": exact_before,
         "selected_ranges": selected_ranges,
+        "selection_mode": (
+            "union_exacta" if scope == "rangos_seleccionados" else "cobertura_continua"
+        ),
     }
 
 
@@ -277,7 +433,8 @@ def write_sna_run_manifest(run: dict[str, object]) -> Path | None:
     if not isinstance(since, str) or not isinstance(before, str):
         return None
     results_dir = Path(run["results_dir"])
-    write_range_contract(results_dir, since, before, "SNA")
+    if run.get("selection_mode") != "union_exacta":
+        write_range_contract(results_dir, since, before, "SNA")
     path = results_dir / "manifiesto_ejecucion_sna.json"
     payload = {
         "manifest_version": 1,
@@ -286,15 +443,68 @@ def write_sna_run_manifest(run: dict[str, object]) -> Path | None:
         "since": since,
         "before": before,
         "interval": "[since,before)",
+        "selection_mode": run.get("selection_mode"),
         "selected_ranges": run.get("selected_ranges", []),
         "input_csv": str(run["input_csv"]),
         "results_dir": str(results_dir),
+        "status": "iniciada",
+        "started_at": ORQ.utc_now(),
+        "finished_at": "",
+        "steps": [
+            {
+                "index": index,
+                "label": label,
+                "script": script_name,
+                "status": "pendiente",
+                "return_code": None,
+                "message": "",
+            }
+            for index, (label, script_name, _) in enumerate(run["steps"], 1)
+        ],
     }
     path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     return path
+
+
+def update_sna_run_manifest(
+    path: Path | None,
+    *,
+    step_index: int | None = None,
+    step_status: str | None = None,
+    return_code: int | None = None,
+    message: str = "",
+    run_status: str | None = None,
+) -> None:
+    if path is None or not path.exists():
+        return
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if step_index is not None and step_status is not None:
+        steps = payload.get("steps", [])
+        if 1 <= step_index <= len(steps):
+            step = steps[step_index - 1]
+            step["status"] = step_status
+            step["return_code"] = return_code
+            step["message"] = message
+            step["updated_at"] = ORQ.utc_now()
+    if run_status is not None:
+        payload["status"] = run_status
+        if run_status in {"completada", "fallida", "detenida"}:
+            payload["finished_at"] = ORQ.utc_now()
+            if run_status != "completada":
+                for step in payload.get("steps", []):
+                    if step.get("status") == "pendiente":
+                        step["status"] = "omitida"
+                        step["message"] = message or "ejecucion_sna_incompleta"
+                        step["updated_at"] = ORQ.utc_now()
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temp_path.replace(path)
 
 
 def validate_date(value: str) -> str:
@@ -349,11 +559,18 @@ class OrquestadorGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Orquestador Pipelines Tampico")
-        self.root.geometry("940x900")
+        self.root.geometry("1040x900")
+        self.root.minsize(760, 600)
+        self.root.resizable(True, True)
 
         self.running_process: subprocess.Popen[str] | None = None
         self.stop_requested = False
+        self.pipeline_had_error = False
         self.venv_python = self.detect_venv()
+        self.active_run_id = ""
+        self.active_run_log: Path | None = None
+        self._log_lock = threading.Lock()
+        self.sna_material_ranges: list[MaterialRange] = []
 
         self.setup_ui()
 
@@ -438,12 +655,31 @@ class OrquestadorGUI:
             foreground="gray",
         ).grid(row=1, column=0, columnspan=4, sticky=tk.W, padx=5)
 
-        history_frame = ttk.LabelFrame(
+        self.main_vertical_pane = tk.PanedWindow(
             main_frame,
-            text="Últimas descargas por fuente",
+            orient=tk.VERTICAL,
+            sashrelief=tk.RAISED,
+            sashwidth=8,
+            showhandle=True,
+            borderwidth=0,
+        )
+        self.main_vertical_pane.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        operations_frame = ttk.Frame(self.main_vertical_pane)
+        self.operations_vertical_pane = tk.PanedWindow(
+            operations_frame,
+            orient=tk.VERTICAL,
+            sashrelief=tk.RAISED,
+            sashwidth=8,
+            showhandle=True,
+            borderwidth=0,
+        )
+
+        history_frame = ttk.LabelFrame(
+            self.operations_vertical_pane,
+            text="Últimos estados por stage",
             padding="8",
         )
-        history_frame.pack(fill=tk.X, pady=5)
         history_columns = ("fuente", "rango", "estado", "finalizo", "carpeta")
         self.download_history_tree = ttk.Treeview(
             history_frame,
@@ -461,15 +697,29 @@ class OrquestadorGUI:
         for column, (label, width) in headings.items():
             self.download_history_tree.heading(column, text=label)
             self.download_history_tree.column(column, width=width, anchor=tk.W)
-        self.download_history_tree.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        history_actions = ttk.Frame(history_frame)
+        history_actions.pack(side=tk.RIGHT, fill=tk.Y, padx=(8, 0))
         ttk.Button(
-            history_frame,
+            history_actions,
             text="Actualizar",
             command=self.refresh_download_history,
-        ).pack(side=tk.RIGHT, padx=(8, 0))
+        ).pack(side=tk.TOP)
+        history_scrollbar = ttk.Scrollbar(
+            history_frame,
+            orient=tk.VERTICAL,
+            command=self.download_history_tree.yview,
+        )
+        self.download_history_tree.configure(yscrollcommand=history_scrollbar.set)
+        history_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.download_history_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.operations_vertical_pane.add(
+            history_frame,
+            minsize=90,
+            stretch="always",
+        )
         self.refresh_download_history()
 
-        options_frame = ttk.Frame(main_frame, padding="5")
+        options_frame = ttk.Frame(operations_frame, padding="5")
         options_frame.pack(fill=tk.X)
 
         self.mode_var = tk.StringVar(value="all_networks")
@@ -486,21 +736,38 @@ class OrquestadorGUI:
             value="per_network",
         ).pack(side=tk.LEFT, padx=10)
 
-        self.continue_error_var = tk.BooleanVar(value=False)
+        self.continue_error_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(
             options_frame,
-            text="Continuar en error",
+            text="Continuar stages independientes",
             variable=self.continue_error_var,
         ).pack(side=tk.LEFT, padx=10)
 
-        sna_frame = ttk.LabelFrame(main_frame, text="Análisis SNA", padding="8")
-        sna_frame.pack(fill=tk.X, pady=5)
+        self.resume_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            options_frame,
+            text="Reanudar completados",
+            variable=self.resume_var,
+        ).pack(side=tk.LEFT, padx=10)
+
+        self.include_chucho_nader_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(
+            options_frame,
+            text="Descargar información de Chucho Nader",
+            variable=self.include_chucho_nader_var,
+        ).pack(side=tk.LEFT, padx=10)
+
+        sna_frame = ttk.LabelFrame(
+            self.operations_vertical_pane,
+            text="Análisis SNA",
+            padding="8",
+        )
 
         ttk.Label(
             sna_frame,
             text=(
-                "Histórico incorpora las fuentes locales y RAdAR. Los alcances "
-                "recientes resuelven fechas reales y usan solo fuentes locales."
+                "Histórico incorpora las fuentes locales y RAdAR. También puedes "
+                "marcar cualquier combinación de los rangos que tienen material."
             ),
             wraplength=800,
         ).grid(row=0, column=0, columnspan=2, sticky=tk.W, padx=5)
@@ -523,16 +790,61 @@ class OrquestadorGUI:
             row=1, column=1, sticky=tk.EW, padx=5, pady=(7, 3)
         )
 
-        self.sna_last_week_button = ttk.Button(
+        ttk.Label(
             sna_frame,
-            text="EJECUTAR SNA ÚLTIMO RANGO",
-            command=lambda: self.start_sna_execution("ultimo_rango"),
+            text="Rangos disponibles (cada clic marca o desmarca):",
+        ).grid(row=2, column=0, columnspan=2, sticky=tk.W, padx=5, pady=(7, 2))
+
+        selector_frame = ttk.Frame(sna_frame)
+        selector_frame.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW, padx=5)
+        self.sna_range_listbox = tk.Listbox(
+            selector_frame,
+            selectmode=tk.MULTIPLE,
+            exportselection=False,
+            height=7,
+            activestyle="dotbox",
         )
-        self.sna_last_week_button.grid(
-            row=2, column=0, columnspan=2, sticky=tk.EW, padx=5, pady=3
+        sna_range_scrollbar = ttk.Scrollbar(
+            selector_frame,
+            orient=tk.VERTICAL,
+            command=self.sna_range_listbox.yview,
+        )
+        self.sna_range_listbox.configure(yscrollcommand=sna_range_scrollbar.set)
+        self.sna_range_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        sna_range_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.sna_range_listbox.bind(
+            "<<ListboxSelect>>",
+            lambda _event: self.update_sna_selection_status(),
+        )
+
+        selector_controls = ttk.Frame(sna_frame)
+        selector_controls.grid(row=4, column=0, columnspan=2, sticky=tk.EW, padx=5, pady=3)
+        ttk.Button(
+            selector_controls,
+            text="Actualizar rangos",
+            command=self.refresh_sna_range_selector,
+        ).pack(side=tk.LEFT)
+        self.sna_selection_status_var = tk.StringVar(value="0 rangos seleccionados")
+        ttk.Label(
+            selector_controls,
+            textvariable=self.sna_selection_status_var,
+            foreground="gray",
+        ).pack(side=tk.RIGHT)
+
+        self.sna_selected_ranges_button = ttk.Button(
+            sna_frame,
+            text="EJECUTAR SNA CON LOS RANGOS SELECCIONADOS",
+            command=lambda: self.start_sna_execution("rangos_seleccionados"),
+        )
+        self.sna_selected_ranges_button.grid(
+            row=5, column=0, columnspan=2, sticky=tk.EW, padx=5, pady=3
         )
         sna_frame.columnconfigure(0, weight=1)
         sna_frame.columnconfigure(1, weight=1)
+        sna_frame.rowconfigure(3, weight=1)
+        selector_frame.columnconfigure(0, weight=1)
+
+        self.refresh_sna_range_selector()
 
         ttk.Label(
             sna_frame,
@@ -542,10 +854,16 @@ class OrquestadorGUI:
             ),
             foreground="gray",
             font=("Helvetica", 8),
-        ).grid(row=3, column=0, columnspan=2, sticky=tk.W, padx=5)
+        ).grid(row=6, column=0, columnspan=2, sticky=tk.W, padx=5)
 
-        control_frame = ttk.Frame(main_frame, padding="10")
-        control_frame.pack(fill=tk.X)
+        self.operations_vertical_pane.add(
+            sna_frame,
+            minsize=220,
+            stretch="always",
+        )
+
+        control_frame = ttk.Frame(operations_frame, padding="10")
+        control_frame.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.play_button = ttk.Button(control_frame, text="EJECUTAR", command=self.start_execution)
         self.play_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
@@ -553,8 +871,21 @@ class OrquestadorGUI:
         self.stop_button = ttk.Button(control_frame, text="DETENER", command=self.stop_execution, state=tk.DISABLED)
         self.stop_button.pack(side=tk.LEFT, padx=5, expand=True, fill=tk.X)
 
-        workspace_pane = ttk.Panedwindow(main_frame, orient=tk.HORIZONTAL)
-        workspace_pane.pack(fill=tk.BOTH, expand=True, pady=5)
+        self.operations_vertical_pane.pack(fill=tk.BOTH, expand=True)
+        self.main_vertical_pane.add(
+            operations_frame,
+            minsize=320,
+            stretch="always",
+        )
+
+        workspace_pane = tk.PanedWindow(
+            self.main_vertical_pane,
+            orient=tk.HORIZONTAL,
+            sashrelief=tk.RAISED,
+            sashwidth=8,
+            showhandle=True,
+            borderwidth=0,
+        )
 
         pipeline_frame = ttk.LabelFrame(workspace_pane, text="Seleccion de Pipelines", padding="10")
 
@@ -580,7 +911,7 @@ class OrquestadorGUI:
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
-        workspace_pane.add(pipeline_frame, weight=1)
+        workspace_pane.add(pipeline_frame, minsize=190, stretch="always")
 
         log_frame = ttk.LabelFrame(workspace_pane, text="Consola de Salida", padding="5")
 
@@ -593,7 +924,38 @@ class OrquestadorGUI:
             font=("Courier", 10),
         )
         self.log_area.pack(fill=tk.BOTH, expand=True)
-        workspace_pane.add(log_frame, weight=2)
+        workspace_pane.add(log_frame, minsize=280, stretch="always")
+        self.main_vertical_pane.add(
+            workspace_pane,
+            minsize=180,
+            stretch="always",
+        )
+
+    def refresh_sna_range_selector(self) -> None:
+        selected_names = {
+            self.sna_material_ranges[index].material_folder.name
+            for index in self.sna_range_listbox.curselection()
+            if index < len(self.sna_material_ranges)
+        }
+        self.sna_material_ranges = list(reversed(discover_material_ranges(REPO_ROOT)))
+        self.sna_range_listbox.delete(0, tk.END)
+        for index, item in enumerate(self.sna_material_ranges):
+            self.sna_range_listbox.insert(tk.END, item.display_label)
+            if item.material_folder.name in selected_names:
+                self.sna_range_listbox.selection_set(index)
+        self.update_sna_selection_status()
+
+    def selected_sna_material_ranges(self) -> list[MaterialRange]:
+        return [
+            self.sna_material_ranges[index]
+            for index in self.sna_range_listbox.curselection()
+            if index < len(self.sna_material_ranges)
+        ]
+
+    def update_sna_selection_status(self) -> None:
+        count = len(self.sna_range_listbox.curselection())
+        suffix = "rango seleccionado" if count == 1 else "rangos seleccionados"
+        self.sna_selection_status_var.set(f"{count} {suffix}")
 
     def build_credential_status(self) -> str:
         tracked = ["YOUTUBE_API_KEY", "APIFY_TOKEN", "CLAUDE_API_KEY"]
@@ -611,18 +973,21 @@ class OrquestadorGUI:
     def refresh_download_history(self) -> None:
         for item in self.download_history_tree.get_children():
             self.download_history_tree.delete(item)
-        records = latest_downloads_by_pipeline(
-            read_download_history(limit=500)
+        pipeline_records = read_pipeline_history(limit=1000)
+        records = (
+            latest_pipeline_records(pipeline_records)
+            if pipeline_records
+            else latest_downloads_by_pipeline(read_download_history(limit=500))
         )
         if not records:
             self.download_history_tree.insert(
                 "",
                 tk.END,
-                values=("—", "Sin descargas registradas", "—", "—", "—"),
+                values=("—", "Sin stages registrados", "—", "—", "—"),
             )
             return
         for record in records:
-            finished = str(record.get("finished_at") or "")
+            finished = str(record.get("finished_at") or record.get("event_at") or "")
             try:
                 parsed = datetime.fromisoformat(finished.replace("Z", "+00:00"))
                 finished = parsed.astimezone().strftime("%Y-%m-%d %H:%M")
@@ -643,6 +1008,10 @@ class OrquestadorGUI:
             )
 
     def log(self, message: str) -> None:
+        if self.active_run_log is not None:
+            with self._log_lock:
+                ORQ.append_run_log(self.active_run_log, message)
+
         def _append() -> None:
             self.log_area.config(state=tk.NORMAL)
             self.log_area.insert(tk.END, message + "\n")
@@ -665,7 +1034,7 @@ class OrquestadorGUI:
         selected.sort(key=lambda item: pipeline_order.index(item.code))
         return selected
 
-    def validate_dependencies(self, selected):
+    def validate_dependencies(self, selected, *, material_available: bool = False):
         selected_codes = {spec.code for spec in selected}
         if "5" in selected_codes and "4" not in selected_codes:
             self.log("Agregando Facebook Posts (4) como dependencia de Comentarios (5)")
@@ -677,7 +1046,11 @@ class OrquestadorGUI:
         required_by_consolidador = {"7": "Claude", "8": "Influencia", "9": "Guiados"}
         for dep_code, dep_label in required_by_consolidador.items():
             selected_codes = {spec.code for spec in selected}
-            if dep_code in selected_codes and "6" not in selected_codes:
+            if (
+                dep_code in selected_codes
+                and "6" not in selected_codes
+                and not material_available
+            ):
                 self.log(f"Agregando Consolidador (6) como dependencia de {dep_label} ({dep_code})")
                 selected.insert(0, PIPELINES_BY_CODE["6"])
             selected = ensure_pipeline_before(selected, "6", dep_code)
@@ -721,17 +1094,50 @@ class OrquestadorGUI:
             messagebox.showerror("Error de Fechas", str(exc))
             return
 
+        selected_codes = {spec.code for spec in selected}
+        material_folder, material_problem = probe_material_folder_for_selected(
+            selected_codes,
+            since,
+            before,
+        )
+        material_available = material_folder is not None
+
         self.clear_log()
+        self.active_run_id = ORQ.create_run_id(since, before)
+        self.active_run_log = ORQ.pipeline_run_log_path(self.active_run_id)
         self.log(f"Iniciando ejecucion: {since} al {before}")
-        selected = self.validate_dependencies(selected)
+        self.log(f"ID de ejecucion: {self.active_run_id}")
+        self.log(f"Bitacora persistente: {self.active_run_log}")
+        if material_available:
+            self.log(f"Material del análisis: {material_folder}")
+        elif material_problem:
+            self.log(
+                "Material consolidado todavía no disponible; el Consolidador (6) "
+                "se ejecutará antes de los análisis que lo requieren."
+            )
+            self.log(f"Detalle: {material_problem}")
+        selected = self.validate_dependencies(
+            selected,
+            material_available=material_available,
+        )
+        include_chucho_nader = self.include_chucho_nader_var.get()
+        self.log(
+            "Información de Chucho Nader: "
+            + ("incluida" if include_chucho_nader else "excluida")
+        )
         self.log(f"Pipelines a ejecutar: {', '.join(spec.label for spec in selected)}")
 
         self.play_button.config(state=tk.DISABLED)
         self.set_sna_buttons_state(tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
         self.stop_requested = False
+        self.pipeline_had_error = False
 
-        thread = threading.Thread(target=self.run_pipelines, args=(selected, since, before), daemon=True)
+        thread = threading.Thread(
+            target=self.run_pipelines,
+            args=(selected, since, before, include_chucho_nader),
+            daemon=True,
+        )
         thread.start()
 
     def build_python_exec(self) -> str:
@@ -742,7 +1148,8 @@ class OrquestadorGUI:
     def set_sna_buttons_state(self, state: str) -> None:
         self.sna_history_button.config(state=state)
         self.sna_recent_button.config(state=state)
-        self.sna_last_week_button.config(state=state)
+        self.sna_selected_ranges_button.config(state=state)
+        self.sna_range_listbox.config(state=state)
 
     def start_sna_execution(self, scope: str) -> None:
         if self.running_process is not None:
@@ -750,11 +1157,26 @@ class OrquestadorGUI:
             return
 
         try:
-            run = build_sna_run(scope)
+            if scope == "rangos_seleccionados":
+                selected_ranges = self.selected_sna_material_ranges()
+                run = build_sna_run(
+                    scope,
+                    selected_material_ranges=selected_ranges,
+                )
+            elif scope == "rango_escrito":
+                since, before = parse_date_range(
+                    self.since_var.get().strip(),
+                    self.before_var.get().strip(),
+                )
+                run = build_sna_run(scope, since=since, before=before)
+            else:
+                run = build_sna_run(scope)
         except (OSError, RuntimeError, ValueError) as exc:
             messagebox.showerror("No se pudo resolver el alcance SNA", str(exc))
             return
         steps = run["steps"]
+        self.active_run_id = ""
+        self.active_run_log = None
         self.clear_log()
         self.log(f"Iniciando SNA: {run['label']}")
         self.log("Etapas: " + ", ".join(label for label, _, _ in steps))
@@ -777,18 +1199,75 @@ class OrquestadorGUI:
             self.running_process.terminate()
             self.log("Solicitud de detencion enviada...")
 
-    def run_pipelines(self, selected, since: str, before: str) -> None:
+    def run_pipelines(
+        self,
+        selected,
+        since: str,
+        before: str,
+        include_chucho_nader: bool = True,
+    ) -> None:
         use_defaults = self.mode_var.get() == "all_networks"
         facebook_posts_csv = ""
+        selected_codes = {spec.code for spec in selected}
+        unsuccessful_codes: set[str] = set()
+        run_id = self.active_run_id or ORQ.create_run_id(since, before)
+        run_log = self.active_run_log or ORQ.pipeline_run_log_path(run_id)
 
-        for spec in selected:
+        def record(
+            spec,
+            cmd: list[str],
+            *,
+            started_at: str,
+            status: str,
+            return_code: int | None,
+            reason: str = "",
+        ) -> None:
+            ORQ.record_pipeline_result(
+                spec,
+                since,
+                before,
+                cmd,
+                run_id=run_id,
+                started_at=started_at,
+                status=status,
+                return_code=return_code,
+                log_path=run_log,
+                reason=reason,
+            )
+            self.root.after(0, self.refresh_download_history)
+
+        def mark_remaining_omitted(start_index: int, reason: str) -> None:
+            for pending in selected[start_index:]:
+                try:
+                    pending_cmd, _ = ORQ.build_pipeline(
+                        pending,
+                        since,
+                        before,
+                        use_defaults=use_defaults,
+                        facebook_posts_csv=facebook_posts_csv,
+                        include_chucho_nader=include_chucho_nader,
+                    )
+                    started = ORQ.utc_now()
+                    record(
+                        pending,
+                        pending_cmd,
+                        started_at=started,
+                        status="omitida",
+                        return_code=None,
+                        reason=reason,
+                    )
+                    self.log(f"Omitido {pending.label}: {reason}")
+                except Exception as exc:
+                    self.log(f"No se pudo registrar omision de {pending.label}: {exc}")
+
+        for index, spec in enumerate(selected):
             if self.stop_requested:
+                mark_remaining_omitted(index, "ejecucion_detenida_por_usuario")
                 break
 
-            self.log(f"\n--- Ejecutando: {spec.label} ---")
             cmd: list[str] | None = None
             started_at: str | None = None
-            download_recorded = False
+            terminal_recorded = False
             try:
                 cmd, env_vars = ORQ.build_pipeline(
                     spec,
@@ -796,17 +1275,89 @@ class OrquestadorGUI:
                     before,
                     use_defaults=use_defaults,
                     facebook_posts_csv=facebook_posts_csv,
+                    include_chucho_nader=include_chucho_nader,
                 )
-
                 if self.use_venv_var.get() and self.venv_python and cmd and cmd[0] == sys.executable:
                     cmd[0] = self.venv_python
 
-                self.log(f"Comando: {ORQ.render_command(cmd)}")
+                blocked = ORQ.failed_dependencies_for_stage(
+                    spec.code,
+                    selected_codes,
+                    unsuccessful_codes,
+                )
+                if blocked:
+                    started_at = ORQ.utc_now()
+                    reason = "dependencias_no_completadas:" + ",".join(sorted(blocked))
+                    record(
+                        spec,
+                        cmd,
+                        started_at=started_at,
+                        status="omitida",
+                        return_code=None,
+                        reason=reason,
+                    )
+                    terminal_recorded = True
+                    unsuccessful_codes.add(spec.code)
+                    self.log(f"\n--- Omitido: {spec.label} ({reason}) ---")
+                    continue
 
+                force_source_refresh = (
+                    not include_chucho_nader and spec.code in ORQ.SOURCE_PIPELINE_CODES
+                )
+                already_completed = (
+                    self.resume_var.get()
+                    and not force_source_refresh
+                    and pipeline_completed_for_range(
+                    spec.key,
+                    since,
+                    before,
+                    )
+                )
+                if already_completed:
+                    contract_ok, contract_detail = ORQ.validate_stage_output_contract(
+                        spec,
+                        since,
+                        before,
+                        cmd,
+                    )
+                    if not contract_ok:
+                        self.log(
+                            f"Reanudacion no omite {spec.label}: {contract_detail}; se ejecutara de nuevo."
+                        )
+                        already_completed = False
+
+                if already_completed:
+                    started_at = ORQ.utc_now()
+                    record(
+                        spec,
+                        cmd,
+                        started_at=started_at,
+                        status="omitida",
+                        return_code=0,
+                        reason="ya_completada",
+                    )
+                    terminal_recorded = True
+                    self.log(f"\n--- Reanudacion: {spec.label} ya estaba completado; se omite ---")
+                    if spec.code == "4":
+                        output_dir_arg = ORQ._extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
+                        report_tag = ORQ.build_range_report_tag(since, before, "Facebook")
+                        candidate = Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv"
+                        facebook_posts_csv = str(candidate) if candidate.exists() else ""
+                    continue
+
+                self.log(f"\n--- Ejecutando: {spec.label} ---")
+                self.log(f"Comando: {ORQ.render_command(cmd)}")
                 env = os.environ.copy()
                 env.update(env_vars)
-
                 started_at = ORQ.utc_now()
+                record(
+                    spec,
+                    cmd,
+                    started_at=started_at,
+                    status="iniciada",
+                    return_code=None,
+                )
+
                 self.running_process = subprocess.Popen(
                     cmd,
                     stdout=subprocess.PIPE,
@@ -817,75 +1368,127 @@ class OrquestadorGUI:
                     bufsize=1,
                     universal_newlines=True,
                 )
-
                 assert self.running_process.stdout is not None
                 for line in self.running_process.stdout:
                     self.log(line.rstrip())
-
                 self.running_process.wait()
                 return_code = self.running_process.returncode
-                download_status = (
+
+                if return_code == 0 and spec.code == "6":
+                    datos_dir = ORQ._range_datos_dir_from_consolidador_cmd(
+                        since,
+                        before,
+                        cmd,
+                    )
+                    limpieza_cmd = [
+                        cmd[0],
+                        str(SCRIPTS_DIR / "limpieza_texto.py"),
+                        "--datos-dir",
+                        str(datos_dir),
+                    ]
+                    self.log(f"🧼 Ejecutando limpieza de texto: {datos_dir}")
+                    self.running_process = subprocess.Popen(
+                        limpieza_cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        text=True,
+                        env=env,
+                        cwd=str(REPO_ROOT),
+                        bufsize=1,
+                    )
+                    assert self.running_process.stdout is not None
+                    for line in self.running_process.stdout:
+                        self.log(line.rstrip())
+                    return_code = self.running_process.wait()
+
+                if return_code == 0:
+                    contract_ok, contract_detail = ORQ.validate_stage_output_contract(
+                        spec,
+                        since,
+                        before,
+                        cmd,
+                    )
+                    if contract_ok:
+                        self.log(f"✅ Contrato de rango verificado: {contract_detail}")
+                    else:
+                        self.log(f"❌ Stage sin contrato válido: {contract_detail}")
+                        return_code = 3
+
+                status = (
                     "completada"
                     if return_code == 0
                     else "detenida"
                     if self.stop_requested
                     else "fallida"
                 )
-                ORQ.record_download_result(
+                record(
                     spec,
-                    since,
-                    before,
                     cmd,
                     started_at=started_at,
-                    status=download_status,
+                    status=status,
                     return_code=return_code,
                 )
-                download_recorded = True
-                self.root.after(0, self.refresh_download_history)
+                terminal_recorded = True
 
                 if return_code == 0:
                     self.log(f"{spec.label} finalizado con exito.")
                     if spec.code == "4":
                         output_dir_arg = ORQ._extract_flag_value(cmd, "--output-dir") or str(REPO_ROOT / "Facebook")
-                        report_tag = ORQ.build_range_report_tag(
-                            since,
-                            before,
-                            "Facebook",
-                        )
-                        facebook_posts_csv = str(Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv")
-                        if os.path.exists(facebook_posts_csv):
+                        report_tag = ORQ.build_range_report_tag(since, before, "Facebook")
+                        candidate = Path(output_dir_arg) / report_tag / f"{report_tag}_posts.csv"
+                        facebook_posts_csv = str(candidate) if candidate.exists() else ""
+                        if facebook_posts_csv:
                             self.log(f"Detectado CSV de posts: {facebook_posts_csv}")
                         else:
-                            self.log(f"CSV esperado no encontrado: {facebook_posts_csv}")
-                            facebook_posts_csv = ""
+                            self.log(f"CSV esperado no encontrado: {candidate}")
                     continue
 
+                unsuccessful_codes.add(spec.code)
                 if self.stop_requested:
                     self.log("Proceso detenido por el usuario.")
+                    mark_remaining_omitted(index + 1, "ejecucion_detenida_por_usuario")
                     break
 
                 self.log(f"Error en {spec.label} (Codigo {return_code})")
                 if not self.continue_error_var.get():
-                    self.log("Abortando ejecucion.")
+                    self.log("Abortando ejecucion; se registran los stages pendientes.")
+                    mark_remaining_omitted(index + 1, f"abortada_por_fallo:{spec.code}")
                     break
 
             except Exception as exc:
-                if cmd is not None and started_at is not None and not download_recorded:
-                    ORQ.record_download_result(
+                unsuccessful_codes.add(spec.code)
+                if not terminal_recorded:
+                    if cmd is None:
+                        cmd = [
+                            self.build_python_exec(),
+                            str(SCRIPTS_DIR / spec.filename),
+                            "--since",
+                            since,
+                            "--before",
+                            before,
+                        ]
+                    if started_at is None:
+                        started_at = ORQ.utc_now()
+                    record(
                         spec,
-                        since,
-                        before,
                         cmd,
                         started_at=started_at,
                         status="detenida" if self.stop_requested else "fallida",
                         return_code=None,
+                        reason=f"{type(exc).__name__}: {exc}",
                     )
-                    self.root.after(0, self.refresh_download_history)
                 self.log(f"Error inesperado ejecutando {spec.label}: {exc}")
-                if not self.continue_error_var.get():
+                if self.stop_requested or not self.continue_error_var.get():
+                    reason = (
+                        "ejecucion_detenida_por_usuario"
+                        if self.stop_requested
+                        else f"abortada_por_fallo:{spec.code}"
+                    )
+                    mark_remaining_omitted(index + 1, reason)
                     break
 
-        self.log("\nProceso terminado.")
+        self.pipeline_had_error = bool(unsuccessful_codes)
+        self.log(f"\nProceso terminado. Bitacora: {run_log}")
         self.root.after(0, self.finish_ui)
 
     def run_sna_pipelines(self, run: dict[str, object]) -> None:
@@ -898,6 +1501,31 @@ class OrquestadorGUI:
         success = False
         results_dir.mkdir(parents=True, exist_ok=True)
         manifest_path = write_sna_run_manifest(run)
+        exact_since = run.get("since")
+        exact_before = run.get("before")
+        history_run_id = ORQ.create_run_id(exact_since, exact_before) if exact_since and exact_before else ""
+        history_started_at = ORQ.utc_now()
+
+        def record_sna_history(status: str, return_code: int | None, reason: str = "") -> None:
+            if not isinstance(exact_since, str) or not isinstance(exact_before, str):
+                return
+            ORQ.append_pipeline_record(
+                run_id=history_run_id,
+                pipeline_code="11",
+                pipeline_key="analisis_sna",
+                pipeline_label="Generar Analisis SNA",
+                since=exact_since,
+                before=exact_before,
+                status=status,
+                started_at=history_started_at,
+                output_dir=results_dir,
+                return_code=return_code,
+                log_path=run_log,
+                reason=reason,
+            )
+            self.root.after(0, self.refresh_download_history)
+
+        record_sna_history("iniciada", None)
 
         with run_log.open("w", encoding="utf-8", buffering=1) as log_handle:
             def sna_log(message: str) -> None:
@@ -918,12 +1546,17 @@ class OrquestadorGUI:
                 if manifest_path is not None:
                     sna_log(f"Manifiesto: {manifest_path}")
 
-                for label, script_name, args in steps:
+                for step_index, (label, script_name, args) in enumerate(steps, 1):
                     if self.stop_requested:
                         had_error = True
                         break
 
                     cmd = [python_exec, str(SCRIPTS_DIR / script_name), *args]
+                    update_sna_run_manifest(
+                        manifest_path,
+                        step_index=step_index,
+                        step_status="iniciada",
+                    )
                     sna_log(f"\n--- Ejecutando SNA: {label} ---")
                     sna_log(f"Comando: {ORQ.render_command(cmd)}")
 
@@ -945,10 +1578,23 @@ class OrquestadorGUI:
                         self.running_process.wait()
                         return_code = self.running_process.returncode
                         if return_code == 0:
+                            update_sna_run_manifest(
+                                manifest_path,
+                                step_index=step_index,
+                                step_status="completada",
+                                return_code=0,
+                            )
                             sna_log(f"{label} finalizado con éxito.")
                             continue
 
                         had_error = True
+                        step_status = "detenida" if self.stop_requested else "fallida"
+                        update_sna_run_manifest(
+                            manifest_path,
+                            step_index=step_index,
+                            step_status=step_status,
+                            return_code=return_code,
+                        )
                         if self.stop_requested:
                             sna_log("Proceso SNA detenido por el usuario.")
                             break
@@ -958,6 +1604,12 @@ class OrquestadorGUI:
                             break
                     except Exception as exc:
                         had_error = True
+                        update_sna_run_manifest(
+                            manifest_path,
+                            step_index=step_index,
+                            step_status="detenida" if self.stop_requested else "fallida",
+                            message=f"{type(exc).__name__}: {exc}",
+                        )
                         sna_log(f"Error inesperado en {label}: {exc}")
                         if not self.continue_error_var.get():
                             break
@@ -979,17 +1631,46 @@ class OrquestadorGUI:
                     sna_log("\nSNA finalizado correctamente.")
                 elif not self.stop_requested:
                     sna_log("\nSNA incompleto: no se generaron los tres HTML finales.")
+                final_status = (
+                    "completada"
+                    if success
+                    else "detenida"
+                    if self.stop_requested
+                    else "fallida"
+                )
+                update_sna_run_manifest(
+                    manifest_path,
+                    run_status=final_status,
+                    message="ejecucion_sna_incompleta" if not success else "",
+                )
+                record_sna_history(
+                    final_status,
+                    0 if success else None,
+                    "" if success else "ejecucion_sna_incompleta",
+                )
                 sna_log(f"Bitácora: {run_log}")
             finally:
                 self.root.after(0, self.finish_sna_ui, success, run)
 
     def finish_ui(self) -> None:
+        run_log = self.active_run_log
         self.play_button.config(state=tk.NORMAL)
         self.set_sna_buttons_state(tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
         self.running_process = None
-        if not self.stop_requested:
-            messagebox.showinfo("Finalizado", "La ejecucion de los pipelines ha concluido.")
+        self.active_run_id = ""
+        self.active_run_log = None
+        if not self.stop_requested and self.pipeline_had_error:
+            messagebox.showwarning(
+                "Ejecucion incompleta",
+                "Algunos stages fallaron o fueron omitidos por dependencias. "
+                f"Revisa la bitacora:\n{run_log}",
+            )
+        elif not self.stop_requested:
+            messagebox.showinfo(
+                "Finalizado",
+                f"Todos los stages seleccionados concluyeron.\nBitacora:\n{run_log}",
+            )
 
     def finish_sna_ui(self, success: bool, run: dict[str, object]) -> None:
         self.play_button.config(state=tk.NORMAL)

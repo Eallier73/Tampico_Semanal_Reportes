@@ -18,14 +18,23 @@ from output_naming import (  # noqa: E402
     build_range_label,
     build_range_report_tag,
     validate_date_range,
+    validate_range_contract_file,
     write_range_contract,
 )
 from download_history import (  # noqa: E402
     append_download_record,
+    append_pipeline_record,
     latest_downloads_by_pipeline,
+    latest_pipeline_records,
+    pipeline_completed_for_range,
     read_download_history,
+    read_pipeline_history,
 )
-from sna_recent_ranges import discover_source_ranges, resolve_recent_scope  # noqa: E402
+from sna_recent_ranges import (  # noqa: E402
+    discover_material_ranges,
+    discover_source_ranges,
+    resolve_recent_scope,
+)
 
 
 def load_script(name: str, filename: str):
@@ -119,6 +128,133 @@ class DownloadHistoryTests(unittest.TestCase):
         self.assertEqual(len(latest), 1)
         self.assertEqual(latest[0]["since"], "2026-08-10")
         self.assertEqual(latest[0]["status"], "fallida")
+
+
+class PipelineHistoryTests(unittest.TestCase):
+    def test_all_stages_can_record_started_and_terminal_status(self) -> None:
+        stages = [
+            ("1", "youtube"),
+            ("2", "twitter"),
+            ("3", "medios_tampico"),
+            ("4", "facebook_posts"),
+            ("5", "facebook_comentarios"),
+            ("12", "instagram"),
+            ("13", "tiktok"),
+            ("6", "consolidador_datos"),
+            ("7", "claude_nlp"),
+            ("8", "influencia_temas"),
+            ("9", "temas_guiados"),
+            ("10", "publicaciones_institucionales_claude"),
+            ("11", "analisis_sna"),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            history_path = Path(tmp) / "pipeline_history.jsonl"
+            download_path = Path(tmp) / "download_history.jsonl"
+            for code, key in stages:
+                common = {
+                    "run_id": "run-1",
+                    "pipeline_code": code,
+                    "pipeline_key": key,
+                    "pipeline_label": key,
+                    "since": "2026-08-01",
+                    "before": "2026-08-09",
+                    "started_at": "2026-08-26T10:00:00Z",
+                    "history_path": history_path,
+                }
+                append_pipeline_record(status="iniciada", **common)
+                append_pipeline_record(status="completada", return_code=0, **common)
+
+            records = read_pipeline_history(history_path)
+            latest = latest_pipeline_records(
+                records,
+                since="2026-08-01",
+                before="2026-08-09",
+            )
+            self.assertEqual(len(records), len(stages) * 2)
+            self.assertEqual(len(latest), len(stages))
+            self.assertTrue(all(row["status"] == "completada" for row in latest))
+            for _, key in stages:
+                self.assertTrue(
+                    pipeline_completed_for_range(
+                        key,
+                        "2026-08-01",
+                        "2026-08-09",
+                        pipeline_history_path=history_path,
+                        download_history_path=download_path,
+                    )
+                )
+
+    def test_interrupted_restart_is_not_treated_as_completed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            history_path = Path(tmp) / "pipeline_history.jsonl"
+            common = {
+                "pipeline_code": "7",
+                "pipeline_key": "claude_nlp",
+                "pipeline_label": "Claude",
+                "since": "2026-08-01",
+                "before": "2026-08-09",
+                "started_at": "2026-08-26T10:00:00Z",
+                "history_path": history_path,
+            }
+            append_pipeline_record(run_id="run-1", status="completada", **common)
+            append_pipeline_record(run_id="run-2", status="iniciada", **common)
+            self.assertFalse(
+                pipeline_completed_for_range(
+                    "claude_nlp",
+                    "2026-08-01",
+                    "2026-08-09",
+                    pipeline_history_path=history_path,
+                    download_history_path=Path(tmp) / "downloads.jsonl",
+                )
+            )
+
+    def test_omission_does_not_invalidate_a_previous_completion(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            history_path = Path(tmp) / "pipeline_history.jsonl"
+            common = {
+                "pipeline_code": "8",
+                "pipeline_key": "influencia_temas",
+                "pipeline_label": "Influencia",
+                "since": "2026-08-01",
+                "before": "2026-08-09",
+                "started_at": "2026-08-26T10:00:00Z",
+                "history_path": history_path,
+            }
+            append_pipeline_record(run_id="run-1", status="completada", **common)
+            append_pipeline_record(
+                run_id="run-2",
+                status="omitida",
+                reason="abortada_por_fallo:7",
+                **common,
+            )
+            self.assertTrue(
+                pipeline_completed_for_range(
+                    "influencia_temas",
+                    "2026-08-01",
+                    "2026-08-09",
+                    pipeline_history_path=history_path,
+                    download_history_path=Path(tmp) / "downloads.jsonl",
+                )
+            )
+
+    def test_contract_validator_rejects_wrong_range(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            write_range_contract(tmp, "2026-08-01", "2026-08-09", "Datos")
+            valid, _ = validate_range_contract_file(
+                tmp,
+                "2026-08-01",
+                "2026-08-09",
+                "Datos",
+            )
+            wrong, detail = validate_range_contract_file(
+                tmp,
+                "2026-08-02",
+                "2026-08-09",
+                "Datos",
+            )
+        self.assertTrue(valid)
+        self.assertFalse(wrong)
+        self.assertIn("contrato incompatible", detail)
 
 
 class TwitterExactRangeTests(unittest.TestCase):
@@ -243,6 +379,17 @@ class SnaRecentRangeTests(unittest.TestCase):
             )
             manifest_path = gui.write_sna_run_manifest(first)
             assert manifest_path is not None
+            gui.update_sna_run_manifest(
+                manifest_path,
+                step_index=1,
+                step_status="completada",
+                return_code=0,
+            )
+            gui.update_sna_run_manifest(
+                manifest_path,
+                run_status="fallida",
+                message="prueba_de_fallo",
+            )
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
         self.assertNotEqual(first["input_csv"], second["input_csv"])
@@ -257,10 +404,191 @@ class SnaRecentRangeTests(unittest.TestCase):
         )
         self.assertEqual(manifest["since"], "2026-08-05")
         self.assertEqual(manifest["before"], "2026-08-13")
+        self.assertEqual(manifest["status"], "fallida")
+        self.assertEqual(manifest["steps"][0]["status"], "completada")
+        self.assertTrue(
+            all(step["status"] == "omitida" for step in manifest["steps"][1:])
+        )
         self.assertEqual(
             manifest["selected_ranges"][0]["identity"],
             "2026_agosto_05_al_2026_agosto_13",
         )
+
+    def test_gui_written_sna_range_requires_matching_material_folder(self) -> None:
+        gui = load_script("test_tampico_gui_written_range", "00_gui_orquestador.py")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            material_dir = root / "Datos" / build_range_report_tag(
+                "2026-08-12",
+                "2026-08-19",
+                "Datos",
+            )
+            write_range_contract(
+                material_dir,
+                "2026-08-12",
+                "2026-08-19",
+                "Datos",
+            )
+            (material_dir / "material_institucional.txt").write_text(
+                "publicación\n",
+                encoding="utf-8",
+            )
+            (material_dir / "material_comentarios.txt").write_text(
+                "comentario\n",
+                encoding="utf-8",
+            )
+
+            run = gui.build_sna_run(
+                "rango_escrito",
+                repo_root=root,
+                since="2026-08-12",
+                before="2026-08-19",
+                now=datetime(2026, 8, 26, 10, 0, 0, 3),
+            )
+
+            self.assertEqual(run["since"], "2026-08-12")
+            self.assertEqual(run["before"], "2026-08-19")
+            self.assertEqual(
+                run["selected_ranges"][0]["material_folder"],
+                str(material_dir),
+            )
+            self.assertIn(material_dir.name, run["label"])
+
+            with self.assertRaisesRegex(RuntimeError, "No existe la carpeta"):
+                gui.build_sna_run(
+                    "rango_escrito",
+                    repo_root=root,
+                    since="2026-08-19",
+                    before="2026-08-26",
+                )
+
+    def test_gui_keeps_historical_and_two_recent_shortcuts(self) -> None:
+        source = (SCRIPTS_DIR / "00_gui_orquestador.py").read_text(encoding="utf-8")
+        self.assertIn("EJECUTAR SNA MATERIAL HISTÓRICO", source)
+        self.assertIn("EJECUTAR SNA 2 RANGOS RECIENTES", source)
+        self.assertIn("EJECUTAR SNA CON LOS RANGOS SELECCIONADOS", source)
+        self.assertNotIn("EJECUTAR SNA ÚLTIMO RANGO", source)
+
+    def test_gui_sections_have_draggable_resize_panes(self) -> None:
+        source = (SCRIPTS_DIR / "00_gui_orquestador.py").read_text(encoding="utf-8")
+        self.assertIn("self.root.resizable(True, True)", source)
+        self.assertGreaterEqual(source.count("tk.PanedWindow("), 3)
+        self.assertIn("orient=tk.VERTICAL", source)
+        self.assertIn("orient=tk.HORIZONTAL", source)
+        self.assertIn("sashwidth=8", source)
+
+    def test_material_range_selector_discovers_legacy_and_exact_folders(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for batch, dates in (
+                ("2026_W14", ["2026-03-30", "2026-04-07"]),
+                ("2026_agosto_12_al_2026_agosto_19", ["2026-08-12", "2026-08-18"]),
+            ):
+                self._write_batch(root, "Twitter", batch, dates)
+                material_dir = root / "Datos" / f"{batch}_Datos"
+                material_dir.mkdir(parents=True)
+                (material_dir / "material_institucional.txt").write_text(
+                    "publicación\n", encoding="utf-8"
+                )
+                (material_dir / "material_comentarios.txt").write_text(
+                    "comentario\n", encoding="utf-8"
+                )
+            write_range_contract(
+                root / "Datos" / "2026_agosto_12_al_2026_agosto_19_Datos",
+                "2026-08-12",
+                "2026-08-19",
+                "Datos",
+            )
+
+            ranges = discover_material_ranges(root)
+
+        self.assertEqual([item.identity for item in ranges], ["2026_W14", "2026_agosto_12_al_2026_agosto_19"])
+        self.assertEqual(ranges[0].since.isoformat(), "2026-03-30")
+        self.assertEqual(ranges[0].before.isoformat(), "2026-04-08")
+        self.assertTrue(ranges[0].inferred_from_rows)
+        self.assertEqual(ranges[1].before.isoformat(), "2026-08-19")
+        self.assertFalse(ranges[1].inferred_from_rows)
+
+    def test_selected_sna_ranges_build_an_exact_union_command(self) -> None:
+        gui = load_script("test_tampico_gui_selected_ranges", "00_gui_orquestador.py")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for batch, dates in (
+                ("lote_a", ["2026-07-01", "2026-07-03"]),
+                ("lote_b", ["2026-08-12", "2026-08-18"]),
+            ):
+                self._write_batch(root, "Twitter", batch, dates)
+                material_dir = root / "Datos" / f"{batch}_Datos"
+                material_dir.mkdir(parents=True)
+                (material_dir / "material_institucional.txt").write_text("a\n", encoding="utf-8")
+                (material_dir / "material_comentarios.txt").write_text("b\n", encoding="utf-8")
+            ranges = discover_material_ranges(root)
+            run = gui.build_sna_run(
+                "rangos_seleccionados",
+                repo_root=root,
+                selected_material_ranges=ranges,
+                now=datetime(2026, 8, 26, 10, 0, 0, 4),
+            )
+
+        consolidate_args = run["steps"][0][2]
+        self.assertEqual(consolidate_args.count("--include-range"), 2)
+        self.assertIn("2026-07-01", consolidate_args)
+        self.assertIn("2026-08-19", consolidate_args)
+        self.assertEqual(run["selection_mode"], "union_exacta")
+        self.assertEqual(len(run["selected_ranges"]), 2)
+        self.assertIn("selecciones", str(run["results_dir"]))
+
+    def test_existing_material_does_not_auto_add_consolidator(self) -> None:
+        gui = load_script("test_tampico_gui_dependencies", "00_gui_orquestador.py")
+        instance = object.__new__(gui.OrquestadorGUI)
+        instance.log = lambda _message: None
+
+        without_material = instance.validate_dependencies(
+            [gui.PIPELINES_BY_CODE["7"]],
+            material_available=False,
+        )
+        with_material = instance.validate_dependencies(
+            [gui.PIPELINES_BY_CODE["7"]],
+            material_available=True,
+        )
+
+        self.assertEqual([item.code for item in without_material], ["6", "7"])
+        self.assertEqual([item.code for item in with_material], ["7"])
+
+    def test_missing_material_does_not_block_downloads_before_analysis(self) -> None:
+        gui = load_script("test_tampico_gui_material_probe", "00_gui_orquestador.py")
+        instance = object.__new__(gui.OrquestadorGUI)
+        instance.log = lambda _message: None
+
+        with tempfile.TemporaryDirectory() as tmp:
+            material_folder, detail = gui.probe_material_folder_for_selected(
+                {"1", "7"},
+                "2026-08-26",
+                "2026-09-02",
+                repo_root=Path(tmp),
+            )
+
+        selected = instance.validate_dependencies(
+            [gui.PIPELINES_BY_CODE["1"], gui.PIPELINES_BY_CODE["7"]],
+            material_available=material_folder is not None,
+        )
+        self.assertIsNone(material_folder)
+        self.assertIn("No existe la carpeta de material", detail)
+        self.assertEqual([item.code for item in selected], ["1", "6", "7"])
+
+    def test_sna_stage_does_not_require_weekly_datos_folder(self) -> None:
+        gui = load_script("test_tampico_gui_sna_material_probe", "00_gui_orquestador.py")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            material_folder, detail = gui.probe_material_folder_for_selected(
+                {"11"},
+                "2026-08-26",
+                "2026-09-02",
+                repo_root=Path(tmp),
+            )
+
+        self.assertIsNone(material_folder)
+        self.assertEqual(detail, "")
 
 
 class PipelinePropagationTests(unittest.TestCase):
@@ -269,6 +597,10 @@ class PipelinePropagationTests(unittest.TestCase):
         cls.orq = load_script("test_tampico_orq", "00_orquestador_general.py")
         cls.sna = load_script("test_tampico_sna", "20_generar_analisis_sna.py")
         cls.consolidator = load_script("test_tampico_consolidator", "6_consolidador_datos.py")
+        cls.sna_consolidator = load_script(
+            "test_tampico_sna_consolidator",
+            "11_consolidar_historico_sna.py",
+        )
         cls.facebook_posts = load_script(
             "test_tampico_facebook_posts",
             "4_extractors_facebook_posts.py",
@@ -299,6 +631,89 @@ class PipelinePropagationTests(unittest.TestCase):
                 self.assertEqual(command[command.index("--since") + 1], since)
                 self.assertEqual(command[command.index("--before") + 1], before)
 
+    def test_every_stage_has_a_range_scoped_contract_destination(self) -> None:
+        since = "2026-08-01"
+        before = "2026-08-09"
+        for pipeline in self.orq.PIPELINES:
+            command, _ = self.orq.build_pipeline(
+                pipeline,
+                since,
+                before,
+                use_defaults=True,
+            )
+            destination = self.orq.range_output_dir_for_command(
+                pipeline,
+                since,
+                before,
+                command,
+            )
+            with self.subTest(stage=pipeline.code):
+                self.assertIsNotNone(destination)
+                self.assertIn("2026_agosto_01_al_2026_agosto_09", str(destination))
+
+    def test_gui_option_removes_chucho_nader_targets_from_all_extractors(self) -> None:
+        since = "2026-08-01"
+        before = "2026-08-09"
+        for code in ("1", "2", "3", "4", "12", "13"):
+            command, _ = self.orq.build_pipeline(
+                self.orq.PIPELINES_BY_CODE[code],
+                since,
+                before,
+                use_defaults=True,
+                include_chucho_nader=False,
+            )
+            rendered = " ".join(command).casefold()
+            with self.subTest(stage=code):
+                self.assertNotIn("chucho nader", rendered)
+                self.assertNotIn("chuchonader", rendered)
+                self.assertNotIn("jesus nader", rendered)
+                self.assertNotIn("diputado nader", rendered)
+
+    def test_gui_option_keeps_chucho_nader_targets_when_enabled(self) -> None:
+        for code in ("1", "2", "3", "4", "12", "13"):
+            command, _ = self.orq.build_pipeline(
+                self.orq.PIPELINES_BY_CODE[code],
+                "2026-08-01",
+                "2026-08-09",
+                use_defaults=True,
+                include_chucho_nader=True,
+            )
+            with self.subTest(stage=code):
+                self.assertTrue(
+                    any(
+                        marker in " ".join(command).casefold()
+                        for marker in self.orq.CHUCHO_NADER_MARKERS
+                    )
+                )
+
+    def test_failure_only_blocks_dependent_stages(self) -> None:
+        selected = {pipeline.code for pipeline in self.orq.PIPELINES}
+        self.assertEqual(
+            self.orq.failed_dependencies_for_stage("7", selected, {"6"}),
+            {"6"},
+        )
+        self.assertEqual(
+            self.orq.failed_dependencies_for_stage("8", selected, {"7"}),
+            set(),
+        )
+        self.assertEqual(
+            self.orq.failed_dependencies_for_stage("6", selected, {"2"}),
+            {"2"},
+        )
+
+    def test_facebook_resume_reconnects_posts_to_comments(self) -> None:
+        posts = self.orq.PIPELINES_BY_CODE["4"]
+        comments = self.orq.PIPELINES_BY_CODE["5"]
+        prepared = [
+            (posts, ["python", "posts.py"], {}),
+            (comments, ["python", "comments.py"], {}),
+        ]
+        self.orq.inject_facebook_posts_input(prepared, 1, "/tmp/posts.csv")
+        self.assertEqual(
+            prepared[1][1][-2:],
+            ["--input-csv", "/tmp/posts.csv"],
+        )
+
     def test_consolidator_reads_only_matching_range_directories(self) -> None:
         sources = self.consolidator._sources(
             "2026-08-01",
@@ -309,6 +724,35 @@ class PipelinePropagationTests(unittest.TestCase):
         self.assertIn("2026_agosto_01_al_2026_agosto_09_Twitter", rendered)
         self.assertIn("2026_agosto_01_al_2026_agosto_09_Medios", rendered)
         self.assertNotIn("2026_W", rendered)
+
+    def test_sna_consolidator_uses_union_without_intermediate_dates(self) -> None:
+        original_root = self.sna_consolidator.REPO_ROOT
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            folder = root / "Twitter" / "lotes_Twitter"
+            folder.mkdir(parents=True)
+            (folder / "lotes_Twitter_comentarios.csv").write_text(
+                "author,datetime_parsed_utc,text,url\n"
+                "uno,2026-07-02T12:00:00Z,primer rango,https://x.test/1\n"
+                "medio,2026-07-20T12:00:00Z,no seleccionado,https://x.test/2\n"
+                "dos,2026-08-13T12:00:00Z,segundo rango,https://x.test/3\n",
+                encoding="utf-8",
+            )
+            self.sna_consolidator.REPO_ROOT = root
+            try:
+                output, _inventory = self.sna_consolidator.consolidate(
+                    included_ranges=[
+                        ("2026-07-01", "2026-07-05"),
+                        ("2026-08-12", "2026-08-19"),
+                    ]
+                )
+            finally:
+                self.sna_consolidator.REPO_ROOT = original_root
+
+        self.assertEqual(
+            output["texto_original"].tolist(),
+            ["primer rango", "segundo rango"],
+        )
 
     def test_facebook_before_boundary_is_rejected(self) -> None:
         self.assertTrue(
